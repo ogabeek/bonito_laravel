@@ -8,4 +8,4 @@
     <h1>Welcome to Laravel!</h1>
     <p>This is your first view {{$name}}</p>
     <p> YOUR IP is {{$ip}} <p>
-@endsection
+@endsection 
