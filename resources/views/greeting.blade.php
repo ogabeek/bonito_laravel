@@ -1,4 +1,6 @@
-<?php@extends('layouts.app')
+<?php
+
+@extends('layouts.app')
 
 @section('title','Greeting Page')
 
