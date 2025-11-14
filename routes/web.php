@@ -15,10 +15,6 @@ Route::get('/greet/{name}', function($name){
 });
 
 
-Route::get('/greeting', function(){
-    return view('greeting');
-});
-
 Route::get('/profile/{name}/{ip}', [GreetingController::class, 'show']);
 
 
