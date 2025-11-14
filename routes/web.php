@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GreetingController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -19,9 +19,7 @@ Route::get('/greeting', function(){
     return view('greeting');
 });
 
-Route::get('/profile/{name}/{ip}', function($name, $ip){
-    return view('greeting', ['name'=> $name, 'ip' => $ip]);
-});
+Route::get('/profile/{name}/{ip}', [GreetingController::class, 'show']);
 
 
 
