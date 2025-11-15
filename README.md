@@ -36,9 +36,6 @@ Online School Management System (Laravel MVP)
 - One-way sync (Laravel → Sheets only)
 - Preserves existing spreadsheet formulas for calculations
 
-**4. Extra: Payment Tracking**
-- Manual entry after Stripe confirmation
-- Balance = sum(payments) - sum(completed_classes * rate)
 
 **Rationale for MVP because:**
 - Small user base (110 total users)
