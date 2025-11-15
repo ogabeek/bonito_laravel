@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('classes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('teacher_id')->constrained()->onDelete('cascade'); //connected to teacher
+            $table->foreignId('student_id')->constrained()->onDelete('cascade');
+            $table->dateTime('class_date');
+            $table->enum('status', ['scheduled', 'completed', 'student_absent', 'teacher_cancelled'])->default('scheduled'); //enum-only one can be chosen
+            $table->string('topic');
+            $table->text('homework')->nullable();
+            $table->text('comments')->nullable();
             $table->timestamps();
         });
     }
