@@ -18,19 +18,21 @@ class Student extends Model
 
 
     //Automatically generate UUI when creating a student
-    pretected static function boot()
+    protected static function boot()
     {
         parent::boot();
 
-        static::creating(finction ($student) {
+        static::creating(function ($student) {
             if (empty($student->uuid)) {
                 $student->uuid = (string) Str::uuid();
             }
         });
+    }
 
     // Relationship: a student haas many lessons
     public function lessons()
     {
         return $this->hasMany(Lesson::class);
     }
+    
 }

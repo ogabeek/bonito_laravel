@@ -11,7 +11,7 @@ class Teacher extends Model
         'password',
     ];
     //Relationship: A teacher has many lessons
-    public finction lessons()
+    public function lessons()
     {
         return $this->hasMany(Lessons::class);
     }
