@@ -11,7 +11,7 @@ Online School Management System (Laravel MVP)
 ### Technical Stack
 
 - **Local Development:** Laravel Herd
-- **Database:** SQLite (dev) 
+- **Database:** SQLite (dev) -> Connected to TablePlus for gui 
 - **Auth:** UUID-based direct links (no password system currently)
 - **Sheets Integration:** revolution/laravel-google-sheets
 - **CSS:** Tailwind 
