@@ -6,5 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Teacher extends Model
 {
-    //
+    protected $fillable = [
+        'name',
+        'password',
+    ];
+    //Relationship: A teacher has many lessons
+    public finction lessons()
+    {
+        return $this->hasMany(Lessons::class);
+    }
 }
