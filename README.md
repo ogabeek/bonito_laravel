@@ -1,59 +1,73 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Online School Management System (Laravel MVP)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Project Overview
 
-## About Laravel
+**Purpose:** Simplified management system for online school with ~10 teachers, ~100 students, handling ~200 classes/month. Replaces manual Google Forms → Spreadsheet workflow while preserving spreadsheet calculations for financial reporting.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Context:** This is a pragmatic MVP built in 2 weeks. We chose speed over perfection. The codebase intentionally violates some best practices (like database normalization) to ship quickly.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**Current Status:** 2-week MVP implementation focusing on core functionality over architectural perfection.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Key Principle:** Working product > Perfect code. Prioritizes rapid deployment 
 
-## Learning Laravel
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Technical Stack
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **Local Development:** Laravel Herd
+- **Database:** SQLite (dev) 
+- **Auth:** UUID-based direct links (no password system currently)
+- **Sheets Integration:** revolution/laravel-google-sheets
+- **CSS:** Tailwind 
 
-## Laravel Sponsors
+## Core Features 
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 1. Teacher Portal (`/teacher/{tid}`)
+- update attendance (completed/cancelled)
+- topic name
+- Homework
+- Loging via given password 
 
-### Premium Partners
+### 2. Student/Parent View (`/student/{uuid}`)
+- Direct link access (no password)
+- View upcoming and past classes
+- Extra: See current classes balance 
+- Read-only access
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 3. Google Sheets Sync
+- Hourly automatic export via cron
+- Manual "Sync Now" button for immediate updates
+- One-way sync (Laravel → Sheets only)
+- Preserves existing spreadsheet formulas for calculations
 
-## Contributing
+### 4. Extra: Payment Tracking
+- Manual entry after Stripe confirmation
+- Balance = sum(payments) - sum(completed_classes * rate)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-## Code of Conduct
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**Acceptable for MVP because:**
+- Small user base (110 total users)
+- Financial calculations remain in tested spreadsheet formulas
+- Daily manual verification possible at this scale
+- Can migrate to proper structure after validating system works
 
-## Security Vulnerabilities
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Database**
+I assume it's a relation many-to-many student may have different teachers and teachers many students, and admin taht can jange everything. Or as we have only one admin for now it's me so for simplisity maybe without creating a user I can access with teachers password if I need to change something 
 
-## License
+## For AI Assistants
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**About me**
+i am doning my first steps on php and laravel, i use herd and just started, so help to go next, explain steps I want to understand, 
+I don't want you to agentically cready or modify something, just tell me how to and why and I will. 
+Feel free to use best practices on teaching to help with it 
+
+**When helping with this codebase:**
+- Assume we want the simplest solution that works
+- Avoid suggesting major refactors unless critical
+- Keep solutions compatible with existing denormalized structure
+- Prioritize solutions that can be implemented in hours, not days
+- Remember that Google Sheets handles complex financial calculations
+
+**Current pain points:**
+- Make a platform for Teachers to mark attendance, topic, HW  -> student see it -> admin have calculation of all classes
