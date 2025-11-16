@@ -33,14 +33,17 @@
                     <div class="grid grid-cols-7 gap-0.5 text-center">
                         <div style="color: var(--color-text-secondary);" class="p-0.5">M</div><div style="color: var(--color-text-secondary);" class="p-0.5">T</div><div style="color: var(--color-text-secondary);" class="p-0.5">W</div><div style="color: var(--color-text-secondary);" class="p-0.5">T</div><div style="color: var(--color-text-secondary);" class="p-0.5">F</div><div style="color: var(--color-text-secondary);" class="p-0.5">S</div><div style="color: var(--color-text-secondary);" class="p-0.5">S</div>
                         
-                        <template x-for="d in days">
-                            <button type="button" 
-                                x-show="d > 0"
-                                @click="selected = fmt(d)"
-                                :style="selected === fmt(d) ? 'background-color: var(--color-primary); color: white; font-weight: var(--font-weight-bold);' : ''"
-                                class="p-0.5 rounded aspect-square hover:bg-gray-100"
-                                x-text="d">
-                            </button>
+                        <template x-for="(d, index) in days" :key="index">
+                            <div class="aspect-square">
+                                <button 
+                                    x-show="d > 0"
+                                    type="button" 
+                                    @click="selected = fmt(d)"
+                                    :style="selected === fmt(d) ? 'background-color: var(--color-primary); color: white; font-weight: var(--font-weight-bold);' : ''"
+                                    class="p-0.5 rounded aspect-square hover:bg-gray-100 w-full h-full"
+                                    x-text="d">
+                                </button>
+                            </div>
                         </template>
                     </div>
                 </div>

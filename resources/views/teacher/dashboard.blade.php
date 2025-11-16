@@ -200,6 +200,10 @@
                 const formData = new FormData(e.target);
                 const data = Object.fromEntries(formData.entries());
                 
+                // Remember the selected student and date
+                const selectedStudent = data.student_id;
+                const selectedDate = data.class_date;
+                
                 console.log('Creating lesson:', data);
                 
                 fetch('/teacher/lesson/create', {
@@ -214,6 +218,10 @@
                 .then(data => {
                     console.log('Response:', data);
                     if (data.success) {
+                        // Store in sessionStorage (persists during browser session only)
+                        sessionStorage.setItem('lastSelectedStudent', selectedStudent);
+                        sessionStorage.setItem('lastSelectedDate', selectedDate);
+                        sessionStorage.setItem('formInUse', 'true');
                         location.reload();
                     } else {
                         alert('Error creating lesson: ' + (data.message || 'Please check all required fields'));
@@ -223,6 +231,56 @@
                     console.error('Error:', error);
                     alert('Error creating lesson. Please try again.');
                 });
+            }
+        });
+
+        // Restore form values after page load (only during active session)
+        document.addEventListener('DOMContentLoaded', function() {
+            const formInUse = sessionStorage.getItem('formInUse');
+            
+            if (formInUse === 'true') {
+                const lastStudent = sessionStorage.getItem('lastSelectedStudent');
+                const lastDate = sessionStorage.getItem('lastSelectedDate');
+                
+                // Restore student
+                if (lastStudent) {
+                    const studentSelect = document.querySelector('#newLessonForm select[name="student_id"]');
+                    if (studentSelect) {
+                        studentSelect.value = lastStudent;
+                    }
+                }
+                
+                // Restore date in Alpine component
+                if (lastDate) {
+                    // Wait for Alpine to initialize
+                    setTimeout(() => {
+                        const calendarContainer = document.querySelector('.calendar-container');
+                        if (calendarContainer && calendarContainer._x_dataStack) {
+                            const alpineData = calendarContainer._x_dataStack[0];
+                            if (alpineData) {
+                                alpineData.selected = lastDate;
+                            }
+                        }
+                    }, 100);
+                }
+            }
+        });
+
+        // Clear session data when user navigates away or closes form
+        window.addEventListener('beforeunload', function() {
+            // Only clear if user is navigating away (not reloading after save)
+            if (!sessionStorage.getItem('formInUse')) {
+                sessionStorage.removeItem('lastSelectedStudent');
+                sessionStorage.removeItem('lastSelectedDate');
+            }
+        });
+
+        // Clear when form is cancelled or hidden
+        document.addEventListener('click', function(e) {
+            if (e.target.textContent === 'Cancel' || e.target.textContent === '▼ New Lesson') {
+                sessionStorage.removeItem('lastSelectedStudent');
+                sessionStorage.removeItem('lastSelectedDate');
+                sessionStorage.removeItem('formInUse');
             }
         });
 
