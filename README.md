@@ -44,7 +44,29 @@ Online School Management System (Laravel MVP)
 - Can migrate to proper structure after validating system works
 
 **Database:**
-I assume it's a relation many-to-many student may have different teachers and teachers many students, and admin taht can jange everything. Or as we have only one admin for now it's me so for simplisity maybe without creating a user I can access with teachers password if I need to change something 
+- Many-to-many relationship: students ↔ teachers (via `student_teacher` pivot table)
+- Each teacher only sees their assigned students
+- Teachers: `id`, `name`, `password`
+- Students: `id`, `uuid`, `name`, `parent_name`, `email`, `goal`, `description`
+- Lessons: `teacher_id`, `student_id`, `class_date`, `status` (completed/student_absent/teacher_cancelled), `topic`, `homework`, `comments`
+
+### Project Structure
+
+**Key Files:**
+- `app/Services/LessonService.php` - Business logic (stats, grouping, CRUD)
+- `app/Http/Controllers/TeacherController.php` - HTTP layer only
+- `app/Http/Requests/` - Form validation (CreateLessonRequest, UpdateLessonRequest)
+- `resources/views/layouts/app.blade.php` - Base layout for all pages
+- `resources/views/components/` - Reusable UI components (status-badge, month-navigation, lesson-display)
+- `public/js/lesson-manager.js` - AJAX operations & session storage
+- `public/css/app.css` - Design system (CSS variables)
+
+**Pattern:**
+```
+Request → FormRequest (validation) → Controller → Service (logic) → Model → Database
+                                                      ↓
+                                                  View (with components)
+```
 
 ---
 
