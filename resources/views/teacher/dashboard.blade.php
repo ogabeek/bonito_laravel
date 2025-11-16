@@ -42,53 +42,10 @@
             </button>
             
             <div x-show="showForm" class="mt-4 border-t pt-4" x-cloak>
-                <form id="newLessonForm" class="space-y-3">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                        <input type="date" name="class_date" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                    </div>
+                <form id="newLessonForm">
+                    <x-lesson-form />
                     
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Student</label>
-                        <select name="student_id" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                            <option value="">Select Student</option>
-                            @php
-                                $allStudents = \App\Models\Student::orderBy('name')->get();
-                            @endphp
-                            @foreach($allStudents as $student)
-                                <option value="{{ $student->id }}">{{ $student->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select name="status" id="newLessonStatus" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                            <option value="scheduled">Scheduled</option>
-                            <option value="completed">Completed</option>
-                            <option value="student_absent">Student Absent</option>
-                            <option value="teacher_cancelled">Teacher Cancelled</option>
-                        </select>
-                    </div>
-                    
-                    <div id="newLessonDetails" style="display: none;">
-                        <div class="mb-3">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Topic *</label>
-                            <input type="text" name="topic" class="w-full px-3 py-2 border border-gray-300 rounded-md">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Homework</label>
-                            <textarea name="homework" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Comments</label>
-                            <textarea name="comments" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 mt-4">
                         <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Lesson</button>
                         <button type="button" @click="showForm = false" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">Cancel</button>
                     </div>
@@ -162,35 +119,10 @@
 
                             <!-- Edit Mode -->
                             <div x-show="editing" class="space-y-2" x-cloak>
-                                <form @submit.prevent="saveLesson({{ $lesson->id }})" class="space-y-2">
-                                    <div>
-                                        <label class="block text-xs font-medium text-gray-700 mb-1">Status</label>
-                                        <select name="status" id="status_{{ $lesson->id }}" class="w-full px-2 py-1 text-sm border border-gray-300 rounded">
-                                            <option value="scheduled" {{ $lesson->status === 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                                            <option value="completed" {{ $lesson->status === 'completed' ? 'selected' : '' }}>Completed</option>
-                                            <option value="student_absent" {{ $lesson->status === 'student_absent' ? 'selected' : '' }}>Student Absent</option>
-                                            <option value="teacher_cancelled" {{ $lesson->status === 'teacher_cancelled' ? 'selected' : '' }}>Teacher Cancelled</option>
-                                        </select>
-                                    </div>
+                                <form @submit.prevent="saveLesson({{ $lesson->id }})">
+                                    <x-lesson-form :lesson="$lesson" />
                                     
-                                    <div id="details_{{ $lesson->id }}" style="{{ in_array($lesson->status, ['completed']) ? '' : 'display:none' }}">
-                                        <div class="mb-2">
-                                            <label class="block text-xs font-medium text-gray-700 mb-1">Topic *</label>
-                                            <input type="text" name="topic" value="{{ $lesson->topic }}" class="w-full px-2 py-1 text-sm border border-gray-300 rounded">
-                                        </div>
-                                        
-                                        <div class="mb-2">
-                                            <label class="block text-xs font-medium text-gray-700 mb-1">Homework</label>
-                                            <textarea name="homework" rows="2" class="w-full px-2 py-1 text-sm border border-gray-300 rounded">{{ $lesson->homework }}</textarea>
-                                        </div>
-                                        
-                                        <div class="mb-2">
-                                            <label class="block text-xs font-medium text-gray-700 mb-1">Comments</label>
-                                            <textarea name="comments" rows="2" class="w-full px-2 py-1 text-sm border border-gray-300 rounded">{{ $lesson->comments }}</textarea>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="flex gap-2">
+                                    <div class="flex gap-2 mt-3">
                                         <button type="submit" class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
                                         <button type="button" @click="editing = false" class="px-3 py-1 text-sm bg-gray-300 text-gray-700 rounded hover:bg-gray-400">Cancel</button>
                                     </div>
@@ -198,19 +130,6 @@
                             </div>
                         </div>
                         
-                        <script>
-                            // Show/hide details based on status for lesson {{ $lesson->id }}
-                            document.addEventListener('DOMContentLoaded', function() {
-                                const statusSelect = document.getElementById('status_{{ $lesson->id }}');
-                                const detailsDiv = document.getElementById('details_{{ $lesson->id }}');
-                                
-                                if (statusSelect) {
-                                    statusSelect.addEventListener('change', function() {
-                                        detailsDiv.style.display = this.value === 'completed' ? 'block' : 'none';
-                                    });
-                                }
-                            });
-                        </script>
                     @endforeach
                 </div>
             </div>
@@ -227,15 +146,6 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <script>
-        // Show/hide topic fields based on status for new lesson form
-        document.addEventListener('DOMContentLoaded', function() {
-            const statusSelect = document.getElementById('newLessonStatus');
-            const detailsDiv = document.getElementById('newLessonDetails');
-            
-            statusSelect.addEventListener('change', function() {
-                detailsDiv.style.display = this.value === 'completed' ? 'block' : 'none';
-            });
-        });
 
         // Create new lesson
         document.getElementById('newLessonForm').addEventListener('submit', function(e) {
