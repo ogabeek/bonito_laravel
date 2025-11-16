@@ -20,25 +20,25 @@
                     let day = String(d).padStart(2, '0');
                     return `${this.year}-${m}-${day}`;
                 }
-            }" class="flex-shrink-0" style="width: 200px;">
+            }" class="calendar-container flex-shrink-0">
                 <input type="hidden" name="class_date" x-model="selected" required>
                 
-                <div class="border rounded p-1.5" style="font-size: 10px;">
-                    <div class="flex justify-between items-center mb-1">
+                <div class="border rounded" style="padding: var(--spacing-sm);">
+                    <div class="flex justify-between items-center" style="margin-bottom: var(--spacing-xs);">
                         <button type="button" @click="date = new Date(year, month - 1)" class="px-1 hover:bg-gray-100">←</button>
-                        <span class="font-medium" x-text="date.toLocaleDateString('en-US', {month:'short', year:'numeric'})"></span>
+                        <span style="font-weight: var(--font-weight-medium);" x-text="date.toLocaleDateString('en-US', {month:'short', year:'numeric'})"></span>
                         <button type="button" @click="date = new Date(year, month + 1)" class="px-1 hover:bg-gray-100">→</button>
                     </div>
                     
                     <div class="grid grid-cols-7 gap-0.5 text-center">
-                        <div class="text-gray-500 p-0.5">M</div><div class="text-gray-500 p-0.5">T</div><div class="text-gray-500 p-0.5">W</div><div class="text-gray-500 p-0.5">T</div><div class="text-gray-500 p-0.5">F</div><div class="text-gray-500 p-0.5">S</div><div class="text-gray-500 p-0.5">S</div>
+                        <div style="color: var(--color-text-secondary);" class="p-0.5">M</div><div style="color: var(--color-text-secondary);" class="p-0.5">T</div><div style="color: var(--color-text-secondary);" class="p-0.5">W</div><div style="color: var(--color-text-secondary);" class="p-0.5">T</div><div style="color: var(--color-text-secondary);" class="p-0.5">F</div><div style="color: var(--color-text-secondary);" class="p-0.5">S</div><div style="color: var(--color-text-secondary);" class="p-0.5">S</div>
                         
                         <template x-for="d in days">
                             <button type="button" 
                                 x-show="d > 0"
                                 @click="selected = fmt(d)"
-                                :class="selected === fmt(d) ? 'bg-blue-600 text-white font-bold' : 'hover:bg-gray-100'"
-                                class="p-0.5 rounded aspect-square"
+                                :style="selected === fmt(d) ? 'background-color: var(--color-primary); color: white; font-weight: var(--font-weight-bold);' : ''"
+                                class="p-0.5 rounded aspect-square hover:bg-gray-100"
                                 x-text="d">
                             </button>
                         </template>
@@ -61,19 +61,19 @@
                         </div>
 
                         <div class="flex gap-1">
-                            <label class="flex items-center gap-1 px-2 py-1.5 border rounded cursor-pointer transition hover:bg-gray-50 has-[:checked]:bg-green-50 has-[:checked]:border-green-500 has-[:checked]:text-green-700" title="Lesson completed successfully">
+                            <label class="status-btn-completed flex items-center gap-1 border rounded cursor-pointer transition" style="padding: var(--spacing-sm); font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);" title="Lesson completed successfully">
                                 <input type="radio" name="status" value="completed" class="status-radio hidden" {{ ($isNew || (!$isNew && $lesson->status === 'completed')) ? 'checked' : '' }}>
-                                <span class="text-sm font-medium">✓ Done</span>
+                                <span>✓ Done</span>
                             </label>
                             
-                            <label class="flex items-center gap-1 px-2 py-1.5 border rounded cursor-pointer transition hover:bg-gray-50 has-[:checked]:bg-red-50 has-[:checked]:border-red-500 has-[:checked]:text-red-700" title="Student was absent">
+                            <label class="status-btn-absent flex items-center gap-1 border rounded cursor-pointer transition" style="padding: var(--spacing-sm); font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);" title="Student was absent">
                                 <input type="radio" name="status" value="student_absent" class="status-radio hidden" {{ (!$isNew && $lesson->status === 'student_absent') ? 'checked' : '' }}>
-                                <span class="text-sm font-medium">⚠ SA</span>
+                                <span>⚠ SA</span>
                             </label>
                             
-                            <label class="flex items-center gap-1 px-2 py-1.5 border rounded cursor-pointer transition hover:bg-gray-50 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-500 has-[:checked]:text-orange-700" title="Cancelled by teacher">
+                            <label class="status-btn-cancelled flex items-center gap-1 border rounded cursor-pointer transition" style="padding: var(--spacing-sm); font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);" title="Cancelled by teacher">
                                 <input type="radio" name="status" value="teacher_cancelled" class="status-radio hidden" {{ (!$isNew && $lesson->status === 'teacher_cancelled') ? 'checked' : '' }}>
-                                <span class="text-sm font-medium">🚫 CT</span>
+                                <span>🚫 CT</span>
                             </label>
                         </div>
                     </div>
@@ -82,38 +82,38 @@
                 <!-- Completed Details -->
                 <div class="completed-section space-y-2" style="{{ $isNew || (!$isNew && $lesson->status === 'completed') ? '' : 'display:none' }}" x-data="{ showNotes: {{ $isNew ? 'false' : ($lesson->comments ? 'true' : 'false') }} }">
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Topic *</label>
+                        <label class="form-label">Topic *</label>
                         <input 
                             type="text" 
                             name="topic" 
                             value="{{ $isNew ? '' : $lesson->topic }}" 
                             {{ ($isNew || (!$isNew && $lesson->status === 'completed')) ? 'required' : '' }}
                             placeholder="What was taught?"
-                            class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            class="form-input w-full"
                         >
                     </div>
                     
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Homework</label>
+                        <label class="form-label">Homework</label>
                         <textarea 
                             name="homework" 
                             rows="2" 
                             placeholder="Optional"
-                            class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            class="form-input w-full"
                         >{{ $isNew ? '' : $lesson->homework }}</textarea>
                     </div>
                     
                     <div x-show="!showNotes">
-                        <button type="button" @click="showNotes = true" class="text-xs text-blue-600 hover:text-blue-800">+ Add Notes</button>
+                        <button type="button" @click="showNotes = true" style="font-size: var(--font-size-xs); color: var(--color-primary);" class="hover:underline">+ Add Notes</button>
                     </div>
                     
                     <div x-show="showNotes">
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Notes</label>
+                        <label class="form-label">Notes</label>
                         <textarea 
                             name="comments" 
                             rows="2" 
                             placeholder="Optional"
-                            class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            class="form-input w-full"
                         >{{ $isNew ? '' : $lesson->comments }}</textarea>
                     </div>
                 </div>
