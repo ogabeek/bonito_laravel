@@ -40,4 +40,10 @@ class Student extends Model
     {
         return $this->belongsToMany(Teacher::class);
     }
+
+    // Use UUID for route model binding instead of ID
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
 }

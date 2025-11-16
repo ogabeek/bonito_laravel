@@ -38,3 +38,8 @@ Route::prefix('lesson')->name('lesson.')->group(function () {
     Route::post('/{lesson}/update', [TeacherController::class, 'updateLesson'])->name('update');
     Route::post('/{lesson}/delete', [TeacherController::class, 'deleteLesson'])->name('delete');
 });
+
+// Student routes (UUID-based access)
+Route::prefix('student')->name('student.')->group(function () {
+    Route::get('/{student}', [\App\Http\Controllers\StudentController::class, 'dashboard'])->name('dashboard');
+});
