@@ -5,6 +5,7 @@
             <div x-data="{ 
                 date: new Date(),
                 selected: '{{ now()->format('Y-m-d') }}',
+                today: '{{ now()->format('Y-m-d') }}',
                 get month() { return this.date.getMonth() },
                 get year() { return this.date.getFullYear() },
                 get days() {
@@ -19,6 +20,9 @@
                     let m = String(this.month + 1).padStart(2, '0');
                     let day = String(d).padStart(2, '0');
                     return `${this.year}-${m}-${day}`;
+                },
+                isToday(d) {
+                    return this.fmt(d) === this.today;
                 }
             }" class="calendar-container flex-shrink-0">
                 <input type="hidden" name="class_date" x-model="selected" required>
@@ -34,13 +38,16 @@
                         <div style="color: var(--color-text-secondary);" class="p-0.5">M</div><div style="color: var(--color-text-secondary);" class="p-0.5">T</div><div style="color: var(--color-text-secondary);" class="p-0.5">W</div><div style="color: var(--color-text-secondary);" class="p-0.5">T</div><div style="color: var(--color-text-secondary);" class="p-0.5">F</div><div style="color: var(--color-text-secondary);" class="p-0.5">S</div><div style="color: var(--color-text-secondary);" class="p-0.5">S</div>
                         
                         <template x-for="(d, index) in days" :key="index">
-                            <div class="aspect-square">
+                            <div class="aspect-square relative">
                                 <button 
                                     x-show="d > 0"
                                     type="button" 
                                     @click="selected = fmt(d)"
-                                    :style="selected === fmt(d) ? 'background-color: var(--color-primary); color: white; font-weight: var(--font-weight-bold);' : ''"
-                                    class="p-0.5 rounded aspect-square hover:bg-gray-100 w-full h-full"
+                                    :class="{
+                                        'ring-1 ring-blue-400': isToday(d) && selected !== fmt(d),
+                                        'bg-blue-600 text-white font-semibold': selected === fmt(d)
+                                    }"
+                                    class="p-0.5 rounded aspect-square hover:bg-gray-100 w-full h-full transition"
                                     x-text="d">
                                 </button>
                             </div>
