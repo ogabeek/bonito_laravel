@@ -10,9 +10,15 @@ class Teacher extends Model
         'name',
         'password',
     ];
-    //Relationship: A teacher has many lessons
+    // Relationship: A teacher has many lessons
     public function lessons()
     {
-        return $this->hasMany(Lessons::class);
+        return $this->hasMany(Lesson::class);
+    }
+
+    // Relationship: A teacher has many students (many-to-many)
+    public function students()
+    {
+        return $this->belongsToMany(Student::class);
     }
 }

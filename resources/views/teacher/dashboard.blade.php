@@ -59,7 +59,7 @@
             <div x-show="showForm" class="px-6 pb-6" x-cloak>
                 <div class="border-t pt-6">
                     <form id="newLessonForm">
-                        <x-lesson-form />
+                        <x-lesson-form :students="$students" />
                         
                         <div class="flex gap-3 mt-6">
                             <button type="submit" class="btn-primary">Save Lesson</button>
@@ -163,7 +163,7 @@
                             <!-- Edit Mode -->
                             <div x-show="editing" class="space-y-2" x-cloak>
                                 <form @submit.prevent="saveLesson({{ $lesson->id }})">
-                                    <x-lesson-form :lesson="$lesson" />
+                                    <x-lesson-form :lesson="$lesson" :students="$students" />
                                     
                                     <div class="flex justify-between items-center mt-3">
                                         <div class="flex gap-2">

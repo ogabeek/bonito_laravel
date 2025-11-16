@@ -29,10 +29,15 @@ class Student extends Model
         });
     }
 
-    // Relationship: a student haas many lessons
+    // Relationship: a student has many lessons
     public function lessons()
     {
         return $this->hasMany(Lesson::class);
     }
-    
+
+    // Relationship: a student belongs to many teachers (many-to-many)
+    public function teachers()
+    {
+        return $this->belongsToMany(Teacher::class);
+    }
 }

@@ -46,6 +46,9 @@ class TeacherController extends Controller
         $month = request('month', now()->format('Y-m'));
         $date = Carbon::parse($month . '-01');
         
+        // Get only students assigned to this teacher (many-to-many)
+        $students = $teacher->students()->orderBy('name')->get();
+        
         // Get all lessons for this teacher in this month
         $lessons = Lesson::where('teacher_id', $teacherId)
             ->whereYear('class_date', $date->year)
@@ -67,7 +70,7 @@ class TeacherController extends Controller
             'teacher_cancelled' => $lessons->where('status', 'teacher_cancelled')->count(),
         ];
         
-        return view('teacher.dashboard', compact('teacher', 'lessonsByWeek', 'date', 'stats'));
+        return view('teacher.dashboard', compact('teacher', 'lessonsByWeek', 'date', 'stats', 'students'));
     }
 
     // Logout
