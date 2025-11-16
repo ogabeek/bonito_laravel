@@ -20,10 +20,21 @@ Route::get('/profile/{name}/{ip}', [GreetingController::class, 'show']);
 
 
 // Teacher routes
-Route::get('/teacher/{teacher}', [TeacherController::class, 'showLogin'])->name('teacher.login');
-Route::post('/teacher/{teacher}/login', [TeacherController::class, 'login'])->name('teacher.login.submit');
-Route::get('/teacher/{teacher}/dashboard', [TeacherController::class, 'dashboard'])->name('teacher.dashboard');
-Route::post('/teacher/logout', [TeacherController::class, 'logout'])->name('teacher.logout');
-Route::post('/lesson/{lesson}/update', [TeacherController::class, 'updateLesson'])->name('lesson.update');
-Route::post('/lesson/{lesson}/delete', [TeacherController::class, 'deleteLesson'])->name('lesson.delete');
-Route::post('/teacher/lesson/create', [TeacherController::class, 'createLesson'])->name('lesson.create');
+Route::prefix('teacher')->name('teacher.')->group(function () {
+    // Authentication
+    Route::get('/{teacher}', [TeacherController::class, 'showLogin'])->name('login');
+    Route::post('/{teacher}/login', [TeacherController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [TeacherController::class, 'logout'])->name('logout');
+    
+    // Dashboard
+    Route::get('/{teacher}/dashboard', [TeacherController::class, 'dashboard'])->name('dashboard');
+    
+    // Lesson management
+    Route::post('/lesson/create', [TeacherController::class, 'createLesson'])->name('lesson.create');
+});
+
+// Lesson routes (shared, with model binding)
+Route::prefix('lesson')->name('lesson.')->group(function () {
+    Route::post('/{lesson}/update', [TeacherController::class, 'updateLesson'])->name('update');
+    Route::post('/{lesson}/delete', [TeacherController::class, 'deleteLesson'])->name('delete');
+});

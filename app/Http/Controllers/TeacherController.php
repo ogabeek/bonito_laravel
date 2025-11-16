@@ -4,12 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Teacher;
 use App\Models\Lesson;
+use App\Services\LessonService;
+use App\Http\Requests\CreateLessonRequest;
+use App\Http\Requests\UpdateLessonRequest;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 
 class TeacherController extends Controller
 {
+    protected $lessonService;
+
+    public function __construct(LessonService $lessonService)
+    {
+        $this->lessonService = $lessonService;
+    }
+
     // Show login form
     public function showLogin($teacherId)
     {
@@ -46,29 +56,13 @@ class TeacherController extends Controller
         $month = request('month', now()->format('Y-m'));
         $date = Carbon::parse($month . '-01');
         
-        // Get only students assigned to this teacher (many-to-many)
+        // Get only students assigned to this teacher
         $students = $teacher->students()->orderBy('name')->get();
         
-        // Get all lessons for this teacher in this month
-        $lessons = Lesson::where('teacher_id', $teacherId)
-            ->whereYear('class_date', $date->year)
-            ->whereMonth('class_date', $date->month)
-            ->with('student')
-            ->orderBy('class_date', 'asc')
-            ->get();
-        
-        // Group lessons by week
-        $lessonsByWeek = $lessons->groupBy(function($lesson) {
-            return $lesson->class_date->startOfWeek()->format('Y-m-d');
-        });
-        
-        // Calculate monthly stats
-        $stats = [
-            'total' => $lessons->count(),
-            'completed' => $lessons->where('status', 'completed')->count(),
-            'student_absent' => $lessons->where('status', 'student_absent')->count(),
-            'teacher_cancelled' => $lessons->where('status', 'teacher_cancelled')->count(),
-        ];
+        // Use service to get lessons and stats
+        $lessons = $this->lessonService->getLessonsForMonth($teacherId, $date);
+        $lessonsByWeek = $this->lessonService->groupLessonsByWeek($lessons);
+        $stats = $this->lessonService->calculateStats($lessons);
         
         return view('teacher.dashboard', compact('teacher', 'lessonsByWeek', 'date', 'stats', 'students'));
     }
@@ -81,73 +75,29 @@ class TeacherController extends Controller
     }
 
      // Update lesson
-    public function updateLesson(Request $request, $lessonId)
+    public function updateLesson(UpdateLessonRequest $request, Lesson $lesson)
     {
-        $lesson = Lesson::findOrFail($lessonId);
+        $updatedLesson = $this->lessonService->updateLesson($lesson, $request->validated());
         
-        // Check if this lesson belongs to the logged-in teacher
-        if (session('teacher_id') != $lesson->teacher_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-        
-        // Validate based on status
-        if ($request->status === 'completed') {
-            $request->validate([
-                'topic' => 'required|string',
-            ]);
-        } elseif ($request->status === 'teacher_cancelled') {
-            $request->validate([
-                'comments' => 'required|string',
-            ]);
-        }
-        
-        // Update lesson
-        $lesson->status = $request->status;
-        $lesson->topic = $request->topic;
-        $lesson->homework = $request->homework;
-        $lesson->comments = $request->comments;
-        
-        $lesson->save();
-        
-        return response()->json(['success' => true, 'lesson' => $lesson]);
+        return response()->json(['success' => true, 'lesson' => $updatedLesson]);
     }
-        // Create new lesson
-    public function createLesson(Request $request)
+    // Create new lesson
+    public function createLesson(CreateLessonRequest $request)
     {
-        // Check if logged in
-        if (!session('teacher_id')) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-        
-        $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'class_date' => 'required|date',
-            'status' => 'required|in:completed,student_absent,teacher_cancelled',
-            'topic' => 'required_if:status,completed|nullable|string',
-            'homework' => 'nullable|string',
-            'comments' => 'required_if:status,teacher_cancelled|nullable|string',
+        $data = array_merge($request->validated(), [
+            'teacher_id' => session('teacher_id')
         ]);
         
-        $lesson = Lesson::create([
-            'teacher_id' => session('teacher_id'),
-            'student_id' => $validated['student_id'],
-            'class_date' => $validated['class_date'],
-            'status' => $validated['status'],
-            'topic' => $validated['topic'] ?? '',
-            'homework' => $validated['homework'] ?? null,
-            'comments' => $validated['comments'] ?? null,
-        ]);
+        $lesson = $this->lessonService->createLesson($data);
         
         return response()->json(['success' => true, 'lesson' => $lesson]);
     }
 
     // Delete lesson
-    public function deleteLesson($lessonId)
+    public function deleteLesson(Lesson $lesson)
     {
-        $lesson = Lesson::findOrFail($lessonId);
-        
-        // Check if this lesson belongs to the logged-in teacher
-        if (session('teacher_id') != $lesson->teacher_id) {
+        // Authorization check via UpdateLessonRequest or manual check
+        if (!$this->lessonService->teacherOwnsLesson(session('teacher_id'), $lesson)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         
