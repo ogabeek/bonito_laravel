@@ -10,10 +10,10 @@ class LessonForm extends Component
     public $students;
     public $isNew;
 
-    public function __construct($lesson = null, $students)
+    public function __construct($lesson = null)
     {
         $this->lesson = $lesson;
-        $this->students = $students;
+        $this->students = \App\Models\Student::orderBy('name')->get();
         $this->isNew = is_null($lesson);
     }
 

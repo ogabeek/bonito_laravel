@@ -85,26 +85,28 @@ class DatabaseSeeder extends Seeder
             'student_id' => $student2->id,
             'class_date' => now()->subDays(2),
             'status' => 'student_absent',
-            'topic' => 'Algebra review',
             'comments' => 'Student did not show up, no notice given',
         ]);
 
-        // Upcoming scheduled lesson
+        // Completed lesson
         Lesson::create([
             'teacher_id' => $teacher2->id,
             'student_id' => $student3->id,
-            'class_date' => now()->addDays(2),
-            'status' => 'scheduled',
+            'class_date' => now()->subDays(5),
+            'status' => 'completed',
             'topic' => 'English conversation practice',
+            'homework' => 'Write a short essay about daily routine',
+            'comments' => 'Good progress with vocabulary',
         ]);
 
-        // Upcoming scheduled lesson
+        // Another completed lesson
         Lesson::create([
             'teacher_id' => $teacher3->id,
             'student_id' => $student4->id,
-            'class_date' => now()->addDays(5),
-            'status' => 'scheduled',
+            'class_date' => now()->subDays(7),
+            'status' => 'completed',
             'topic' => 'Quadratic equations',
+            'homework' => 'Solve problems 1-15',
         ]);
 
         // Teacher cancelled

@@ -29,8 +29,7 @@
                 {{ $stats['total'] }} lessons: 
                 {{ $stats['completed'] }} completed, 
                 {{ $stats['student_absent'] }} absent, 
-                {{ $stats['teacher_cancelled'] }} cancelled,
-                {{ $stats['scheduled'] }} scheduled
+                {{ $stats['teacher_cancelled'] }} cancelled
             </div>
         </div>
 
@@ -105,11 +104,19 @@
                                                 @endif
                                             </div>
                                         @elseif($lesson->status === 'student_absent')
-                                            <div class="text-sm text-red-600">⚠ Student Absent</div>
+                                            <div class="text-sm text-red-600">
+                                                ⚠ Student Absent
+                                                @if($lesson->comments)
+                                                    <div class="text-xs mt-1">{{ $lesson->comments }}</div>
+                                                @endif
+                                            </div>
                                         @elseif($lesson->status === 'teacher_cancelled')
-                                            <div class="text-sm text-orange-600">🚫 Teacher Cancelled</div>
-                                        @else
-                                            <div class="text-sm text-blue-600">📅 Scheduled</div>
+                                            <div class="text-sm text-orange-600">
+                                                🚫 Teacher Cancelled
+                                                @if($lesson->comments)
+                                                    <div class="text-xs mt-1">{{ $lesson->comments }}</div>
+                                                @endif
+                                            </div>
                                         @endif
                                     </div>
                                 

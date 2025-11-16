@@ -65,7 +65,6 @@ class TeacherController extends Controller
             'completed' => $lessons->where('status', 'completed')->count(),
             'student_absent' => $lessons->where('status', 'student_absent')->count(),
             'teacher_cancelled' => $lessons->where('status', 'teacher_cancelled')->count(),
-            'scheduled' => $lessons->where('status', 'scheduled')->count(),
         ];
         
         return view('teacher.dashboard', compact('teacher', 'lessonsByWeek', 'date', 'stats'));
