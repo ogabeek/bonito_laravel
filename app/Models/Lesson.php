@@ -17,7 +17,7 @@ class Lesson extends Model
     ];
 
     protected $casts = [
-        'class_date' => 'datetime', //convert automatically to Carbon(date)
+        'class_date' => 'date', //convert automatically to Carbon(date)
     ];
 
     //Relationship: A lesson belongs to a teacher

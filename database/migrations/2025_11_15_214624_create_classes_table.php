@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('teacher_id')->constrained()->onDelete('cascade'); //connected to teacher
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
-            $table->dateTime('class_date');
+            $table->date('class_date');
             $table->enum('status', ['scheduled', 'completed', 'student_absent', 'teacher_cancelled'])->default('scheduled'); //enum-only one can be chosen
             $table->string('topic');
             $table->text('homework')->nullable();
