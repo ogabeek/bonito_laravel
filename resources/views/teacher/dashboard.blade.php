@@ -48,21 +48,25 @@
         </div>
 
         <!-- Add New Lesson Section -->
-        <div class="bg-white rounded-lg shadow mb-4 p-4" x-data="{ showForm: false }">
-            <button @click="showForm = !showForm" class="w-full text-left font-semibold text-blue-600 hover:text-blue-800">
-                <span x-show="!showForm">+ Add New Lesson</span>
-                <span x-show="showForm">− Hide Form</span>
+        <div class="bg-white rounded-lg shadow mb-6" x-data="{ showForm: true }">
+            <button @click="showForm = !showForm" class="w-full px-6 py-4 text-left font-semibold text-blue-600 hover:text-blue-800 hover:bg-gray-50 flex items-center gap-2">
+                <span x-show="!showForm">▶</span>
+                <span x-show="showForm">▼</span>
+                <span x-show="!showForm">Add New Lesson</span>
+                <span x-show="showForm">New Lesson</span>
             </button>
             
-            <div x-show="showForm" class="mt-4 border-t pt-4" x-cloak>
-                <form id="newLessonForm">
-                    <x-lesson-form />
-                    
-                    <div class="flex gap-2 mt-4">
-                        <button type="submit" class="px-5 py-2 text-sm font-medium bg-blue-600 text-white rounded hover:bg-blue-700 transition">Save Lesson</button>
-                        <button type="button" @click="showForm = false" class="px-5 py-2 text-sm font-medium bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Cancel</button>
-                    </div>
-                </form>
+            <div x-show="showForm" class="px-6 pb-6" x-cloak>
+                <div class="border-t pt-6">
+                    <form id="newLessonForm">
+                        <x-lesson-form />
+                        
+                        <div class="flex gap-3 mt-6">
+                            <button type="submit" class="btn-primary">Save Lesson</button>
+                            <button type="button" @click="showForm = false" class="px-5 py-2 text-sm font-medium bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Cancel</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 

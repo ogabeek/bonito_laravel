@@ -14,7 +14,7 @@ Online School Management System (Laravel MVP)
 - **Database:** SQLite (dev) -> Connected to TablePlus for gui 
 - **Auth:** UUID-based direct links (no password system currently)
 - **Sheets Integration:** revolution/laravel-google-sheets
-- **CSS:** Tailwind 
+- **CSS:** Tailwind and app.css file as a design references
 
 ### Core Features 
 

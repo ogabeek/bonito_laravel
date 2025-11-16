@@ -1,6 +1,6 @@
-<div class="space-y-3">
+<div>
     @if($isNew)
-        <div class="flex gap-3">
+        <div class="flex gap-4">
             <!-- Calendar on Left -->
             <div x-data="{ 
                 date: new Date(),
@@ -24,10 +24,10 @@
                 <input type="hidden" name="class_date" x-model="selected" required>
                 
                 <div class="border rounded" style="padding: var(--spacing-sm);">
-                    <div class="flex justify-between items-center" style="margin-bottom: var(--spacing-xs);">
-                        <button type="button" @click="date = new Date(year, month - 1)" class="px-1 hover:bg-gray-100">←</button>
+                    <div class="flex justify-between items-center" style="margin-bottom: var(--spacing-sm);">
+                        <button type="button" @click="date = new Date(year, month - 1)" style="padding: var(--spacing-xs);" class="hover:bg-gray-100 rounded">←</button>
                         <span style="font-weight: var(--font-weight-medium);" x-text="date.toLocaleDateString('en-US', {month:'short', year:'numeric'})"></span>
-                        <button type="button" @click="date = new Date(year, month + 1)" class="px-1 hover:bg-gray-100">→</button>
+                        <button type="button" @click="date = new Date(year, month + 1)" style="padding: var(--spacing-xs);" class="hover:bg-gray-100 rounded">→</button>
                     </div>
                     
                     <div class="grid grid-cols-7 gap-0.5 text-center">
@@ -47,12 +47,12 @@
             </div>
 
             <!-- Right Side: Student, Status, and Details -->
-            <div class="flex-1 space-y-2">
+            <div class="flex-1" style="display: flex; flex-direction: column; gap: var(--spacing-lg);">
                 <div>
-                    <div class="flex gap-2 items-end mb-2">
+                    <div class="flex gap-3 items-end">
                         <div class="flex-1">
-                            <label class="block text-xs font-medium text-gray-700 mb-1">Student</label>
-                            <select name="student_id" required class="w-full px-2 py-1.5 text-sm border rounded">
+                            <label class="form-label">Student</label>
+                            <select name="student_id" required class="form-input w-full">
                                 <option value="">Select...</option>
                                 @foreach($students as $student)
                                     <option value="{{ $student->id }}">{{ $student->name }}</option>
@@ -60,7 +60,7 @@
                             </select>
                         </div>
 
-                        <div class="flex gap-1">
+                        <div class="flex gap-2">
                             <label class="status-btn-completed flex items-center gap-1 border rounded cursor-pointer transition" style="padding: var(--spacing-sm); font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);" title="Lesson completed successfully">
                                 <input type="radio" name="status" value="completed" class="status-radio hidden" {{ ($isNew || (!$isNew && $lesson->status === 'completed')) ? 'checked' : '' }}>
                                 <span>✓ Done</span>
@@ -80,7 +80,7 @@
                 </div>
 
                 <!-- Completed Details -->
-                <div class="completed-section space-y-2" style="{{ $isNew || (!$isNew && $lesson->status === 'completed') ? '' : 'display:none' }}" x-data="{ showNotes: {{ $isNew ? 'false' : ($lesson->comments ? 'true' : 'false') }} }">
+                <div class="completed-section" style="{{ $isNew || (!$isNew && $lesson->status === 'completed') ? 'display: flex; flex-direction: column;' : 'display:none' }}; gap: var(--spacing-md);" x-data="{ showNotes: {{ $isNew ? 'false' : ($lesson->comments ? 'true' : 'false') }} }">
                     <div>
                         <label class="form-label">Topic *</label>
                         <input 
@@ -121,12 +121,12 @@
                 <!-- Student Absent Details -->
                 <div class="absent-section" style="{{ !$isNew && $lesson->status === 'student_absent' ? '' : 'display:none' }}">
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Notes (optional)</label>
+                        <label class="form-label">Notes (optional)</label>
                         <textarea 
                             name="comments" 
                             rows="2" 
                             placeholder="Why did the student miss?"
-                            class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            class="form-input w-full"
                         >{{ $isNew ? '' : $lesson->comments }}</textarea>
                     </div>
                 </div>
@@ -134,13 +134,13 @@
                 <!-- Teacher Cancelled Details -->
                 <div class="cancelled-section" style="{{ !$isNew && $lesson->status === 'teacher_cancelled' ? '' : 'display:none' }}">
                     <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Reason *</label>
+                        <label class="form-label">Reason *</label>
                         <textarea 
                             name="comments" 
                             rows="2" 
                             placeholder="Why was it cancelled?"
                             {{ (!$isNew && $lesson->status === 'teacher_cancelled') ? 'required' : '' }}
-                            class="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            class="form-input w-full"
                         >{{ $isNew ? '' : $lesson->comments }}</textarea>
                     </div>
                 </div>
