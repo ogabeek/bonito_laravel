@@ -155,16 +155,8 @@
                                             <div class="text-sm text-blue-600">📅 Scheduled</div>
                                         @endif
                                     </div>
-                                    
-                                    @if($lesson->status === 'scheduled')
-                                        <div class="flex gap-2 text-sm">
-                                            <button onclick="quickUpdate({{ $lesson->id }}, 'completed')" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700">Complete</button>
-                                            <button onclick="quickUpdate({{ $lesson->id }}, 'student_absent')" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Absent</button>
-                                            <button onclick="quickUpdate({{ $lesson->id }}, 'teacher_cancelled')" class="px-3 py-1 bg-orange-600 text-white rounded hover:bg-orange-700">Cancel</button>
-                                        </div>
-                                    @else
+                                
                                         <button @click="editing = true" class="text-sm text-blue-600 hover:underline">Edit</button>
-                                    @endif
                                 </div>
                             </div>
 
@@ -269,33 +261,6 @@
                 }
             });
         });
-
-        // Quick update for scheduled lessons (Complete/Absent/Cancel buttons)
-        function quickUpdate(lessonId, status) {
-            if (status === 'completed') {
-                alert('Please click on the lesson to edit and add topic/homework details');
-                return;
-            }
-            
-            if (!confirm('Mark this lesson as ' + status.replace('_', ' ') + '?')) {
-                return;
-            }
-            
-            fetch('/lesson/' + lessonId + '/update', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ status: status })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                }
-            });
-        }
 
         // Save edited lesson
         function saveLesson(lessonId) {
