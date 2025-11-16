@@ -45,8 +45,8 @@
                     <x-lesson-form />
                     
                     <div class="flex gap-2 mt-4">
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save Lesson</button>
-                        <button type="button" @click="showForm = false" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">Cancel</button>
+                        <button type="submit" class="px-5 py-2 text-sm font-medium bg-blue-600 text-white rounded hover:bg-blue-700 transition">Save Lesson</button>
+                        <button type="button" @click="showForm = false" class="px-5 py-2 text-sm font-medium bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -129,9 +129,12 @@
                                 <form @submit.prevent="saveLesson({{ $lesson->id }})">
                                     <x-lesson-form :lesson="$lesson" />
                                     
-                                    <div class="flex gap-2 mt-3">
-                                        <button type="submit" class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
-                                        <button type="button" @click="editing = false" class="px-3 py-1 text-sm bg-gray-300 text-gray-700 rounded hover:bg-gray-400">Cancel</button>
+                                    <div class="flex justify-between items-center mt-3">
+                                        <div class="flex gap-2">
+                                            <button type="submit" class="px-4 py-1.5 text-sm font-medium bg-blue-600 text-white rounded hover:bg-blue-700 transition">Save</button>
+                                            <button type="button" @click="editing = false" class="px-4 py-1.5 text-sm font-medium bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Cancel</button>
+                                        </div>
+                                        <button type="button" onclick="deleteLesson({{ $lesson->id }})" class="px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 transition">🗑 Delete</button>
                                     </div>
                                 </form>
                             </div>
@@ -153,30 +156,38 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <script>
-
-        // Create new lesson
-        document.getElementById('newLessonForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const data = Object.fromEntries(formData.entries());
-            
-            fetch('/teacher/lesson/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Error creating lesson. Make sure all required fields are filled.');
-                }
-            });
+        // Create new lesson - use event delegation
+        document.addEventListener('submit', function(e) {
+            if (e.target.id === 'newLessonForm') {
+                e.preventDefault();
+                
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                
+                console.log('Creating lesson:', data);
+                
+                fetch('/teacher/lesson/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Response:', data);
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error creating lesson: ' + (data.message || 'Please check all required fields'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error creating lesson. Please try again.');
+                });
+            }
         });
 
         // Save edited lesson
@@ -184,6 +195,8 @@
             const form = event.target;
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
+            
+            console.log('Updating lesson:', lessonId, data);
             
             fetch('/lesson/' + lessonId + '/update', {
                 method: 'POST',
@@ -195,11 +208,43 @@
             })
             .then(response => response.json())
             .then(data => {
+                console.log('Response:', data);
                 if (data.success) {
                     location.reload();
                 } else {
-                    alert('Error: Topic is required for completed lessons');
+                    alert('Error updating lesson: ' + (data.message || 'Please check all required fields'));
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating lesson. Please try again.');
+            });
+        }
+
+        // Delete lesson
+        function deleteLesson(lessonId) {
+            if (!confirm('Are you sure you want to delete this lesson? This cannot be undone.')) {
+                return;
+            }
+            
+            fetch('/lesson/' + lessonId + '/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error deleting lesson');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting lesson. Please try again.');
             });
         }
     </script>

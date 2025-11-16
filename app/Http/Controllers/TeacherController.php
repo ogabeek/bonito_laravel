@@ -87,18 +87,22 @@ class TeacherController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         
-        $lesson->status = $request->status;
-        
-        // If marking as completed, require topic
+        // Validate based on status
         if ($request->status === 'completed') {
             $request->validate([
                 'topic' => 'required|string',
             ]);
-            
-            $lesson->topic = $request->topic;
-            $lesson->homework = $request->homework;
-            $lesson->comments = $request->comments;
+        } elseif ($request->status === 'teacher_cancelled') {
+            $request->validate([
+                'comments' => 'required|string',
+            ]);
         }
+        
+        // Update lesson
+        $lesson->status = $request->status;
+        $lesson->topic = $request->topic;
+        $lesson->homework = $request->homework;
+        $lesson->comments = $request->comments;
         
         $lesson->save();
         
@@ -115,10 +119,10 @@ class TeacherController extends Controller
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
             'class_date' => 'required|date',
-            'status' => 'required|in:scheduled,completed,student_absent,teacher_cancelled',
+            'status' => 'required|in:completed,student_absent,teacher_cancelled',
             'topic' => 'required_if:status,completed|nullable|string',
             'homework' => 'nullable|string',
-            'comments' => 'nullable|string',
+            'comments' => 'required_if:status,teacher_cancelled|nullable|string',
         ]);
         
         $lesson = Lesson::create([
@@ -132,5 +136,20 @@ class TeacherController extends Controller
         ]);
         
         return response()->json(['success' => true, 'lesson' => $lesson]);
+    }
+
+    // Delete lesson
+    public function deleteLesson($lessonId)
+    {
+        $lesson = Lesson::findOrFail($lessonId);
+        
+        // Check if this lesson belongs to the logged-in teacher
+        if (session('teacher_id') != $lesson->teacher_id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        
+        $lesson->delete();
+        
+        return response()->json(['success' => true]);
     }
 }

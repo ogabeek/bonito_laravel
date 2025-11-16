@@ -25,5 +25,5 @@ Route::post('/teacher/{teacher}/login', [TeacherController::class, 'login'])->na
 Route::get('/teacher/{teacher}/dashboard', [TeacherController::class, 'dashboard'])->name('teacher.dashboard');
 Route::post('/teacher/logout', [TeacherController::class, 'logout'])->name('teacher.logout');
 Route::post('/lesson/{lesson}/update', [TeacherController::class, 'updateLesson'])->name('lesson.update');
+Route::post('/lesson/{lesson}/delete', [TeacherController::class, 'deleteLesson'])->name('lesson.delete');
 Route::post('/teacher/lesson/create', [TeacherController::class, 'createLesson'])->name('lesson.create');
-// dd("hello");
