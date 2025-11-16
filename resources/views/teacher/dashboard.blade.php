@@ -25,11 +25,24 @@
                 <h2 class="text-xl font-semibold">{{ $date->format('F Y') }}</h2>
                 <a href="?month={{ $date->copy()->addMonth()->format('Y-m') }}" class="text-blue-600 hover:underline">{{ $date->copy()->addMonth()->format('M') }} →</a>
             </div>
-            <div class="text-center text-gray-600 mt-2">
-                {{ $stats['total'] }} lessons: 
-                {{ $stats['completed'] }} completed, 
-                {{ $stats['student_absent'] }} absent, 
-                {{ $stats['teacher_cancelled'] }} cancelled
+            <div class="flex justify-center gap-4 mt-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl font-bold text-gray-800">{{ $stats['total'] }}</span>
+                    <span class="text-sm text-gray-500">Total</span>
+                </div>
+                <div class="border-l border-gray-300"></div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xl font-semibold text-green-600">{{ $stats['completed'] }}</span>
+                    <span class="text-sm text-gray-600">Completed</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xl font-semibold text-orange-600">{{ $stats['student_absent'] }}</span>
+                    <span class="text-sm text-gray-600">Absent</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xl font-semibold text-red-600">{{ $stats['teacher_cancelled'] }}</span>
+                    <span class="text-sm text-gray-600">Cancelled</span>
+                </div>
             </div>
         </div>
 
@@ -60,7 +73,7 @@
                 $isCurrentWeek = now()->between($weekStartDate, $weekEndDate);
             @endphp
             
-            <div class="bg-white rounded-lg shadow mb-4" x-data="{ open: {{ $isCurrentWeek ? 'true' : 'false' }} }">
+            <div class="bg-white rounded-lg shadow mb-4" x-data="{ open: true }">
                 <!-- Week Header -->
                 <button 
                     @click="open = !open" 
@@ -88,39 +101,57 @@
                         " x-data="{ editing: false }">
                             <!-- Display Mode -->
                             <div x-show="!editing">
-                                <div class="flex justify-between items-start">
-                                    <div class="flex-1 cursor-pointer" @click="editing = true">
-                                        <div class="font-medium">
-                                            {{ $lesson->class_date->format('D M d') }} - {{ $lesson->student->name }}
+                                <div class="flex justify-between items-start gap-4">
+                                    <div class="flex-shrink-0">
+                                        <div class="mb-2">
+                                            <div class="text-sm font-bold text-gray-900">
+                                                {{ $lesson->class_date->format('D') }} {{ $lesson->class_date->format('d') }}
+                                            </div>
+                                            <div class="text-xs font-medium text-gray-700">
+                                                {{ $lesson->student->name }}
+                                            </div>
                                         </div>
+                                        <button @click="editing = true" class="text-xs text-blue-600 hover:text-blue-800 hover:underline">Edit</button>
+                                    </div>
+                                    
+                                    <div class="flex-1">
                                         @if($lesson->status === 'completed')
-                                            <div class="text-sm text-gray-600 mt-1">
-                                                <div><strong>Topic:</strong> {{ $lesson->topic }}</div>
-                                                @if($lesson->homework)
-                                                    <div><strong>HW:</strong> {{ $lesson->homework }}</div>
-                                                @endif
-                                                @if($lesson->comments)
-                                                    <div><strong>Notes:</strong> {{ $lesson->comments }}</div>
-                                                @endif
+                                            <div class="text-xs text-gray-600 space-y-0.5 flex justify-end">
+                                                <div class="space-y-0.5">
+                                                    <div class="grid grid-cols-[auto_1fr] gap-2 items-start">
+                                                        <span class="text-gray-400 text-right">Topic:</span>
+                                                        <span>{{ $lesson->topic }}</span>
+                                                    </div>
+                                                    @if($lesson->homework)
+                                                        <div class="grid grid-cols-[auto_1fr] gap-2 items-start">
+                                                            <span class="text-gray-400 text-right">HW:</span>
+                                                            <span>{{ $lesson->homework }}</span>
+                                                        </div>
+                                                    @endif
+                                                    @if($lesson->comments)
+                                                        <div class="grid grid-cols-[auto_1fr] gap-2 items-start">
+                                                            <span class="text-gray-400 text-right">Notes:</span>
+                                                            <span>{{ $lesson->comments }}</span>
+                                                        </div>
+                                                    @endif
+                                                </div>
                                             </div>
                                         @elseif($lesson->status === 'student_absent')
-                                            <div class="text-sm text-red-600">
+                                            <div class="text-xs text-red-600 text-right">
                                                 ⚠ Student Absent
                                                 @if($lesson->comments)
-                                                    <div class="text-xs mt-1">{{ $lesson->comments }}</div>
+                                                    <div class="text-gray-500 mt-0.5">{{ $lesson->comments }}</div>
                                                 @endif
                                             </div>
                                         @elseif($lesson->status === 'teacher_cancelled')
-                                            <div class="text-sm text-orange-600">
+                                            <div class="text-xs text-orange-600 text-right">
                                                 🚫 Teacher Cancelled
                                                 @if($lesson->comments)
-                                                    <div class="text-xs mt-1">{{ $lesson->comments }}</div>
+                                                    <div class="text-gray-500 mt-0.5">{{ $lesson->comments }}</div>
                                                 @endif
                                             </div>
                                         @endif
                                     </div>
-                                
-                                        <button @click="editing = true" class="text-sm text-blue-600 hover:underline">Edit</button>
                                 </div>
                             </div>
 
