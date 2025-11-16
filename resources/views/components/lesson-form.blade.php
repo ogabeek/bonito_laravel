@@ -9,6 +9,8 @@
                 get year() { return this.date.getFullYear() },
                 get days() {
                     let first = new Date(this.year, this.month, 1).getDay();
+                    // Convert Sunday (0) to 7, then subtract 1 to make Monday = 0
+                    first = (first === 0 ? 6 : first - 1);
                     let last = new Date(this.year, this.month + 1, 0).getDate();
                     let arr = Array(first).fill(0).concat([...Array(last)].map((_, i) => i + 1));
                     return arr;
@@ -29,7 +31,7 @@
                     </div>
                     
                     <div class="grid grid-cols-7 gap-0.5 text-center">
-                        <div class="text-gray-500 p-0.5">S</div><div class="text-gray-500 p-0.5">M</div><div class="text-gray-500 p-0.5">T</div><div class="text-gray-500 p-0.5">W</div><div class="text-gray-500 p-0.5">T</div><div class="text-gray-500 p-0.5">F</div><div class="text-gray-500 p-0.5">S</div>
+                        <div class="text-gray-500 p-0.5">M</div><div class="text-gray-500 p-0.5">T</div><div class="text-gray-500 p-0.5">W</div><div class="text-gray-500 p-0.5">T</div><div class="text-gray-500 p-0.5">F</div><div class="text-gray-500 p-0.5">S</div><div class="text-gray-500 p-0.5">S</div>
                         
                         <template x-for="d in days">
                             <button type="button" 
@@ -47,32 +49,33 @@
             <!-- Right Side: Student, Status, and Details -->
             <div class="flex-1 space-y-2">
                 <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Student</label>
-                    <select name="student_id" required class="w-full px-2 py-1.5 text-sm border rounded">
-                        <option value="">Select...</option>
-                        @foreach($students as $student)
-                            <option value="{{ $student->id }}">{{ $student->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                    <div class="flex gap-2 items-end mb-2">
+                        <div class="flex-1">
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Student</label>
+                            <select name="student_id" required class="w-full px-2 py-1.5 text-sm border rounded">
+                                <option value="">Select...</option>
+                                @foreach($students as $student)
+                                    <option value="{{ $student->id }}">{{ $student->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 mb-1">Status</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <label class="flex items-center justify-center px-3 py-2 border rounded cursor-pointer transition hover:bg-gray-50 has-[:checked]:bg-green-50 has-[:checked]:border-green-500 has-[:checked]:text-green-700">
-                            <input type="radio" name="status" value="completed" class="status-radio hidden" {{ ($isNew || (!$isNew && $lesson->status === 'completed')) ? 'checked' : '' }}>
-                            <span class="text-sm font-medium">✓ Done</span>
-                        </label>
-                        
-                        <label class="flex items-center justify-center px-3 py-2 border rounded cursor-pointer transition hover:bg-gray-50 has-[:checked]:bg-red-50 has-[:checked]:border-red-500 has-[:checked]:text-red-700">
-                            <input type="radio" name="status" value="student_absent" class="status-radio hidden" {{ (!$isNew && $lesson->status === 'student_absent') ? 'checked' : '' }}>
-                            <span class="text-sm font-medium">⚠ Absent</span>
-                        </label>
-                        
-                        <label class="flex items-center justify-center px-3 py-2 border rounded cursor-pointer transition hover:bg-gray-50 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-500 has-[:checked]:text-orange-700">
-                            <input type="radio" name="status" value="teacher_cancelled" class="status-radio hidden" {{ (!$isNew && $lesson->status === 'teacher_cancelled') ? 'checked' : '' }}>
-                            <span class="text-sm font-medium">🚫 Cancel</span>
-                        </label>
+                        <div class="flex gap-1">
+                            <label class="flex items-center gap-1 px-2 py-1.5 border rounded cursor-pointer transition hover:bg-gray-50 has-[:checked]:bg-green-50 has-[:checked]:border-green-500 has-[:checked]:text-green-700" title="Lesson completed successfully">
+                                <input type="radio" name="status" value="completed" class="status-radio hidden" {{ ($isNew || (!$isNew && $lesson->status === 'completed')) ? 'checked' : '' }}>
+                                <span class="text-sm font-medium">✓ Done</span>
+                            </label>
+                            
+                            <label class="flex items-center gap-1 px-2 py-1.5 border rounded cursor-pointer transition hover:bg-gray-50 has-[:checked]:bg-red-50 has-[:checked]:border-red-500 has-[:checked]:text-red-700" title="Student was absent">
+                                <input type="radio" name="status" value="student_absent" class="status-radio hidden" {{ (!$isNew && $lesson->status === 'student_absent') ? 'checked' : '' }}>
+                                <span class="text-sm font-medium">⚠ SA</span>
+                            </label>
+                            
+                            <label class="flex items-center gap-1 px-2 py-1.5 border rounded cursor-pointer transition hover:bg-gray-50 has-[:checked]:bg-orange-50 has-[:checked]:border-orange-500 has-[:checked]:text-orange-700" title="Cancelled by teacher">
+                                <input type="radio" name="status" value="teacher_cancelled" class="status-radio hidden" {{ (!$isNew && $lesson->status === 'teacher_cancelled') ? 'checked' : '' }}>
+                                <span class="text-sm font-medium">🚫 CT</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
