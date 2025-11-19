@@ -90,3 +90,6 @@ Feel free to use best practices on teaching to help with it
 
 **Current pain points:**
 Make a platform for Teachers to mark attendance, topic, HW  -> student see it -> admin have calculation of all classes
+
+<img src="image-1.png" alt="Alt Text" width="200" >
+
