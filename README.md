@@ -1,11 +1,22 @@
 Boniato School Management System 
 
-Todo:
-add steps how to set up project 
+**Purpose:** 
+Simplified management system for online school with ~10 teachers, ~100 students, handling ~200 classes/month. Replaces manual Google Forms → Spreadsheet workflow while preserving spreadsheet calculations for financial reporting.
 
-**Purpose:** Simplified management system for online school with ~10 teachers, ~100 students, handling ~200 classes/month. Replaces manual Google Forms → Spreadsheet workflow while preserving spreadsheet calculations for financial reporting.
+**Context:** 
+This is a pragmatic MVP built in 2 weeks focusing on core functionality over architectural perfection.
 
-**Context:** This is a pragmatic MVP built in 2 weeks focusing on core functionality over architectural perfection.
+---
+
+## How to Setup
+
+**Dependencies:** `composer install && npm install`  
+**Environment:** `cp .env.example .env && php artisan key:generate`  
+**Database:** `php artisan migrate`  
+**Build:** `npm run build`  
+**Access:** `http://boniato_check.test` (Herd auto-serves)
+
+---
 
 ### Technical Stack
 
