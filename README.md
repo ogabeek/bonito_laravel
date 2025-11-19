@@ -8,7 +8,17 @@ This is a pragmatic MVP built in 2 weeks focusing on core functionality over arc
 
 ---
 
-## How to Setup
+### Technical Stack
+
+- **Local Development:** Laravel Herd
+- **Database:** SQLite (dev) -> Connected to TablePlus for gui 
+- **Auth:** UUID-based direct links (no password system currently)
+- **Sheets Integration:** revolution/laravel-google-sheets
+- **CSS:** Tailwind and app.css file as a design references
+
+---
+
+### How to Setup
 
 **Dependencies:** `composer install && npm install`  
 **Environment:** `cp .env.example .env && php artisan key:generate`  
@@ -17,14 +27,6 @@ This is a pragmatic MVP built in 2 weeks focusing on core functionality over arc
 **Access:** `http://boniato_check.test` (Herd auto-serves)
 
 ---
-
-### Technical Stack
-
-- **Local Development:** Laravel Herd
-- **Database:** SQLite (dev) -> Connected to TablePlus for gui 
-- **Auth:** UUID-based direct links (no password system currently)
-- **Sheets Integration:** revolution/laravel-google-sheets
-- **CSS:** Tailwind and app.css file as a design references
 
 ### Core Features 
 
