@@ -1,12 +1,11 @@
-Online School Management System (Laravel MVP)
+Boniato School Management System 
+
+Todo:
+add steps how to set up project 
 
 **Purpose:** Simplified management system for online school with ~10 teachers, ~100 students, handling ~200 classes/month. Replaces manual Google Forms → Spreadsheet workflow while preserving spreadsheet calculations for financial reporting.
 
-**Context:** This is a pragmatic MVP built in 2 weeks. We chose speed over perfection. The codebase intentionally violates some best practices (like database normalization) to ship quickly.
-
-**Current Status:** 2-week MVP implementation focusing on core functionality over architectural perfection.
-
-**Key Principle:** Working product > Perfect code. Prioritizes rapid deployment 
+**Context:** This is a pragmatic MVP built in 2 weeks focusing on core functionality over architectural perfection.
 
 ### Technical Stack
 
@@ -34,7 +33,6 @@ Online School Management System (Laravel MVP)
 - Hourly automatic export via cron
 - Manual "Sync Now" button for immediate updates
 - One-way sync (Laravel → Sheets only)
-- Preserves existing spreadsheet formulas for calculations
 
 
 **Rationale for MVP because:**
@@ -60,13 +58,6 @@ Online School Management System (Laravel MVP)
 - `resources/views/components/` - Reusable UI components (status-badge, month-navigation, lesson-display)
 - `public/js/lesson-manager.js` - AJAX operations & session storage
 - `public/css/app.css` - Design system (CSS variables)
-
-**Pattern:**
-```
-Request → FormRequest (validation) → Controller → Service (logic) → Model → Database
-                                                      ↓
-                                                  View (with components)
-```
 
 ---
 
