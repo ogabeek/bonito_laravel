@@ -97,85 +97,14 @@
                 <!-- Week Lessons -->
                 <div x-show="open" class="px-6 pb-4 space-y-2">
                     @foreach($lessons as $lesson)
-                        <div class="border-l-4 pl-4 py-2 
-                            @if($lesson->status === 'completed') border-green-500
-                            @elseif($lesson->status === 'student_absent') border-red-500
-                            @elseif($lesson->status === 'teacher_cancelled') border-orange-500
-                            @else border-blue-500
-                            @endif
-                        " x-data="{ editing: false }">
-                            <!-- Display Mode -->
-                            <div x-show="!editing">
-                                <div class="flex justify-between items-start gap-4">
-                                    <div class="flex-shrink-0">
-                                        <div class="mb-2">
-                                            <div class="text-sm font-bold text-gray-900">
-                                                {{ $lesson->class_date->format('D') }} {{ $lesson->class_date->format('d') }}
-                                            </div>
-                                            <div class="text-xs font-medium text-gray-700">
-                                                {{ $lesson->student->name }}
-                                            </div>
-                                        </div>
-                                        <button @click="editing = true" class="text-xs text-blue-600 hover:text-blue-800 hover:underline">Edit</button>
-                                    </div>
-                                    
-                                    <div class="flex-1">
-                                        @if($lesson->status === 'completed')
-                                            <div class="text-xs text-gray-600 space-y-0.5 flex justify-end">
-                                                <div class="space-y-0.5">
-                                                    <div class="grid grid-cols-[auto_1fr] gap-2 items-start">
-                                                        <span class="text-gray-400 text-right">Topic:</span>
-                                                        <span>{{ $lesson->topic }}</span>
-                                                    </div>
-                                                    @if($lesson->homework)
-                                                        <div class="grid grid-cols-[auto_1fr] gap-2 items-start">
-                                                            <span class="text-gray-400 text-right">HW:</span>
-                                                            <span>{{ $lesson->homework }}</span>
-                                                        </div>
-                                                    @endif
-                                                    @if($lesson->comments)
-                                                        <div class="grid grid-cols-[auto_1fr] gap-2 items-start">
-                                                            <span class="text-gray-400 text-right">Notes:</span>
-                                                            <span>{{ $lesson->comments }}</span>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        @elseif($lesson->status === 'student_absent')
-                                            <div class="text-xs text-red-600 text-right">
-                                                ⚠ Student Absent
-                                                @if($lesson->comments)
-                                                    <div class="text-gray-500 mt-0.5">{{ $lesson->comments }}</div>
-                                                @endif
-                                            </div>
-                                        @elseif($lesson->status === 'teacher_cancelled')
-                                            <div class="text-xs text-orange-600 text-right">
-                                                🚫 Teacher Cancelled
-                                                @if($lesson->comments)
-                                                    <div class="text-gray-500 mt-0.5">{{ $lesson->comments }}</div>
-                                                @endif
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Edit Mode -->
-                            <div x-show="editing" class="space-y-2" x-cloak>
-                                <form @submit.prevent="saveLesson({{ $lesson->id }})">
-                                    <x-lesson-form :lesson="$lesson" :students="$students" />
-                                    
-                                    <div class="flex justify-between items-center mt-3">
-                                        <div class="flex gap-2">
-                                            <button type="submit" class="px-4 py-1.5 text-sm font-medium bg-blue-600 text-white rounded hover:bg-blue-700 transition">Save</button>
-                                            <button type="button" @click="editing = false" class="px-4 py-1.5 text-sm font-medium bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Cancel</button>
-                                        </div>
-                                        <button type="button" onclick="deleteLesson({{ $lesson->id }})" class="px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 transition">🗑 Delete</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                        
+                        <x-lesson-card 
+                            :lesson="$lesson" 
+                            :showStudent="true" 
+                            :showDelete="true"
+                            :coloredBg="false"
+                            :compact="true"
+                            dateFormat="D d"
+                        />
                     @endforeach
                 </div>
             </div>

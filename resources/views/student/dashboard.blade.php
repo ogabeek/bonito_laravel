@@ -54,52 +54,11 @@
             @if($pastLessons->count() > 0)
                 <div class="p-6 space-y-3">
                     @foreach($pastLessons as $lesson)
-                        <div class="border-l-4 pl-4 py-3
-                            @if($lesson->status === 'completed') border-green-500 bg-green-50
-                            @elseif($lesson->status === 'student_absent') border-red-500 bg-red-50
-                            @elseif($lesson->status === 'teacher_cancelled') border-orange-500 bg-orange-50
-                            @endif
-                        ">
-                            <div class="flex justify-between items-start gap-4">
-                                <div class="flex-1">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <div class="font-semibold text-gray-900">
-                                            {{ $lesson->class_date->format('M d, Y') }}
-                                        </div>
-                                        <x-status-badge :status="$lesson->status" />
-                                    </div>
-                                    <div class="text-sm text-gray-600">
-                                        Teacher: {{ $lesson->teacher->name }}
-                                    </div>
-                                    
-                                    @if($lesson->status === 'completed')
-                                        <div class="mt-2 text-sm space-y-1">
-                                            <div><span class="font-semibold text-gray-700">Topic:</span> {{ $lesson->topic }}</div>
-                                            @if($lesson->homework)
-                                                <div><span class="font-semibold text-gray-700">Homework:</span> {{ $lesson->homework }}</div>
-                                            @endif
-                                            @if($lesson->comments)
-                                                <div><span class="font-semibold text-gray-700">Notes:</span> {{ $lesson->comments }}</div>
-                                            @endif
-                                        </div>
-                                    @elseif($lesson->status === 'student_absent')
-                                        <div class="mt-2 text-sm text-gray-600">
-                                            <span class="italic">You were absent</span>
-                                            @if($lesson->comments)
-                                                <div class="mt-1"><span class="font-semibold">Notes:</span> {{ $lesson->comments }}</div>
-                                            @endif
-                                        </div>
-                                    @elseif($lesson->status === 'teacher_cancelled')
-                                        <div class="mt-2 text-sm text-gray-600">
-                                            <span class="italic">Lesson was cancelled</span>
-                                            @if($lesson->comments)
-                                                <div class="mt-1"><span class="font-semibold">Reason:</span> {{ $lesson->comments }}</div>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
+                        <x-lesson-card 
+                            :lesson="$lesson" 
+                            :showTeacher="true" 
+                            dateFormat="M d, Y"
+                        />
                     @endforeach
                 </div>
             @else

@@ -45,7 +45,19 @@ class AdminController extends Controller
                 return $lesson->student_id . '_' . $lesson->class_date->format('Y-m-d');
             });
         
-        return view('admin.dashboard', compact('stats', 'teachers', 'students', 'currentMonth', 'daysInMonth', 'monthStart', 'lessonsThisMonth', 'prevMonth', 'nextMonth'));
+        // Pre-calculate lesson stats per student for this month (avoids N+1 in Blade)
+        $studentLessonStats = Lesson::whereYear('class_date', $currentMonth->year)
+            ->whereMonth('class_date', $currentMonth->month)
+            ->get()
+            ->groupBy('student_id')
+            ->map(function($lessons) {
+                return [
+                    'total' => $lessons->count(),
+                    'completed' => $lessons->where('status', 'completed')->count()
+                ];
+            });
+        
+        return view('admin.dashboard', compact('stats', 'teachers', 'students', 'currentMonth', 'daysInMonth', 'monthStart', 'lessonsThisMonth', 'prevMonth', 'nextMonth', 'studentLessonStats'));
     }
 
     // Teachers Management
@@ -61,13 +73,13 @@ class AdminController extends Controller
             'password' => $request->password,
         ]);
 
-        return redirect()->route('admin.teachers')->with('success', 'Teacher created successfully!');
+        return redirect()->route('admin.dashboard')->with('success', 'Teacher created successfully!');
     }
 
     public function deleteTeacher(Teacher $teacher)
     {
         $teacher->delete();
-        return redirect()->route('admin.teachers')->with('success', 'Teacher deleted successfully!');
+        return redirect()->route('admin.dashboard')->with('success', 'Teacher deleted successfully!');
     }
 
     // Students Management
@@ -83,7 +95,7 @@ class AdminController extends Controller
 
         Student::create($request->all());
 
-        return redirect()->route('admin.students')->with('success', 'Student created successfully!');
+        return redirect()->route('admin.dashboard')->with('success', 'Student created successfully!');
     }
 
     public function editStudentForm(Student $student)
