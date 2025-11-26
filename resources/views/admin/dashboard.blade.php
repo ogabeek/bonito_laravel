@@ -33,9 +33,11 @@
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
-                <div>
-                    <p class="text-sm text-gray-600">Lessons - {{ $currentMonth->format('M Y') }}</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $stats['lessons_this_month'] }}</p>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-600">Lessons - {{ $currentMonth->format('M Y') }}</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ $stats['lessons_this_month'] }}</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -179,11 +181,7 @@
                                                 </a>
                                                 
                                                 @php
-                                                    $totalLessons = $student->lessons()->whereYear('class_date', $currentMonth->year)
-                                                        ->whereMonth('class_date', $currentMonth->month)->count();
-                                                    $completedLessons = $student->lessons()->whereYear('class_date', $currentMonth->year)
-                                                        ->whereMonth('class_date', $currentMonth->month)
-                                                        ->where('status', 'completed')->count();
+                                                    $lessonStats = $studentLessonStats->get($student->id, ['total' => 0, 'completed' => 0]);
                                                 @endphp
                                                 
                                                 <!-- Teachers (compact, single line) -->
@@ -196,9 +194,9 @@
                                             
                                             <!-- Actions & Stats (compact icons on right) -->
                                             <div class="flex items-center gap-2 text-xs shrink-0">
-                                                @if($totalLessons > 0)
-                                                    <span class="text-gray-600 font-medium" title="{{ $completedLessons }} completed / {{ $totalLessons }} total">
-                                                        {{ $completedLessons }}/{{ $totalLessons }}
+                                                @if($lessonStats['total'] > 0)
+                                                    <span class="text-gray-600 font-medium" title="{{ $lessonStats['completed'] }} completed / {{ $lessonStats['total'] }} total">
+                                                        {{ $lessonStats['completed'] }}/{{ $lessonStats['total'] }}
                                                     </span>
                                                 @endif
                                             </div>
@@ -309,14 +307,11 @@
                                     <td class="px-4 py-3 text-sm">{{ $teacher->students_count }}</td>
                                     <td class="px-4 py-3 text-sm">{{ $teacher->lessons_count }}</td>
                                     <td class="px-4 py-3 text-right">
-                                        <div class="flex gap-2 justify-end">
-                                            <button @click="selectTeacherForAssignment({{ $teacher->id }}); activeTab = 'assignments'" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Assign</button>
-                                            <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}" onsubmit="return confirm('Delete {{ $teacher->name }}?')" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>
-                                            </form>
-                                        </div>
+                                        <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}" onsubmit="return confirm('Delete {{ $teacher->name }}?')" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>
+                                        </form>
                                     </td>
                                 </tr>
                             @endforeach
@@ -335,12 +330,7 @@ function adminDashboard() {
         activeTab: 'calendar',
         showAddTeacher: false,
         showAddStudent: false,
-        selectedTeacherId: null,
-        selectedTeacher: '', // For calendar filter
-        
-        selectTeacherForAssignment(teacherId) {
-            this.selectedTeacherId = teacherId;
-        }
+        selectedTeacher: ''
     }
 }
 </script>
