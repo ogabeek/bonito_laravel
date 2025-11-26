@@ -11,26 +11,44 @@ use Carbon\Carbon;
 class AdminController extends Controller
 {
     // Dashboard
-    public function dashboard()
+    public function dashboard(Request $request)
     {
+        // Calendar data - get month from query param or use current month
+        $year = $request->get('year', now()->year);
+        $month = $request->get('month', now()->month);
+        $currentMonth = Carbon::createFromDate($year, $month, 1);
+        
         $stats = [
             'teachers' => Teacher::count(),
             'students' => Student::count(),
-            'lessons_this_month' => Lesson::whereYear('class_date', now()->year)
-                ->whereMonth('class_date', now()->month)
+            'lessons_this_month' => Lesson::whereYear('class_date', $currentMonth->year)
+                ->whereMonth('class_date', $currentMonth->month)
                 ->count(),
         ];
         
-        return view('admin.dashboard', compact('stats'));
+        $teachers = Teacher::withCount('students', 'lessons')->with('students')->get();
+        $students = Student::withCount('teachers', 'lessons')->with('teachers')->get();
+        
+        $daysInMonth = $currentMonth->daysInMonth;
+        $monthStart = $currentMonth->copy()->startOfMonth();
+        
+        // Previous and next month for navigation
+        $prevMonth = $currentMonth->copy()->subMonth();
+        $nextMonth = $currentMonth->copy()->addMonth();
+        
+        // Get all lessons for selected month grouped by student and date
+        $lessonsThisMonth = Lesson::with(['teacher', 'student'])
+            ->whereYear('class_date', $currentMonth->year)
+            ->whereMonth('class_date', $currentMonth->month)
+            ->get()
+            ->groupBy(function($lesson) {
+                return $lesson->student_id . '_' . $lesson->class_date->format('Y-m-d');
+            });
+        
+        return view('admin.dashboard', compact('stats', 'teachers', 'students', 'currentMonth', 'daysInMonth', 'monthStart', 'lessonsThisMonth', 'prevMonth', 'nextMonth'));
     }
 
     // Teachers Management
-    public function teachers()
-    {
-        $teachers = Teacher::withCount('students', 'lessons')->get();
-        return view('admin.teachers.index', compact('teachers'));
-    }
-
     public function createTeacher(Request $request)
     {
         $request->validate([
@@ -53,17 +71,6 @@ class AdminController extends Controller
     }
 
     // Students Management
-    public function students()
-    {
-        $students = Student::withCount('teachers', 'lessons')->get();
-        return view('admin.students.index', compact('students'));
-    }
-
-    public function createStudentForm()
-    {
-        return view('admin.students.create');
-    }
-
     public function createStudent(Request $request)
     {
         $request->validate([
@@ -102,20 +109,20 @@ class AdminController extends Controller
     public function deleteStudent(Student $student)
     {
         $student->delete();
-        return redirect()->route('admin.students')->with('success', 'Student deleted successfully!');
+        return redirect()->route('admin.dashboard')->with('success', 'Student deleted successfully!');
+    }
+
+    public function assignTeacherToStudent(Request $request, Student $student)
+    {
+        $request->validate(['teacher_id' => 'required|exists:teachers,id']);
+        
+        // Attach teacher to student
+        $student->teachers()->attach($request->teacher_id);
+        
+        return back()->with('success', 'Teacher assigned successfully!');
     }
 
     // Teacher-Student Assignment
-    public function teacherStudents(Teacher $teacher)
-    {
-        $assignedStudents = $teacher->students;
-        $availableStudents = Student::whereDoesntHave('teachers', function($query) use ($teacher) {
-            $query->where('teacher_id', $teacher->id);
-        })->get();
-        
-        return view('admin.teachers.students', compact('teacher', 'assignedStudents', 'availableStudents'));
-    }
-
     public function assignStudent(Request $request, Teacher $teacher)
     {
         $request->validate(['student_id' => 'required|exists:students,id']);
