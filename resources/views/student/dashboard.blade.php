@@ -9,9 +9,6 @@
         <!-- Header -->
         <div class="mb-6">
             <h1 class="text-3xl font-bold">{{ $student->name }}</h1>
-            @if($student->parent_name)
-                <p class="text-gray-600 text-sm">Parent: {{ $student->parent_name }}</p>
-            @endif
             @if($student->goal)
                 <p class="text-gray-700 mt-2 text-sm"><span class="font-semibold">Goal:</span> {{ $student->goal }}</p>
             @endif
