@@ -68,7 +68,7 @@ This is a pragmatic MVP built in 2 weeks focusing on core functionality over arc
 - `app/Http/Controllers/TeacherController.php` - HTTP layer only
 - `app/Http/Requests/` - Form validation (CreateLessonRequest, UpdateLessonRequest)
 - `resources/views/layouts/app.blade.php` - Base layout for all pages
-- `resources/views/components/` - Reusable UI components (status-badge, month-navigation, lesson-display)
+- `resources/views/components/` - Reusable UI components (lesson-card, lesson-form, status-badge, calendar-picker)
 - `public/js/lesson-manager.js` - AJAX operations & session storage
 - `public/css/app.css` - Design system (CSS variables)
 
