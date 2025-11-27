@@ -1,23 +1,10 @@
 <?php
 
-use App\Http\Controllers\GreetingController;
 use App\Http\Controllers\TeacherController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('admin.login');
 });
-
-Route::get('/hello', function(){
-    return 'Hello world! 🪴';
-});
-
-Route::get('/greet/{name}', function($name){
-    return "Hello, $name! 🪴";
-});
-
-
-Route::get('/profile/{name}/{ip}', [GreetingController::class, 'show']);
-
 
 // Teacher routes
 Route::prefix('teacher')->name('teacher.')->group(function () {
