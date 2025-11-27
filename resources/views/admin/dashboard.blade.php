@@ -77,27 +77,12 @@
                         </div>
                         
                         <!-- Month Navigation -->
-                        <div class="flex items-center gap-2">
-                            <a href="{{ route('admin.dashboard', ['year' => $prevMonth->year, 'month' => $prevMonth->month]) }}" 
-                               class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm font-medium transition"
-                               title="Previous month">
-                                ← {{ $prevMonth->format('M') }}
-                            </a>
-                            
-                            @if(!$currentMonth->isCurrentMonth())
-                                <a href="{{ route('admin.dashboard') }}" 
-                                   class="px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm font-medium transition"
-                                   title="Go to current month">
-                                    Today
-                                </a>
-                            @endif
-                            
-                            <a href="{{ route('admin.dashboard', ['year' => $nextMonth->year, 'month' => $nextMonth->month]) }}" 
-                               class="px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm font-medium transition"
-                               title="Next month">
-                                {{ $nextMonth->format('M') }} →
-                            </a>
-                        </div>
+                        <x-month-nav 
+                            :currentMonth="$currentMonth"
+                            :prevMonth="$prevMonth"
+                            :nextMonth="$nextMonth"
+                            routeName="admin.dashboard"
+                        />
                     </div>
                     
                     <button @click="showAddStudent = !showAddStudent" class="btn-primary">
@@ -340,8 +325,4 @@ function adminDashboard() {
     }
 }
 </script>
-
-<style>
-[x-cloak] { display: none !important; }
-</style>
 @endsection

@@ -192,3 +192,8 @@
 .card-compact {
     padding: var(--spacing-md);
 }
+
+/* ALPINE.JS CLOAK - Hide elements until Alpine initializes */
+[x-cloak] { 
+    display: none !important; 
+}

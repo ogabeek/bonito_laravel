@@ -236,8 +236,4 @@
         });
     }
 </script>
-
-<style>
-    [x-cloak] { display: none !important; }
-</style>
 @endpush
