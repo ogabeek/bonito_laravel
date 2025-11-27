@@ -23,4 +23,10 @@ class Teacher extends Model
     {
         return $this->belongsToMany(Student::class);
     }
+
+    // Scope: Load teacher with full details (students and lessons count)
+    public function scopeWithFullDetails($query)
+    {
+        return $query->withCount('students', 'lessons')->with('students');
+    }
 }

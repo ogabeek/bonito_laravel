@@ -39,4 +39,16 @@ enum LessonStatus: string
             self::TEACHER_CANCELLED => 'bg-red-100 text-red-800',
         };
     }
+
+    /**
+     * Get CSS class for lesson card styling
+     */
+    public function cssClass(): string
+    {
+        return match($this) {
+            self::COMPLETED => 'completed',
+            self::STUDENT_ABSENT => 'absent',
+            self::TEACHER_CANCELLED => 'cancelled',
+        };
+    }
 }

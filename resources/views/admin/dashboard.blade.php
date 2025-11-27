@@ -48,16 +48,10 @@
 
                 <!-- Add Student Form -->
                 <div x-show="showAddStudent" x-cloak class="bg-gray-50 rounded-lg p-4 mb-4">
-                    <form method="POST" action="{{ route('admin.students.store') }}" class="space-y-3">
+                    <form method="POST" action="{{ route('admin.students.store') }}">
                         @csrf
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="text" name="name" placeholder="Student Name *" required class="px-3 py-2 border rounded">
-                            <input type="text" name="parent_name" placeholder="Parent Name" class="px-3 py-2 border rounded">
-                            <input type="email" name="email" placeholder="Email" class="px-3 py-2 border rounded">
-                            <input type="text" name="goal" placeholder="Goal" class="px-3 py-2 border rounded">
-                        </div>
-                        <textarea name="description" placeholder="Description" rows="2" class="w-full px-3 py-2 border rounded"></textarea>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Create Student</button>
+                        <x-student-form mode="create" />
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-3">Create Student</button>
                     </form>
                 </div>
 
@@ -92,10 +86,7 @@
                         </thead>
                         <tbody>
                             @foreach($students as $student)
-                                @php
-                                    $studentTeacherIds = $student->teachers->pluck('id')->toArray();
-                                @endphp
-                                <tr x-show="selectedTeacher === '' || {{ json_encode($studentTeacherIds) }}.includes(parseInt(selectedTeacher))" class="border-t hover:bg-gray-50">
+                                <tr x-show="selectedTeacher === '' || {{ json_encode($student->teacher_ids) }}.includes(parseInt(selectedTeacher))" class="border-t hover:bg-gray-50">
                                     <td class="px-3 py-2 border-r sticky left-0 bg-white">
                                         <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-gray-900 hover:text-blue-600">
                                             {{ $student->name }}
@@ -114,12 +105,9 @@
                                         @endphp
                                         <td class="px-1 py-2 text-center border-l {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
                                             @foreach($lessons as $lesson)
-                                                @php
-                                                    $statusClass = ['completed' => 'completed', 'student_absent' => 'absent', 'teacher_cancelled' => 'cancelled'][$lesson->status] ?? 'completed';
-                                                @endphp
-                                                <div class="inline-block px-1.5 py-0.5 text-xs font-medium rounded" 
-                                                     style="background: var(--color-status-{{ $statusClass }}-bg); color: var(--color-status-{{ $statusClass }});"
-                                                     title="{{ $lesson->teacher->name }} - {{ ucfirst(str_replace('_', ' ', $lesson->status)) }}">
+                                                <div class="inline-block px-1.5 py-0.5 text-xs font-medium rounded"
+                                                     style="background: var(--color-status-{{ $lesson->status->cssClass() }}-bg); color: var(--color-status-{{ $lesson->status->cssClass() }});"
+                                                     title="{{ $lesson->teacher->name }} - {{ $lesson->status->label() }}">
                                                     {{ substr($lesson->teacher->name, 0, 1) }}
                                                 </div>
                                             @endforeach

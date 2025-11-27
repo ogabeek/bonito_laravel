@@ -48,4 +48,10 @@ class Student extends Model
     {
         return 'uuid';
     }
+
+    // Scope: Load student with full details (teachers and lessons count)
+    public function scopeWithFullDetails($query)
+    {
+        return $query->withCount('teachers', 'lessons')->with('teachers');
+    }
 }

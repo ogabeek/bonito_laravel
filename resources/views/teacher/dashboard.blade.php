@@ -79,9 +79,7 @@
             // Remember the selected student and date
             const selectedStudent = data.student_id;
             const selectedDate = data.class_date;
-            
-            console.log('Creating lesson:', data);
-            
+
             fetch('/teacher/lesson/create', {
                 method: 'POST',
                 headers: {
@@ -92,7 +90,6 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Response:', data);
                 if (data.success) {
                     // Store in sessionStorage (persists during browser session only)
                     sessionStorage.setItem('lastSelectedStudent', selectedStudent);

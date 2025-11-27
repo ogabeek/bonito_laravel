@@ -6,22 +6,18 @@ use App\Enums\LessonStatus;
 use App\Models\Teacher;
 use App\Models\Student;
 use App\Models\Lesson;
+use App\Services\CalendarService;
+use App\Services\LessonStatisticsService;
+use App\Http\Requests\CreateStudentRequest;
+use App\Http\Requests\UpdateStudentRequest;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class AdminController extends Controller
 {
+
     // Admin password (in production, store this in .env or database)
     private const ADMIN_PASSWORD = 'admin13';
-    
-    // Shared validation rules for student creation/update
-    private const STUDENT_RULES = [
-        'name' => 'required|string|max:255',
-        'parent_name' => 'nullable|string|max:255',
-        'email' => 'nullable|email|max:255',
-        'goal' => 'nullable|string',
-        'description' => 'nullable|string',
-    ];
 
     // Show login form
     public function showLogin()
@@ -57,48 +53,39 @@ class AdminController extends Controller
     }
 
     // Dashboard
-    public function dashboard(Request $request)
+    public function dashboard(Request $request, CalendarService $calendar, LessonStatisticsService $statsService)
     {
-        // Calendar data - get month from query param or use current month
-        $year = $request->get('year', now()->year);
-        $month = $request->get('month', now()->month);
-        $currentMonth = Carbon::createFromDate($year, $month, 1);
-        
-        $daysInMonth = $currentMonth->daysInMonth;
-        $monthStart = $currentMonth->copy()->startOfMonth();
-        
-        // Previous and next month for navigation
-        $prevMonth = $currentMonth->copy()->subMonth();
-        $nextMonth = $currentMonth->copy()->addMonth();
-        
-        // Get all lessons for selected month grouped by student and date
-        $lessonsThisMonth = Lesson::with(['teacher', 'student'])
-            ->forMonth($currentMonth)
-            ->get()
-            ->groupBy(function($lesson) {
-                return $lesson->student_id . '_' . $lesson->class_date->format('Y-m-d');
-            });
-        
+        // Get calendar data
+        $calendarData = $calendar->getMonthData($request);
+        $currentMonth = $calendarData['currentMonth'];
+        $prevMonth = $calendarData['prevMonth'];
+        $nextMonth = $calendarData['nextMonth'];
+        $daysInMonth = $calendarData['daysInMonth'];
+        $monthStart = $calendarData['monthStart'];
+
+        // Get all lessons for selected month with relationships (single query)
+        $monthLessons = Lesson::with(['teacher', 'student'])->forMonth($currentMonth)->get();
+
+        // Group lessons by student and date for calendar display
+        $lessonsThisMonth = $monthLessons->groupBy(function($lesson) {
+            return $lesson->student_id . '_' . $lesson->class_date->format('Y-m-d');
+        });
+
         // Pre-calculate lesson stats per student for this month (avoids N+1 in Blade)
-        $studentLessonStats = Lesson::forMonth($currentMonth)
-            ->get()
-            ->groupBy('student_id')
-            ->map(function($lessons) {
-                return [
-                    'total' => $lessons->count(),
-                    'completed' => $lessons->where('status', LessonStatus::COMPLETED)->count()
-                ];
-            });
-        
+        $studentLessonStats = $statsService->calculateStatsByStudent($monthLessons);
+
         $stats = [
             'teachers' => Teacher::count(),
             'students' => Student::count(),
-            'lessons_this_month' => Lesson::forMonth($currentMonth)->count(),
+            'lessons_this_month' => $monthLessons->count(),
         ];
-        
-        $teachers = Teacher::withCount('students', 'lessons')->with('students')->get();
-        $students = Student::withCount('teachers', 'lessons')->with('teachers')->get();
-        
+
+        $teachers = Teacher::withFullDetails()->get();
+        $students = Student::withFullDetails()->get()->map(function($student) {
+            $student->teacher_ids = $student->teachers->pluck('id')->toArray();
+            return $student;
+        });
+
         return view('admin.dashboard', compact('stats', 'teachers', 'students', 'currentMonth', 'daysInMonth', 'monthStart', 'lessonsThisMonth', 'prevMonth', 'nextMonth', 'studentLessonStats'));
     }
 
@@ -125,25 +112,24 @@ class AdminController extends Controller
     }
 
     // Students Management
-    public function createStudent(Request $request)
+    public function createStudent(CreateStudentRequest $request)
     {
-        $request->validate(self::STUDENT_RULES);
-
-        Student::create($request->all());
+        Student::create($request->validated());
 
         return redirect()->route('admin.dashboard')->with('success', 'Student created successfully!');
     }
 
     public function editStudentForm(Student $student)
     {
-        return view('admin.students.edit', compact('student'));
+        $assignedTeacherIds = $student->teachers->pluck('id')->toArray();
+        $availableTeachers = Teacher::whereNotIn('id', $assignedTeacherIds)->get();
+
+        return view('admin.students.edit', compact('student', 'availableTeachers'));
     }
 
-    public function updateStudent(Request $request, Student $student)
+    public function updateStudent(UpdateStudentRequest $request, Student $student)
     {
-        $request->validate(self::STUDENT_RULES);
-
-        $student->update($request->all());
+        $student->update($request->validated());
 
         return redirect()->route('admin.students.edit', $student)->with('success', 'Student updated successfully!');
     }
@@ -157,27 +143,17 @@ class AdminController extends Controller
     public function assignTeacherToStudent(Request $request, Student $student)
     {
         $request->validate(['teacher_id' => 'required|exists:teachers,id']);
-        
+
         // Attach teacher to student
         $student->teachers()->attach($request->teacher_id);
-        
+
         return back()->with('success', 'Teacher assigned successfully!');
     }
 
-    // Teacher-Student Assignment
-    public function assignStudent(Request $request, Teacher $teacher)
-    {
-        $request->validate(['student_id' => 'required|exists:students,id']);
-        
-        $teacher->students()->attach($request->student_id);
-        
-        return back()->with('success', 'Student assigned successfully!');
-    }
-
-    public function unassignStudent(Teacher $teacher, Student $student)
+    public function unassignStudent(Student $student, Teacher $teacher)
     {
         $teacher->students()->detach($student->id);
-        
+
         return back()->with('success', 'Student unassigned successfully!');
     }
 }

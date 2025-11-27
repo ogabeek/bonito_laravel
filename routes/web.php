@@ -12,12 +12,12 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
     Route::get('/{teacher}', [TeacherController::class, 'showLogin'])->name('login');
     Route::post('/{teacher}/login', [TeacherController::class, 'login'])->name('login.submit');
     Route::post('/logout', [TeacherController::class, 'logout'])->name('logout');
-    
-    // Dashboard
-    Route::get('/{teacher}/dashboard', [TeacherController::class, 'dashboard'])->name('dashboard');
-    
-    // Lesson management
-    Route::post('/lesson/create', [TeacherController::class, 'createLesson'])->name('lesson.create');
+
+    // Protected routes (require teacher authentication)
+    Route::middleware('teacher.auth')->group(function () {
+        Route::get('/{teacher}/dashboard', [TeacherController::class, 'dashboard'])->name('dashboard');
+        Route::post('/lesson/create', [TeacherController::class, 'createLesson'])->name('lesson.create');
+    });
 });
 
 // Lesson routes (shared, with model binding)
@@ -52,9 +52,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/students/{student}', [\App\Http\Controllers\AdminController::class, 'updateStudent'])->name('students.update');
         Route::delete('/students/{student}', [\App\Http\Controllers\AdminController::class, 'deleteStudent'])->name('students.delete');
         Route::post('/students/{student}/assign-teacher', [\App\Http\Controllers\AdminController::class, 'assignTeacherToStudent'])->name('student.assign.teacher');
-        
-        // Teacher-Student Assignment
-        Route::post('/teachers/{teacher}/students', [\App\Http\Controllers\AdminController::class, 'assignStudent'])->name('teachers.students.assign');
-        Route::delete('/teachers/{teacher}/students/{student}', [\App\Http\Controllers\AdminController::class, 'unassignStudent'])->name('teachers.students.unassign');
+        Route::delete('/students/{student}/teachers/{teacher}', [\App\Http\Controllers\AdminController::class, 'unassignStudent'])->name('teachers.students.unassign');
     });
 });
