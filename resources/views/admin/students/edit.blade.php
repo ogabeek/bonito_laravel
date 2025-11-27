@@ -5,7 +5,6 @@
 @section('content')
 <div class="p-6 max-w-3xl mx-auto">
     
-    <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold">Edit Student</h1>
         <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-900">← Back</a>
@@ -17,8 +16,7 @@
         </div>
     @endif
 
-    <!-- Edit Form -->
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
+    <x-card class="mb-6">
         <form method="POST" action="{{ route('admin.students.update', $student) }}" class="space-y-4">
             @csrf
             @method('PUT')
@@ -46,11 +44,9 @@
             </div>
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Update Student</button>
         </form>
-    </div>
+    </x-card>
 
-    <!-- Teacher Assignment -->
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 class="text-lg font-semibold mb-4">Teachers</h2>
+    <x-card title="Teachers" class="mb-6">
         @if($student->teachers->count() > 0)
             <div class="flex flex-wrap gap-2 mb-4">
                 @foreach($student->teachers as $teacher)
@@ -79,9 +75,8 @@
             </select>
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Assign</button>
         </form>
-    </div>
+    </x-card>
 
-    <!-- Delete -->
     <div class="bg-red-50 border border-red-200 rounded-lg p-6">
         <form method="POST" action="{{ route('admin.students.delete', $student) }}" onsubmit="return confirm('Delete {{ $student->name }}? This cannot be undone.')">
             @csrf

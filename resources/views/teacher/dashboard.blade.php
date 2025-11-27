@@ -3,20 +3,14 @@
 @section('title', $teacher->name . "'s Dashboard")
 
 @section('content')
-<div class="p-6">
-    <div class="max-w-5xl mx-auto">
-        
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold">{{ $teacher->name }}'s Dashboard</h1>
-            <form method="POST" action="{{ route('teacher.logout') }}">
-                @csrf
-                <button class="text-gray-600 hover:text-gray-800">Logout</button>
-            </form>
-        </div>
+<div class="p-6 max-w-5xl mx-auto">
+    
+    <x-page-header 
+        :title="$teacher->name . \"'s Dashboard\"" 
+        :logoutRoute="route('teacher.logout')" 
+    />
 
-        <!-- Month Navigation -->
-        <div class="bg-white p-4 rounded-lg shadow mb-6">
+    <x-card class="mb-6">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-semibold">{{ $date->format('F Y') }}</h2>
                 <x-month-nav 
@@ -46,38 +40,29 @@
                     <span class="text-sm text-gray-600">Cancelled</span>
                 </div>
             </div>
-        </div>
+    </x-card>
 
-        <!-- Add Lesson -->
-        <div class="bg-white rounded-lg shadow mb-6 p-6">
-            <form id="newLessonForm">
-                <x-lesson-form :students="$students" />
-                
-                <div class="mt-6">
-                    <button type="submit" class="btn-primary">+ Add Class</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Lessons History -->
-        <div class="bg-white rounded-lg shadow">
-            <div class="px-6 py-4 border-b">
-                <h2 class="text-xl font-semibold text-gray-700">📚 Lessons ({{ $stats['total'] }})</h2>
+    <x-card class="mb-6">
+        <form id="newLessonForm">
+            <x-lesson-form :students="$students" />
+            <div class="mt-6">
+                <button type="submit" class="btn-primary">+ Add Class</button>
             </div>
-            
-            @if($lessons->count() > 0)
-                <div class="p-6 space-y-2">
-                    @foreach($lessons as $lesson)
-                        <x-lesson-card :lesson="$lesson" :showStudent="true" :showDelete="true" />
-                    @endforeach
-                </div>
-            @else
-                <div class="p-8 text-center text-gray-500">
-                    No lessons this month
-                </div>
-            @endif
-        </div>
-    </div>
+        </form>
+    </x-card>
+
+    <x-card :title="'📚 Lessons (' . $stats['total'] . ')'">
+        @if($lessons->count() > 0)
+            <div class="space-y-2">
+                @foreach($lessons as $lesson)
+                    <x-lesson-card :lesson="$lesson" :showStudent="true" :showDelete="true" />
+                @endforeach
+            </div>
+        @else
+            <x-empty-state message="No lessons this month" />
+        @endif
+    </x-card>
+
 </div>
 @endsection
 

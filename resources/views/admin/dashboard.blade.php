@@ -5,33 +5,25 @@
 @section('content')
 <div class="p-6 max-w-7xl mx-auto" x-data="{ activeTab: 'calendar', showAddTeacher: false, showAddStudent: false, selectedTeacher: '' }">
     
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Admin Dashboard</h1>
-        <form method="POST" action="{{ route('admin.logout') }}" class="inline">
-            @csrf
-            <button class="text-gray-600 hover:text-gray-900">Logout</button>
-        </form>
-    </div>
+    <x-page-header title="Admin Dashboard" :logoutRoute="route('admin.logout')" />
 
     <!-- Stats -->
     <div class="grid grid-cols-3 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow p-4">
+        <x-card class="p-4">
             <p class="text-sm text-gray-600">Teachers</p>
             <p class="text-2xl font-bold">{{ $stats['teachers'] }}</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4">
+        </x-card>
+        <x-card class="p-4">
             <p class="text-sm text-gray-600">Students</p>
             <p class="text-2xl font-bold">{{ $stats['students'] }}</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4">
+        </x-card>
+        <x-card class="p-4">
             <p class="text-sm text-gray-600">Lessons - {{ $currentMonth->format('M Y') }}</p>
             <p class="text-2xl font-bold">{{ $stats['lessons_this_month'] }}</p>
-        </div>
+        </x-card>
     </div>
 
-    <!-- Tabs -->
-    <div class="bg-white rounded-lg shadow">
+    <x-card>
         <div class="border-b flex gap-4 px-4">
             <button @click="activeTab = 'calendar'" 
                     :class="activeTab === 'calendar' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'"
@@ -139,20 +131,8 @@
                     </table>
                 </div>
 
-                <!-- Legend -->
-                <div class="mt-4 flex gap-4 text-sm">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-4 rounded" style="background: var(--color-status-completed-bg);"></div>
-                        <span>Completed</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-4 rounded" style="background: var(--color-status-absent-bg);"></div>
-                        <span>Student Absent</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-4 rounded" style="background: var(--color-status-cancelled-bg);"></div>
-                        <span>Teacher Cancelled</span>
-                    </div>
+                <div class="mt-4">
+                    <x-status-legend />
                 </div>
             </div>
 
@@ -204,6 +184,6 @@
                 </table>
             </div>
         </div>
-    </div>
+    </x-card>
 </div>
 @endsection
