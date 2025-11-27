@@ -68,12 +68,6 @@
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-
-                <div>
-                    <label class="form-label">UUID (Read-only)</label>
-                    <input type="text" value="{{ $student->uuid }}" readonly class="form-input w-full bg-gray-100">
-                    <p class="text-xs text-gray-500 mt-1">Student portal: <a href="{{ route('student.dashboard', $student) }}" target="_blank" class="text-blue-600 hover:underline">{{ route('student.dashboard', $student) }}</a></p>
-                </div>
                 
                 <div class="flex justify-between items-center pt-4">
                     <button type="submit" class="btn-primary">Update Student</button>
@@ -119,35 +113,6 @@
                 </select>
                 <button type="submit" class="btn-primary">Assign Teacher</button>
             </form>
-        </div>
-
-        <!-- Student Info & Statistics -->
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Statistics & Links</h2>
-            <div class="space-y-3">
-                <div class="flex justify-between py-2 border-b">
-                    <span class="text-gray-600">Student Portal:</span>
-                    <a href="{{ route('student.dashboard', $student) }}" target="_blank" class="text-blue-600 hover:underline font-medium">
-                        View Portal →
-                    </a>
-                </div>
-                <div class="flex justify-between py-2 border-b">
-                    <span class="text-gray-600">Total Lessons:</span>
-                    <span class="font-medium">{{ $student->lessons()->count() }}</span>
-                </div>
-                <div class="flex justify-between py-2 border-b">
-                    <span class="text-gray-600">Completed Lessons:</span>
-                    <span class="font-medium text-green-600">{{ $student->lessons()->where('status', 'completed')->count() }}</span>
-                </div>
-                <div class="flex justify-between py-2 border-b">
-                    <span class="text-gray-600">Student Absent:</span>
-                    <span class="font-medium text-yellow-600">{{ $student->lessons()->where('status', 'student_absent')->count() }}</span>
-                </div>
-                <div class="flex justify-between py-2 border-b">
-                    <span class="text-gray-600">Teacher Cancelled:</span>
-                    <span class="font-medium text-red-600">{{ $student->lessons()->where('status', 'teacher_cancelled')->count() }}</span>
-                </div>
-            </div>
         </div>
 
         <!-- Danger Zone -->
