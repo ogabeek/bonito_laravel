@@ -1,134 +1,93 @@
-@extends('layouts.app')
+@extends('layouts.app', ['favicon' => 'favicon-admin.svg'])
 
 @section('title', 'Edit Student')
 
 @section('content')
-<div class="p-6">
-    <div class="max-w-3xl mx-auto">
-        
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <h1 class="text-3xl font-bold">Edit Student</h1>
-                <p class="text-gray-600 text-sm">Update student information</p>
-            </div>
-            <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-800">← Back to Dashboard</a>
-        </div>
+<div class="p-6 max-w-3xl mx-auto">
+    
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Edit Student</h1>
+        <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-900">← Back</a>
+    </div>
 
-        @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-                {{ session('success') }}
+    @if(session('success'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <!-- Edit Form -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <form method="POST" action="{{ route('admin.students.update', $student) }}" class="space-y-4">
+            @csrf
+            @method('PUT')
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Student Name *</label>
+                    <input type="text" name="name" value="{{ old('name', $student->name) }}" required class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Parent Name</label>
+                    <input type="text" name="parent_name" value="{{ old('parent_name', $student->parent_name) }}" class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Email</label>
+                    <input type="email" name="email" value="{{ old('email', $student->email) }}" class="w-full px-3 py-2 border rounded">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Goal</label>
+                    <input type="text" name="goal" value="{{ old('goal', $student->goal) }}" class="w-full px-3 py-2 border rounded">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-medium mb-1">Description</label>
+                <textarea name="description" rows="3" class="w-full px-3 py-2 border rounded">{{ old('description', $student->description) }}</textarea>
+            </div>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Update Student</button>
+        </form>
+    </div>
+
+    <!-- Teacher Assignment -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4">Teachers</h2>
+        @if($student->teachers->count() > 0)
+            <div class="flex flex-wrap gap-2 mb-4">
+                @foreach($student->teachers as $teacher)
+                    <div class="bg-gray-100 px-3 py-1 rounded flex items-center gap-2">
+                        <span>{{ $teacher->name }}</span>
+                        <form method="POST" action="{{ route('admin.teachers.students.unassign', [$teacher, $student]) }}" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-600 hover:text-red-800">×</button>
+                        </form>
+                    </div>
+                @endforeach
             </div>
         @endif
+        <form method="POST" action="{{ route('admin.student.assign.teacher', $student) }}" class="flex gap-2">
+            @csrf
+            <select name="teacher_id" required class="flex-1 px-3 py-2 border rounded">
+                <option value="">Select teacher...</option>
+                @php
+                    $assignedTeacherIds = $student->teachers->pluck('id')->toArray();
+                    $availableTeachers = \App\Models\Teacher::whereNotIn('id', $assignedTeacherIds)->get();
+                @endphp
+                @foreach($availableTeachers as $teacher)
+                    <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                @endforeach
+            </select>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Assign</button>
+        </form>
+    </div>
 
-        <!-- Edit Form -->
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <form method="POST" action="{{ route('admin.students.update', $student) }}" class="space-y-4">
-                @csrf
-                @method('PUT')
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="form-label">Student Name *</label>
-                        <input type="text" name="name" value="{{ old('name', $student->name) }}" required class="form-input w-full">
-                        @error('name')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    
-                    <div>
-                        <label class="form-label">Parent Name</label>
-                        <input type="text" name="parent_name" value="{{ old('parent_name', $student->parent_name) }}" class="form-input w-full">
-                        @error('parent_name')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    
-                    <div>
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email" value="{{ old('email', $student->email) }}" class="form-input w-full">
-                        @error('email')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    
-                    <div>
-                        <label class="form-label">Goal</label>
-                        <input type="text" name="goal" value="{{ old('goal', $student->goal) }}" class="form-input w-full">
-                        @error('goal')
-                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-                
-                <div>
-                    <label class="form-label">Description</label>
-                    <textarea name="description" rows="3" class="form-input w-full">{{ old('description', $student->description) }}</textarea>
-                    @error('description')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-                
-                <div class="flex justify-between items-center pt-4">
-                    <button type="submit" class="btn-primary">Update Student</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Teacher Assignment -->
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Assign Teachers</h2>
-            
-            <!-- Assigned Teachers -->
-            @if($student->teachers->count() > 0)
-                <div class="mb-4">
-                    <p class="text-sm text-gray-600 mb-2">Currently Assigned:</p>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach($student->teachers as $teacher)
-                            <div class="bg-blue-100 text-blue-700 px-3 py-2 rounded flex items-center gap-2">
-                                <span>{{ $teacher->name }}</span>
-                                <form method="POST" action="{{ route('admin.teachers.students.unassign', [$teacher, $student]) }}" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-800 font-bold">×</button>
-                                </form>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
-            <!-- Assign New Teacher -->
-            <form method="POST" action="{{ route('admin.student.assign.teacher', $student) }}" class="flex gap-2">
-                @csrf
-                <select name="teacher_id" required class="form-input flex-1">
-                    <option value="">Select teacher to assign...</option>
-                    @php
-                        $assignedTeacherIds = $student->teachers->pluck('id')->toArray();
-                        $availableTeachers = \App\Models\Teacher::whereNotIn('id', $assignedTeacherIds)->get();
-                    @endphp
-                    @foreach($availableTeachers as $teacher)
-                        <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
-                    @endforeach
-                </select>
-                <button type="submit" class="btn-primary">Assign Teacher</button>
-            </form>
-        </div>
-
-        <!-- Danger Zone -->
-        <div class="bg-red-50 border border-red-200 rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-red-800 mb-2">Danger Zone</h2>
-            <p class="text-sm text-red-700 mb-4">Deleting this student will remove all their lessons and assignments. This action cannot be undone.</p>
-            
-            <form method="POST" action="{{ route('admin.students.delete', $student) }}" onsubmit="return confirm('Are you sure you want to delete {{ $student->name }}? This will delete all their lessons and cannot be undone.')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded">
-                    Delete Student
-                </button>
-            </form>
-        </div>
-
+    <!-- Delete -->
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+        <form method="POST" action="{{ route('admin.students.delete', $student) }}" onsubmit="return confirm('Delete {{ $student->name }}? This cannot be undone.')">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Delete Student</button>
+        </form>
     </div>
 </div>
 @endsection

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app', ['favicon' => 'favicon-admin.svg'])
 
 @section('title', 'Admin Login')
 

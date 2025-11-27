@@ -1,131 +1,77 @@
-@extends('layouts.app')
+@extends('layouts.app', ['favicon' => 'favicon-admin.svg'])
 
 @section('title', 'Admin Dashboard')
 
 @section('content')
-<div class="p-6" x-data="adminDashboard()">
-    <div class="max-w-7xl mx-auto">
-        
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <h1 class="text-3xl font-bold">Admin Dashboard</h1>
-                <p class="text-gray-600 text-sm">Manage everything in one place</p>
-            </div>
-            <form method="POST" action="{{ route('admin.logout') }}">
-                @csrf
-                <button class="text-gray-600 hover:text-gray-800">Logout</button>
-            </form>
+<div class="p-6 max-w-7xl mx-auto" x-data="{ activeTab: 'calendar', showAddTeacher: false, showAddStudent: false, selectedTeacher: '' }">
+    
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Admin Dashboard</h1>
+        <form method="POST" action="{{ route('admin.logout') }}" class="inline">
+            @csrf
+            <button class="text-gray-600 hover:text-gray-900">Logout</button>
+        </form>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-4">
+            <p class="text-sm text-gray-600">Teachers</p>
+            <p class="text-2xl font-bold">{{ $stats['teachers'] }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+            <p class="text-sm text-gray-600">Students</p>
+            <p class="text-2xl font-bold">{{ $stats['students'] }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+            <p class="text-sm text-gray-600">Lessons - {{ $currentMonth->format('M Y') }}</p>
+            <p class="text-2xl font-bold">{{ $stats['lessons_this_month'] }}</p>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="border-b flex gap-4 px-4">
+            <button @click="activeTab = 'calendar'" 
+                    :class="activeTab === 'calendar' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'"
+                    class="py-3 font-medium">Calendar</button>
+            <button @click="activeTab = 'teachers'" 
+                    :class="activeTab === 'teachers' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'"
+                    class="py-3 font-medium">Teachers</button>
         </div>
 
-        <!-- Stats Bar -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-600">Teachers</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ $stats['teachers'] }}</p>
-                    </div>
-                    <span class="text-3xl">👨‍🏫</span>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-600">Students</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ $stats['students'] }}</p>
-                    </div>
-                    <span class="text-3xl">👨‍🎓</span>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-gray-600">Lessons - {{ $currentMonth->format('M Y') }}</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ $stats['lessons_this_month'] }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab Navigation -->
-        <div class="bg-white rounded-t-lg shadow-sm border-b">
-            <div class="flex gap-1 px-4">
-                <button @click="activeTab = 'calendar'" 
-                        :class="activeTab === 'calendar' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600 hover:text-gray-900'"
-                        class="px-4 py-3 font-medium transition">
-                    📅 Calendar
-                </button>
-                <button @click="activeTab = 'teachers'" 
-                        :class="activeTab === 'teachers' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600 hover:text-gray-900'"
-                        class="px-4 py-3 font-medium transition">
-                    👨‍🏫 Teachers
-                </button>
-            </div>
-        </div>
-
-        <!-- Tab Content -->
-        <div class="bg-white rounded-b-lg shadow-lg p-6">
-
-            <!-- CALENDAR TAB -->
+        <div class="p-6">
+            <!-- Calendar Tab -->
             <div x-show="activeTab === 'calendar'" x-cloak>
-                <div class="mb-4 flex justify-between items-center">
+                <div class="flex justify-between items-center mb-4">
                     <div class="flex items-center gap-4">
-                        <div>
-                            <h2 class="text-2xl font-bold">Monthly Calendar</h2>
-                            <p class="text-gray-600 text-sm">{{ $currentMonth->format('F Y') }}</p>
-                        </div>
-                        
-                        <!-- Month Navigation -->
-                        <x-month-nav 
-                            :currentMonth="$currentMonth"
-                            :prevMonth="$prevMonth"
-                            :nextMonth="$nextMonth"
-                            routeName="admin.dashboard"
-                        />
+                        <h2 class="text-xl font-semibold">{{ $currentMonth->format('F Y') }}</h2>
+                        <x-month-nav :currentMonth="$currentMonth" :prevMonth="$prevMonth" :nextMonth="$nextMonth" routeName="admin.dashboard" />
                     </div>
-                    
-                    <button @click="showAddStudent = !showAddStudent" class="btn-primary">
-                        <span x-show="!showAddStudent">+ Add Student</span>
-                        <span x-show="showAddStudent">✕ Cancel</span>
+                    <button @click="showAddStudent = !showAddStudent" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        <span x-text="showAddStudent ? 'Cancel' : '+ Add Student'"></span>
                     </button>
                 </div>
 
                 <!-- Add Student Form -->
-                <div x-show="showAddStudent" x-cloak class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                    <h3 class="font-semibold mb-3">Create New Student</h3>
+                <div x-show="showAddStudent" x-cloak class="bg-gray-50 rounded-lg p-4 mb-4">
                     <form method="POST" action="{{ route('admin.students.store') }}" class="space-y-3">
                         @csrf
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="form-label">Student Name *</label>
-                                <input type="text" name="name" required class="form-input w-full">
-                            </div>
-                            <div>
-                                <label class="form-label">Parent Name</label>
-                                <input type="text" name="parent_name" class="form-input w-full">
-                            </div>
-                            <div>
-                                <label class="form-label">Email</label>
-                                <input type="email" name="email" class="form-input w-full">
-                            </div>
-                            <div>
-                                <label class="form-label">Goal</label>
-                                <input type="text" name="goal" class="form-input w-full">
-                            </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="text" name="name" placeholder="Student Name *" required class="px-3 py-2 border rounded">
+                            <input type="text" name="parent_name" placeholder="Parent Name" class="px-3 py-2 border rounded">
+                            <input type="email" name="email" placeholder="Email" class="px-3 py-2 border rounded">
+                            <input type="text" name="goal" placeholder="Goal" class="px-3 py-2 border rounded">
                         </div>
-                        <div>
-                            <label class="form-label">Description</label>
-                            <textarea name="description" rows="2" class="form-input w-full"></textarea>
-                        </div>
-                        <button type="submit" class="btn-primary">Create Student</button>
+                        <textarea name="description" placeholder="Description" rows="2" class="w-full px-3 py-2 border rounded"></textarea>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Create Student</button>
                     </form>
                 </div>
 
-                <!-- Filter by Teacher -->
-                <div class="mb-4 flex gap-4 items-center">
-                    <label class="text-sm font-medium">Filter by Teacher:</label>
-                    <select x-model="selectedTeacher" class="form-input text-sm">
+                <!-- Filter -->
+                <div class="mb-4">
+                    <select x-model="selectedTeacher" class="pl-3 pr-8 py-2 border rounded">
                         <option value="">All Teachers</option>
                         @foreach($teachers as $teacher)
                             <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
@@ -134,20 +80,18 @@
                 </div>
 
                 <!-- Calendar Grid -->
-                <div class="overflow-x-auto border rounded-lg">
+                <div class="overflow-x-auto border rounded">
                     <table class="w-full text-sm">
-                        <thead class="bg-gray-50 sticky top-0">
+                        <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-3 py-2 text-left font-medium text-gray-700 border-r bg-gray-100 sticky left-0 z-10 min-w-[150px]">
-                                    Student
-                                </th>
+                                <th class="px-3 py-2 text-left border-r sticky left-0 bg-gray-50 min-w-[150px]">Student</th>
                                 @for($day = 1; $day <= $daysInMonth; $day++)
                                     @php
                                         $date = $monthStart->copy()->addDays($day - 1);
                                         $isWeekend = $date->isWeekend();
                                         $isToday = $date->isToday();
                                     @endphp
-                                    <th class="px-2 py-2 text-center min-w-[50px] border-l {{ $isWeekend ? 'bg-gray-200' : '' }} {{ $isToday ? 'bg-blue-100' : '' }}">
+                                    <th class="px-2 py-2 text-center min-w-[50px] border-l {{ $isWeekend ? 'bg-gray-100' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
                                         <div class="font-bold">{{ $day }}</div>
                                         <div class="text-xs text-gray-500">{{ $date->format('D') }}</div>
                                     </th>
@@ -157,41 +101,16 @@
                         <tbody>
                             @foreach($students as $student)
                                 @php
-                                    // Filter by selected teacher if applicable
                                     $studentTeacherIds = $student->teachers->pluck('id')->toArray();
                                 @endphp
-                                <tr x-show="selectedTeacher === '' || {{ json_encode($studentTeacherIds) }}.includes(parseInt(selectedTeacher))" 
-                                    class="hover:bg-gray-50/50 border-t group">
-                                    <td class="px-3 py-3 border-r bg-white/95 sticky left-0 z-10 backdrop-blur-sm">
-                                        <div class="flex items-center justify-between gap-3">
-                                            <!-- Student Name & Link -->
-                                            <div class="flex-1 min-w-0">
-                                                <a href="{{ route('admin.students.edit', $student) }}" 
-                                                   class="font-medium text-gray-900 hover:text-blue-600 transition-colors block truncate">
-                                                    {{ $student->name }}
-                                                </a>
-                                                
-                                                @php
-                                                    $lessonStats = $studentLessonStats->get($student->id, ['total' => 0, 'completed' => 0]);
-                                                @endphp
-                                                
-                                                <!-- Teachers (compact, single line) -->
-                                                @if($student->teachers->count() > 0)
-                                                    <div class="text-xs text-gray-500 truncate mt-0.5">
-                                                        {{ $student->teachers->pluck('name')->join(', ') }}
-                                                    </div>
-                                                @endif
-                                            </div>
-                                            
-                                            <!-- Actions & Stats (compact icons on right) -->
-                                            <div class="flex items-center gap-2 text-xs shrink-0">
-                                                @if($lessonStats['total'] > 0)
-                                                    <span class="text-gray-600 font-medium" title="{{ $lessonStats['completed'] }} completed / {{ $lessonStats['total'] }} total">
-                                                        {{ $lessonStats['completed'] }}/{{ $lessonStats['total'] }}
-                                                    </span>
-                                                @endif
-                                            </div>
-                                        </div>
+                                <tr x-show="selectedTeacher === '' || {{ json_encode($studentTeacherIds) }}.includes(parseInt(selectedTeacher))" class="border-t hover:bg-gray-50">
+                                    <td class="px-3 py-2 border-r sticky left-0 bg-white">
+                                        <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-gray-900 hover:text-blue-600">
+                                            {{ $student->name }}
+                                        </a>
+                                        @if($student->teachers->count() > 0)
+                                            <div class="text-xs text-gray-500">{{ $student->teachers->pluck('name')->join(', ') }}</div>
+                                        @endif
                                     </td>
                                     @for($day = 1; $day <= $daysInMonth; $day++)
                                         @php
@@ -201,20 +120,17 @@
                                             $isWeekend = $date->isWeekend();
                                             $isToday = $date->isToday();
                                         @endphp
-                                        <td class="px-1 py-2 text-center border-l {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50 ring-1 ring-blue-200 ring-inset' : '' }}">
-                                            @if($lessons->isNotEmpty())
-                                                <div class="flex flex-col gap-1 items-center">
-                                                    @foreach($lessons as $lesson)
-                                                        <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold transition-transform hover:scale-110 cursor-default
-                                                            {{ $lesson->status === 'completed' ? 'bg-green-500 text-white shadow-sm' : '' }}
-                                                            {{ $lesson->status === 'student_absent' ? 'bg-yellow-400 text-white shadow-sm' : '' }}
-                                                            {{ $lesson->status === 'teacher_cancelled' ? 'bg-red-500 text-white shadow-sm' : '' }}"
-                                                            title="{{ $lesson->teacher->name }} - {{ ucfirst(str_replace('_', ' ', $lesson->status)) }}">
-                                                            {{ substr($lesson->teacher->name, 0, 1) }}
-                                                        </div>
-                                                    @endforeach
+                                        <td class="px-1 py-2 text-center border-l {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
+                                            @foreach($lessons as $lesson)
+                                                @php
+                                                    $statusClass = ['completed' => 'completed', 'student_absent' => 'absent', 'teacher_cancelled' => 'cancelled'][$lesson->status] ?? 'completed';
+                                                @endphp
+                                                <div class="inline-block px-1.5 py-0.5 text-xs font-medium rounded" 
+                                                     style="background: var(--color-status-{{ $statusClass }}-bg); color: var(--color-status-{{ $statusClass }});"
+                                                     title="{{ $lesson->teacher->name }} - {{ ucfirst(str_replace('_', ' ', $lesson->status)) }}">
+                                                    {{ substr($lesson->teacher->name, 0, 1) }}
                                                 </div>
-                                            @endif
+                                            @endforeach
                                         </td>
                                     @endfor
                                 </tr>
@@ -224,105 +140,70 @@
                 </div>
 
                 <!-- Legend -->
-                <div class="mt-4 flex gap-6 text-sm">
+                <div class="mt-4 flex gap-4 text-sm">
                     <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 bg-green-500 rounded"></div>
+                        <div class="w-6 h-4 rounded" style="background: var(--color-status-completed-bg);"></div>
                         <span>Completed</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 bg-yellow-500 rounded"></div>
+                        <div class="w-6 h-4 rounded" style="background: var(--color-status-absent-bg);"></div>
                         <span>Student Absent</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 bg-red-500 rounded"></div>
+                        <div class="w-6 h-4 rounded" style="background: var(--color-status-cancelled-bg);"></div>
                         <span>Teacher Cancelled</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 bg-blue-100 border border-blue-300 rounded"></div>
-                        <span>Today</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 bg-gray-200 rounded"></div>
-                        <span>Weekend</span>
                     </div>
                 </div>
             </div>
 
-            <!-- TEACHERS TAB -->
+            <!-- Teachers Tab -->
             <div x-show="activeTab === 'teachers'" x-cloak>
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold">Teachers Management</h2>
-                    <button @click="showAddTeacher = !showAddTeacher" class="btn-primary">
-                        <span x-show="!showAddTeacher">+ Add Teacher</span>
-                        <span x-show="showAddTeacher">✕ Cancel</span>
+                    <h2 class="text-xl font-semibold">Teachers</h2>
+                    <button @click="showAddTeacher = !showAddTeacher" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        <span x-text="showAddTeacher ? 'Cancel' : '+ Add Teacher'"></span>
                     </button>
                 </div>
 
                 <!-- Add Teacher Form -->
-                <div x-show="showAddTeacher" x-cloak class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                    <h3 class="font-semibold mb-3">Create New Teacher</h3>
-                    <form method="POST" action="{{ route('admin.teachers.create') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div x-show="showAddTeacher" x-cloak class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <form method="POST" action="{{ route('admin.teachers.create') }}" class="flex gap-4">
                         @csrf
-                        <div>
-                            <label class="form-label">Name *</label>
-                            <input type="text" name="name" required class="form-input w-full">
-                        </div>
-                        <div>
-                            <label class="form-label">Password *</label>
-                            <input type="text" name="password" required class="form-input w-full" placeholder="Min 4 chars">
-                        </div>
-                        <div class="flex items-end">
-                            <button type="submit" class="btn-primary w-full">Create Teacher</button>
-                        </div>
+                        <input type="text" name="name" placeholder="Name *" required class="flex-1 px-3 py-2 border rounded">
+                        <input type="text" name="password" placeholder="Password *" required class="flex-1 px-3 py-2 border rounded">
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Create</button>
                     </form>
                 </div>
 
                 <!-- Teachers Table -->
-                <div class="overflow-x-auto border rounded-lg">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Teacher</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Students</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lessons</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <table class="w-full border rounded">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left">Teacher</th>
+                            <th class="px-4 py-2 text-left">Students</th>
+                            <th class="px-4 py-2 text-left">Lessons</th>
+                            <th class="px-4 py-2 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($teachers as $teacher)
+                            <tr class="border-t hover:bg-gray-50">
+                                <td class="px-4 py-2">{{ $teacher->name }}</td>
+                                <td class="px-4 py-2">{{ $teacher->students_count }}</td>
+                                <td class="px-4 py-2">{{ $teacher->lessons_count }}</td>
+                                <td class="px-4 py-2 text-right">
+                                    <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}" onsubmit="return confirm('Delete {{ $teacher->name }}?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="text-red-600 hover:text-red-800">Delete</button>
+                                    </form>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            @foreach($teachers as $teacher)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3">
-                                        <div class="font-medium">{{ $teacher->name }}</div>
-                                        <div class="text-xs text-gray-500">ID: {{ $teacher->id }}</div>
-                                    </td>
-                                    <td class="px-4 py-3 text-sm">{{ $teacher->students_count }}</td>
-                                    <td class="px-4 py-3 text-sm">{{ $teacher->lessons_count }}</td>
-                                    <td class="px-4 py-3 text-right">
-                                        <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}" onsubmit="return confirm('Delete {{ $teacher->name }}?')" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium">Delete</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-
         </div>
     </div>
 </div>
-
-<script>
-function adminDashboard() {
-    return {
-        activeTab: 'calendar',
-        showAddTeacher: false,
-        showAddStudent: false,
-        selectedTeacher: ''
-    }
-}
-</script>
 @endsection

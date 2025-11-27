@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app', ['favicon' => 'favicon-teacher.svg'])
 
 @section('title', $teacher->name . "'s Dashboard")
 
