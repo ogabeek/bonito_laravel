@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\LessonStatus;
 use App\Models\Teacher;
 use App\Models\Lesson;
 use App\Http\Requests\CreateLessonRequest;
@@ -65,9 +66,9 @@ class TeacherController extends Controller
         // Calculate stats
         $stats = [
             'total' => $lessons->count(),
-            'completed' => $lessons->where('status', 'completed')->count(),
-            'student_absent' => $lessons->where('status', 'student_absent')->count(),
-            'teacher_cancelled' => $lessons->where('status', 'teacher_cancelled')->count(),
+            'completed' => $lessons->where('status', LessonStatus::COMPLETED)->count(),
+            'student_absent' => $lessons->where('status', LessonStatus::STUDENT_ABSENT)->count(),
+            'teacher_cancelled' => $lessons->where('status', LessonStatus::TEACHER_CANCELLED)->count(),
         ];
         
         return view('teacher.dashboard', compact('teacher', 'lessons', 'date', 'stats', 'students', 'prevMonth', 'nextMonth'));

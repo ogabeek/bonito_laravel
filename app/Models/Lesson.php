@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\LessonStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -19,6 +20,7 @@ class Lesson extends Model
 
     protected $casts = [
         'class_date' => 'date', //convert automatically to Carbon(date)
+        'status' => LessonStatus::class,
     ];
 
     //Relationship: A lesson belongs to a teacher

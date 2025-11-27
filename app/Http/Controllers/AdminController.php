@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\LessonStatus;
 use App\Models\Teacher;
 use App\Models\Student;
 use App\Models\Lesson;
@@ -85,7 +86,7 @@ class AdminController extends Controller
             ->map(function($lessons) {
                 return [
                     'total' => $lessons->count(),
-                    'completed' => $lessons->where('status', 'completed')->count()
+                    'completed' => $lessons->where('status', LessonStatus::COMPLETED)->count()
                 ];
             });
         
