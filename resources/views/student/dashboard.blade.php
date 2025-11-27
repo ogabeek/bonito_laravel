@@ -52,13 +52,9 @@
             </div>
             
             @if($pastLessons->count() > 0)
-                <div class="p-6 space-y-3">
+                <div class="p-6 space-y-2">
                     @foreach($pastLessons as $lesson)
-                        <x-lesson-card 
-                            :lesson="$lesson" 
-                            :showTeacher="true" 
-                            dateFormat="M d, Y"
-                        />
+                        <x-lesson-card :lesson="$lesson" :showTeacher="true" />
                     @endforeach
                 </div>
             @else

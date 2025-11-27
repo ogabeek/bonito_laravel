@@ -71,51 +71,24 @@
             </div>
         </div>
 
-        <!-- Lessons by Week -->
-        @foreach($lessonsByWeek as $weekStart => $lessons)
-            @php
-                $weekStartDate = \Carbon\Carbon::parse($weekStart);
-                $weekEndDate = $weekStartDate->copy()->endOfWeek();
-                $isCurrentWeek = now()->between($weekStartDate, $weekEndDate);
-            @endphp
+        <!-- Lessons History -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b">
+                <h2 class="text-xl font-semibold text-gray-700">📚 Lessons ({{ $stats['total'] }})</h2>
+            </div>
             
-            <div class="bg-white rounded-lg shadow mb-4" x-data="{ open: true }">
-                <!-- Week Header -->
-                <button 
-                    @click="open = !open" 
-                    class="w-full px-6 py-4 flex justify-between items-center hover:bg-gray-50"
-                >
-                    <div>
-                        <span class="font-semibold" :class="open ? '' : 'text-gray-600'">
-                            <span x-show="open">▼</span>
-                            <span x-show="!open">▶</span>
-                            {{ $isCurrentWeek ? 'This Week' : 'Week of' }} {{ $weekStartDate->format('M d') }}-{{ $weekEndDate->format('d') }}
-                        </span>
-                        <span class="text-gray-500 ml-4">{{ $lessons->count() }} lessons</span>
-                    </div>
-                </button>
-
-                <!-- Week Lessons -->
-                <div x-show="open" class="px-6 pb-4 space-y-2">
+            @if($lessons->count() > 0)
+                <div class="p-6 space-y-2">
                     @foreach($lessons as $lesson)
-                        <x-lesson-card 
-                            :lesson="$lesson" 
-                            :showStudent="true" 
-                            :showDelete="true"
-                            :coloredBg="false"
-                            :compact="true"
-                            dateFormat="D d"
-                        />
+                        <x-lesson-card :lesson="$lesson" :showStudent="true" :showDelete="true" />
                     @endforeach
                 </div>
-            </div>
-        @endforeach
-
-        @if($lessonsByWeek->isEmpty())
-            <div class="bg-white p-8 rounded-lg shadow text-center text-gray-500">
-                No lessons this month
-            </div>
-        @endif
+            @else
+                <div class="p-8 text-center text-gray-500">
+                    No lessons this month
+                </div>
+            @endif
+        </div>
     </div>
 </div>
 @endsection

@@ -62,11 +62,6 @@ class TeacherController extends Controller
             ->orderBy('class_date', 'desc')
             ->get();
         
-        // Group by week (newest week first)
-        $lessonsByWeek = $lessons->groupBy(function ($lesson) {
-            return $lesson->class_date->startOfWeek()->format('Y-m-d');
-        })->sortKeysDesc();
-        
         // Calculate stats
         $stats = [
             'total' => $lessons->count(),
@@ -75,7 +70,7 @@ class TeacherController extends Controller
             'teacher_cancelled' => $lessons->where('status', 'teacher_cancelled')->count(),
         ];
         
-        return view('teacher.dashboard', compact('teacher', 'lessonsByWeek', 'date', 'stats', 'students', 'prevMonth', 'nextMonth'));
+        return view('teacher.dashboard', compact('teacher', 'lessons', 'date', 'stats', 'students', 'prevMonth', 'nextMonth'));
     }
 
     // Logout
