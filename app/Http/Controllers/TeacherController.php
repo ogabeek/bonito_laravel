@@ -51,18 +51,18 @@ class TeacherController extends Controller
         // Get only students assigned to this teacher
         $students = $teacher->students()->orderBy('name')->get();
         
-        // Get lessons for this month
+        // Get lessons for this month (newest first)
         $lessons = Lesson::where('teacher_id', $teacherId)
             ->whereYear('class_date', $date->year)
             ->whereMonth('class_date', $date->month)
             ->with('student')
-            ->orderBy('class_date', 'asc')
+            ->orderBy('class_date', 'desc')
             ->get();
         
-        // Group by week
+        // Group by week (newest week first)
         $lessonsByWeek = $lessons->groupBy(function ($lesson) {
             return $lesson->class_date->startOfWeek()->format('Y-m-d');
-        });
+        })->sortKeysDesc();
         
         // Calculate stats
         $stats = [
