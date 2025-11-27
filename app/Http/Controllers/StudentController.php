@@ -3,18 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Student;
-use App\Services\LessonService;
 use Carbon\Carbon;
 
 class StudentController extends Controller
 {
-    protected $lessonService;
-
-    public function __construct(LessonService $lessonService)
-    {
-        $this->lessonService = $lessonService;
-    }
-
     // Show student dashboard
     public function dashboard(Student $student)
     {

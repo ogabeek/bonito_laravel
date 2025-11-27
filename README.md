@@ -64,12 +64,11 @@ This is a pragmatic MVP built in 2 weeks focusing on core functionality over arc
 ### Project Structure
 
 **Key Files:**
-- `app/Services/LessonService.php` - Business logic (stats, grouping, CRUD)
-- `app/Http/Controllers/TeacherController.php` - HTTP layer only
+- `app/Http/Controllers/` - AdminController, TeacherController, StudentController
 - `app/Http/Requests/` - Form validation (CreateLessonRequest, UpdateLessonRequest)
+- `app/Models/` - Teacher, Student, Lesson (with relationships)
 - `resources/views/layouts/app.blade.php` - Base layout for all pages
-- `resources/views/components/` - Reusable UI components (lesson-card, lesson-form, status-badge, calendar-picker)
-- `public/js/lesson-manager.js` - AJAX operations & session storage
+- `resources/views/components/` - Reusable UI (lesson-card, lesson-form, status-badge, calendar-picker, login-card)
 - `public/css/app.css` - Design system (CSS variables)
 
 ---

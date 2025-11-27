@@ -54,17 +54,6 @@ class AdminController extends Controller
         $month = $request->get('month', now()->month);
         $currentMonth = Carbon::createFromDate($year, $month, 1);
         
-        $stats = [
-            'teachers' => Teacher::count(),
-            'students' => Student::count(),
-            'lessons_this_month' => Lesson::whereYear('class_date', $currentMonth->year)
-                ->whereMonth('class_date', $currentMonth->month)
-                ->count(),
-        ];
-        
-        $teachers = Teacher::withCount('students', 'lessons')->with('students')->get();
-        $students = Student::withCount('teachers', 'lessons')->with('teachers')->get();
-        
         $daysInMonth = $currentMonth->daysInMonth;
         $monthStart = $currentMonth->copy()->startOfMonth();
         
@@ -92,6 +81,17 @@ class AdminController extends Controller
                     'completed' => $lessons->where('status', 'completed')->count()
                 ];
             });
+        
+        $stats = [
+            'teachers' => Teacher::count(),
+            'students' => Student::count(),
+            'lessons_this_month' => Lesson::whereYear('class_date', $currentMonth->year)
+                ->whereMonth('class_date', $currentMonth->month)
+                ->count(),
+        ];
+        
+        $teachers = Teacher::withCount('students', 'lessons')->with('students')->get();
+        $students = Student::withCount('teachers', 'lessons')->with('teachers')->get();
         
         return view('admin.dashboard', compact('stats', 'teachers', 'students', 'currentMonth', 'daysInMonth', 'monthStart', 'lessonsThisMonth', 'prevMonth', 'nextMonth', 'studentLessonStats'));
     }
