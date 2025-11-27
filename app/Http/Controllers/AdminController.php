@@ -10,6 +10,42 @@ use Carbon\Carbon;
 
 class AdminController extends Controller
 {
+    // Admin password (in production, store this in .env or database)
+    private const ADMIN_PASSWORD = 'admin13';
+
+    // Show login form
+    public function showLogin()
+    {
+        // If already logged in, redirect to dashboard
+        if (session('admin_authenticated')) {
+            return redirect()->route('admin.dashboard');
+        }
+        
+        return view('admin.login');
+    }
+
+    // Handle login
+    public function login(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        if ($request->password === self::ADMIN_PASSWORD) {
+            session(['admin_authenticated' => true]);
+            return redirect()->route('admin.dashboard');
+        }
+
+        return back()->with('error', 'Invalid password');
+    }
+
+    // Handle logout
+    public function logout()
+    {
+        session()->forget('admin_authenticated');
+        return redirect()->route('admin.login')->with('success', 'Logged out successfully');
+    }
+
     // Dashboard
     public function dashboard(Request $request)
     {

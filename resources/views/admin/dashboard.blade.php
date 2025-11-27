@@ -7,9 +7,15 @@
     <div class="max-w-7xl mx-auto">
         
         <!-- Header -->
-        <div class="mb-6">
-            <h1 class="text-3xl font-bold">Admin Dashboard</h1>
-            <p class="text-gray-600 text-sm">Manage everything in one place</p>
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold">Admin Dashboard</h1>
+                <p class="text-gray-600 text-sm">Manage everything in one place</p>
+            </div>
+            <form method="POST" action="{{ route('admin.logout') }}">
+                @csrf
+                <button class="text-gray-600 hover:text-gray-800">Logout</button>
+            </form>
         </div>
 
         <!-- Stats Bar -->

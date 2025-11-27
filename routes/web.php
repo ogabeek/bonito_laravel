@@ -46,20 +46,28 @@ Route::prefix('student')->name('student.')->group(function () {
 
 // Admin routes
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
+    // Auth routes (public)
+    Route::get('/login', [\App\Http\Controllers\AdminController::class, 'showLogin'])->name('login');
+    Route::post('/login', [\App\Http\Controllers\AdminController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [\App\Http\Controllers\AdminController::class, 'logout'])->name('logout');
     
-    // Teachers
-    Route::post('/teachers', [\App\Http\Controllers\AdminController::class, 'createTeacher'])->name('teachers.create');
-    Route::delete('/teachers/{teacher}', [\App\Http\Controllers\AdminController::class, 'deleteTeacher'])->name('teachers.delete');
-    
-    // Students
-    Route::post('/students', [\App\Http\Controllers\AdminController::class, 'createStudent'])->name('students.store');
-    Route::get('/students/{student}/edit', [\App\Http\Controllers\AdminController::class, 'editStudentForm'])->name('students.edit');
-    Route::put('/students/{student}', [\App\Http\Controllers\AdminController::class, 'updateStudent'])->name('students.update');
-    Route::delete('/students/{student}', [\App\Http\Controllers\AdminController::class, 'deleteStudent'])->name('students.delete');
-    Route::post('/students/{student}/assign-teacher', [\App\Http\Controllers\AdminController::class, 'assignTeacherToStudent'])->name('student.assign.teacher');
-    
-    // Teacher-Student Assignment
-    Route::post('/teachers/{teacher}/students', [\App\Http\Controllers\AdminController::class, 'assignStudent'])->name('teachers.students.assign');
-    Route::delete('/teachers/{teacher}/students/{student}', [\App\Http\Controllers\AdminController::class, 'unassignStudent'])->name('teachers.students.unassign');
+    // Protected routes (require session)
+    Route::middleware('admin.auth')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
+        
+        // Teachers
+        Route::post('/teachers', [\App\Http\Controllers\AdminController::class, 'createTeacher'])->name('teachers.create');
+        Route::delete('/teachers/{teacher}', [\App\Http\Controllers\AdminController::class, 'deleteTeacher'])->name('teachers.delete');
+        
+        // Students
+        Route::post('/students', [\App\Http\Controllers\AdminController::class, 'createStudent'])->name('students.store');
+        Route::get('/students/{student}/edit', [\App\Http\Controllers\AdminController::class, 'editStudentForm'])->name('students.edit');
+        Route::put('/students/{student}', [\App\Http\Controllers\AdminController::class, 'updateStudent'])->name('students.update');
+        Route::delete('/students/{student}', [\App\Http\Controllers\AdminController::class, 'deleteStudent'])->name('students.delete');
+        Route::post('/students/{student}/assign-teacher', [\App\Http\Controllers\AdminController::class, 'assignTeacherToStudent'])->name('student.assign.teacher');
+        
+        // Teacher-Student Assignment
+        Route::post('/teachers/{teacher}/students', [\App\Http\Controllers\AdminController::class, 'assignStudent'])->name('teachers.students.assign');
+        Route::delete('/teachers/{teacher}/students/{student}', [\App\Http\Controllers\AdminController::class, 'unassignStudent'])->name('teachers.students.unassign');
+    });
 });
