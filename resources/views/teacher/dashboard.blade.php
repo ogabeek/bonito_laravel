@@ -1,13 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $teacher->name }}'s Dashboard</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 min-h-screen p-6">
+@extends('layouts.app')
+
+@section('title', $teacher->name . "'s Dashboard")
+
+@section('content')
+<div class="p-6">
     <div class="max-w-5xl mx-auto">
         
         <!-- Header -->
@@ -116,116 +112,30 @@
             </div>
         @endif
     </div>
+</div>
+@endsection
 
-    <!-- Alpine.js for simple interactivity -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
-    <script>
-        // Create new lesson - use event delegation
-        document.addEventListener('submit', function(e) {
-            if (e.target.id === 'newLessonForm') {
-                e.preventDefault();
-                
-                const formData = new FormData(e.target);
-                const data = Object.fromEntries(formData.entries());
-                
-                // Remember the selected student and date
-                const selectedStudent = data.student_id;
-                const selectedDate = data.class_date;
-                
-                console.log('Creating lesson:', data);
-                
-                fetch('/teacher/lesson/create', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Response:', data);
-                    if (data.success) {
-                        // Store in sessionStorage (persists during browser session only)
-                        sessionStorage.setItem('lastSelectedStudent', selectedStudent);
-                        sessionStorage.setItem('lastSelectedDate', selectedDate);
-                        sessionStorage.setItem('formInUse', 'true');
-                        location.reload();
-                    } else {
-                        alert('Error creating lesson: ' + (data.message || 'Please check all required fields'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error creating lesson. Please try again.');
-                });
-            }
-        });
-
-        // Restore form values after page load (only during active session)
-        document.addEventListener('DOMContentLoaded', function() {
-            const formInUse = sessionStorage.getItem('formInUse');
+@push('scripts')
+<script>
+    // Create new lesson - use event delegation
+    document.addEventListener('submit', function(e) {
+        if (e.target.id === 'newLessonForm') {
+            e.preventDefault();
             
-            if (formInUse === 'true') {
-                const lastStudent = sessionStorage.getItem('lastSelectedStudent');
-                const lastDate = sessionStorage.getItem('lastSelectedDate');
-                
-                // Restore student
-                if (lastStudent) {
-                    const studentSelect = document.querySelector('#newLessonForm select[name="student_id"]');
-                    if (studentSelect) {
-                        studentSelect.value = lastStudent;
-                    }
-                }
-                
-                // Restore date in Alpine component
-                if (lastDate) {
-                    // Wait for Alpine to initialize
-                    setTimeout(() => {
-                        const calendarContainer = document.querySelector('.calendar-container');
-                        if (calendarContainer && calendarContainer._x_dataStack) {
-                            const alpineData = calendarContainer._x_dataStack[0];
-                            if (alpineData) {
-                                alpineData.selected = lastDate;
-                            }
-                        }
-                    }, 100);
-                }
-            }
-        });
-
-        // Clear session data when user navigates away or closes form
-        window.addEventListener('beforeunload', function() {
-            // Only clear if user is navigating away (not reloading after save)
-            if (!sessionStorage.getItem('formInUse')) {
-                sessionStorage.removeItem('lastSelectedStudent');
-                sessionStorage.removeItem('lastSelectedDate');
-            }
-        });
-
-        // Clear when form is cancelled or hidden
-        document.addEventListener('click', function(e) {
-            if (e.target.textContent === 'Cancel' || e.target.textContent === '▼ New Lesson') {
-                sessionStorage.removeItem('lastSelectedStudent');
-                sessionStorage.removeItem('lastSelectedDate');
-                sessionStorage.removeItem('formInUse');
-            }
-        });
-
-        // Save edited lesson
-        function saveLesson(lessonId) {
-            const form = event.target;
-            const formData = new FormData(form);
+            const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
             
-            console.log('Updating lesson:', lessonId, data);
+            // Remember the selected student and date
+            const selectedStudent = data.student_id;
+            const selectedDate = data.class_date;
             
-            fetch('/lesson/' + lessonId + '/update', {
+            console.log('Creating lesson:', data);
+            
+            fetch('/teacher/lesson/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify(data)
             })
@@ -233,47 +143,101 @@
             .then(data => {
                 console.log('Response:', data);
                 if (data.success) {
+                    // Store in sessionStorage (persists during browser session only)
+                    sessionStorage.setItem('lastSelectedStudent', selectedStudent);
+                    sessionStorage.setItem('lastSelectedDate', selectedDate);
+                    sessionStorage.setItem('formInUse', 'true');
                     location.reload();
                 } else {
-                    alert('Error updating lesson: ' + (data.message || 'Please check all required fields'));
+                    alert('Error creating lesson: ' + (data.message || 'Please check all required fields'));
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error updating lesson. Please try again.');
+                alert('Error creating lesson. Please try again.');
             });
         }
+    });
 
-        // Delete lesson
-        function deleteLesson(lessonId) {
-            if (!confirm('Are you sure you want to delete this lesson? This cannot be undone.')) {
-                return;
+    // Restore form values after page load (only during active session)
+    document.addEventListener('DOMContentLoaded', function() {
+        const formInUse = sessionStorage.getItem('formInUse');
+        
+        if (formInUse === 'true') {
+            const lastStudent = sessionStorage.getItem('lastSelectedStudent');
+            const lastDate = sessionStorage.getItem('lastSelectedDate');
+            
+            // Restore student
+            if (lastStudent) {
+                const studentSelect = document.querySelector('#newLessonForm select[name="student_id"]');
+                if (studentSelect) {
+                    studentSelect.value = lastStudent;
+                }
             }
             
-            fetch('/lesson/' + lessonId + '/delete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Error deleting lesson');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error deleting lesson. Please try again.');
-            });
+            // Restore date in Alpine component
+            if (lastDate) {
+                // Wait for Alpine to initialize
+                setTimeout(() => {
+                    const calendarContainer = document.querySelector('.calendar-container');
+                    if (calendarContainer && calendarContainer._x_dataStack) {
+                        const alpineData = calendarContainer._x_dataStack[0];
+                        if (alpineData) {
+                            alpineData.selected = lastDate;
+                        }
+                    }
+                }, 100);
+            }
         }
-    </script>
-    
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
-</body>
-</html>
+    });
+
+    // Clear session data when user navigates away or closes form
+    window.addEventListener('beforeunload', function() {
+        // Only clear if user is navigating away (not reloading after save)
+        if (!sessionStorage.getItem('formInUse')) {
+            sessionStorage.removeItem('lastSelectedStudent');
+            sessionStorage.removeItem('lastSelectedDate');
+        }
+    });
+
+    // Clear when form is cancelled or hidden
+    document.addEventListener('click', function(e) {
+        if (e.target.textContent === 'Cancel' || e.target.textContent === '▼ New Lesson') {
+            sessionStorage.removeItem('lastSelectedStudent');
+            sessionStorage.removeItem('lastSelectedDate');
+            sessionStorage.removeItem('formInUse');
+        }
+    });
+
+    // Delete lesson
+    function deleteLesson(lessonId) {
+        if (!confirm('Are you sure you want to delete this lesson? This cannot be undone.')) {
+            return;
+        }
+        
+        fetch('/lesson/' + lessonId + '/delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting lesson');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting lesson. Please try again.');
+        });
+    }
+</script>
+
+<style>
+    [x-cloak] { display: none !important; }
+</style>
+@endpush
