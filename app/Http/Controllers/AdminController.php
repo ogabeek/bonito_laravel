@@ -63,16 +63,14 @@ class AdminController extends Controller
         
         // Get all lessons for selected month grouped by student and date
         $lessonsThisMonth = Lesson::with(['teacher', 'student'])
-            ->whereYear('class_date', $currentMonth->year)
-            ->whereMonth('class_date', $currentMonth->month)
+            ->forMonth($currentMonth)
             ->get()
             ->groupBy(function($lesson) {
                 return $lesson->student_id . '_' . $lesson->class_date->format('Y-m-d');
             });
         
         // Pre-calculate lesson stats per student for this month (avoids N+1 in Blade)
-        $studentLessonStats = Lesson::whereYear('class_date', $currentMonth->year)
-            ->whereMonth('class_date', $currentMonth->month)
+        $studentLessonStats = Lesson::forMonth($currentMonth)
             ->get()
             ->groupBy('student_id')
             ->map(function($lessons) {
@@ -85,9 +83,7 @@ class AdminController extends Controller
         $stats = [
             'teachers' => Teacher::count(),
             'students' => Student::count(),
-            'lessons_this_month' => Lesson::whereYear('class_date', $currentMonth->year)
-                ->whereMonth('class_date', $currentMonth->month)
-                ->count(),
+            'lessons_this_month' => Lesson::forMonth($currentMonth)->count(),
         ];
         
         $teachers = Teacher::withCount('students', 'lessons')->with('students')->get();

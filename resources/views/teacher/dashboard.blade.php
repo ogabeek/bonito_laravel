@@ -17,12 +17,17 @@
 
         <!-- Month Navigation -->
         <div class="bg-white p-4 rounded-lg shadow mb-6">
-            <div class="flex justify-between items-center">
-                <a href="?month={{ $date->copy()->subMonth()->format('Y-m') }}" class="text-blue-600 hover:underline">← {{ $date->copy()->subMonth()->format('M') }}</a>
+            <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-semibold">{{ $date->format('F Y') }}</h2>
-                <a href="?month={{ $date->copy()->addMonth()->format('Y-m') }}" class="text-blue-600 hover:underline">{{ $date->copy()->addMonth()->format('M') }} →</a>
+                <x-month-nav 
+                    :currentMonth="$date" 
+                    :prevMonth="$prevMonth" 
+                    :nextMonth="$nextMonth" 
+                    routeName="teacher.dashboard" 
+                    :routeParams="['teacher' => $teacher->id]" 
+                />
             </div>
-            <div class="flex justify-center gap-4 mt-3">
+            <div class="flex justify-center gap-4 mt-3 border-t pt-3">
                 <div class="flex items-center gap-2">
                     <span class="text-2xl font-bold text-gray-800">{{ $stats['total'] }}</span>
                     <span class="text-sm text-gray-500">Total</span>

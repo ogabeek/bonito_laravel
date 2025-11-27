@@ -31,4 +31,11 @@ class Lesson extends Model
     {
         return $this->belongsTo(Student::class);
     }
+
+    // Scope: Filter by month
+    public function scopeForMonth($query, $date)
+    {
+        return $query->whereYear('class_date', $date->year)
+                     ->whereMonth('class_date', $date->month);
+    }
 }

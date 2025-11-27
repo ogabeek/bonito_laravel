@@ -44,17 +44,20 @@ class TeacherController extends Controller
 
         $teacher = Teacher::findOrFail($teacherId);
         
-        // Get current month from request or use current month
-        $month = request('month', now()->format('Y-m'));
-        $date = Carbon::parse($month . '-01');
+        // Standardize date handling
+        $year = request('year', now()->year);
+        $month = request('month', now()->month);
+        $date = Carbon::createFromDate($year, $month, 1);
+        
+        $prevMonth = $date->copy()->subMonth();
+        $nextMonth = $date->copy()->addMonth();
         
         // Get only students assigned to this teacher
         $students = $teacher->students()->orderBy('name')->get();
         
         // Get lessons for this month (newest first)
         $lessons = Lesson::where('teacher_id', $teacherId)
-            ->whereYear('class_date', $date->year)
-            ->whereMonth('class_date', $date->month)
+            ->forMonth($date)
             ->with('student')
             ->orderBy('class_date', 'desc')
             ->get();
@@ -72,7 +75,7 @@ class TeacherController extends Controller
             'teacher_cancelled' => $lessons->where('status', 'teacher_cancelled')->count(),
         ];
         
-        return view('teacher.dashboard', compact('teacher', 'lessonsByWeek', 'date', 'stats', 'students'));
+        return view('teacher.dashboard', compact('teacher', 'lessonsByWeek', 'date', 'stats', 'students', 'prevMonth', 'nextMonth'));
     }
 
     // Logout
