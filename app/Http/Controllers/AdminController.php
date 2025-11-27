@@ -12,6 +12,15 @@ class AdminController extends Controller
 {
     // Admin password (in production, store this in .env or database)
     private const ADMIN_PASSWORD = 'admin13';
+    
+    // Shared validation rules for student creation/update
+    private const STUDENT_RULES = [
+        'name' => 'required|string|max:255',
+        'parent_name' => 'nullable|string|max:255',
+        'email' => 'nullable|email|max:255',
+        'goal' => 'nullable|string',
+        'description' => 'nullable|string',
+    ];
 
     // Show login form
     public function showLogin()
@@ -117,13 +126,7 @@ class AdminController extends Controller
     // Students Management
     public function createStudent(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'parent_name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'goal' => 'nullable|string',
-            'description' => 'nullable|string',
-        ]);
+        $request->validate(self::STUDENT_RULES);
 
         Student::create($request->all());
 
@@ -137,17 +140,11 @@ class AdminController extends Controller
 
     public function updateStudent(Request $request, Student $student)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'parent_name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'goal' => 'nullable|string',
-            'description' => 'nullable|string',
-        ]);
+        $request->validate(self::STUDENT_RULES);
 
         $student->update($request->all());
 
-        return redirect()->route('admin.students')->with('success', 'Student updated successfully!');
+        return redirect()->route('admin.students.edit', $student)->with('success', 'Student updated successfully!');
     }
 
     public function deleteStudent(Student $student)

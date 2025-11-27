@@ -34,15 +34,15 @@
                 </div>
                 <div class="border-l border-gray-300"></div>
                 <div class="flex items-center gap-2">
-                    <span class="text-xl font-semibold text-green-600">{{ $stats['completed'] }}</span>
+                    <span class="text-xl font-semibold" style="color: var(--color-status-completed);">{{ $stats['completed'] }}</span>
                     <span class="text-sm text-gray-600">Completed</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="text-xl font-semibold text-orange-600">{{ $stats['student_absent'] }}</span>
+                    <span class="text-xl font-semibold" style="color: var(--color-status-absent);">{{ $stats['student_absent'] }}</span>
                     <span class="text-sm text-gray-600">Absent</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="text-xl font-semibold text-red-600">{{ $stats['teacher_cancelled'] }}</span>
+                    <span class="text-xl font-semibold" style="color: var(--color-status-cancelled);">{{ $stats['teacher_cancelled'] }}</span>
                     <span class="text-sm text-gray-600">Cancelled</span>
                 </div>
             </div>
