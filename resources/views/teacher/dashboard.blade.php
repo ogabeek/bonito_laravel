@@ -48,21 +48,15 @@
             </div>
         </div>
 
-        <!-- Add New Lesson Section -->
-        <div class="bg-white rounded-lg shadow mb-6">
-            <div class="px-6 py-4 border-b">
-                <h2 class="text-xl font-semibold text-blue-600">New Lesson</h2>
-            </div>
-            
-            <div class="px-6 py-6">
-                <form id="newLessonForm">
-                    <x-lesson-form :students="$students" />
-                    
-                    <div class="flex gap-3 mt-6">
-                        <button type="submit" class="btn-primary">Save Lesson</button>
-                    </div>
-                </form>
-            </div>
+        <!-- Add Lesson -->
+        <div class="bg-white rounded-lg shadow mb-6 p-6">
+            <form id="newLessonForm">
+                <x-lesson-form :students="$students" />
+                
+                <div class="mt-6">
+                    <button type="submit" class="btn-primary">+ Add Class</button>
+                </div>
+            </form>
         </div>
 
         <!-- Lessons History -->
