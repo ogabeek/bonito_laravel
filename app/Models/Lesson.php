@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Lesson extends Model
 {
@@ -21,13 +22,13 @@ class Lesson extends Model
     ];
 
     //Relationship: A lesson belongs to a teacher
-    public function teacher()
+    public function teacher(): BelongsTo
     {
         return $this ->belongsTo(Teacher::class);
     }
 
     // Relationship: A lesson belongs to a student
-    public function student()
+    public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
     }

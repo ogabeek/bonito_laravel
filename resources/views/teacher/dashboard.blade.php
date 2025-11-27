@@ -49,25 +49,19 @@
         </div>
 
         <!-- Add New Lesson Section -->
-        <div class="bg-white rounded-lg shadow mb-6" x-data="{ showForm: true }">
-            <button @click="showForm = !showForm" class="w-full px-6 py-4 text-left font-semibold text-blue-600 hover:text-blue-800 hover:bg-gray-50 flex items-center gap-2">
-                <span x-show="!showForm">▶</span>
-                <span x-show="showForm">▼</span>
-                <span x-show="!showForm">Add New Lesson</span>
-                <span x-show="showForm">New Lesson</span>
-            </button>
+        <div class="bg-white rounded-lg shadow mb-6">
+            <div class="px-6 py-4 border-b">
+                <h2 class="text-xl font-semibold text-blue-600">New Lesson</h2>
+            </div>
             
-            <div x-show="showForm" class="px-6 pb-6" x-cloak>
-                <div class="border-t pt-6">
-                    <form id="newLessonForm">
-                        <x-lesson-form :students="$students" />
-                        
-                        <div class="flex gap-3 mt-6">
-                            <button type="submit" class="btn-primary">Save Lesson</button>
-                            <button type="button" @click="showForm = false" class="px-5 py-2 text-sm font-medium bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">Cancel</button>
-                        </div>
-                    </form>
-                </div>
+            <div class="px-6 py-6">
+                <form id="newLessonForm">
+                    <x-lesson-form :students="$students" />
+                    
+                    <div class="flex gap-3 mt-6">
+                        <button type="submit" class="btn-primary">Save Lesson</button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -124,7 +118,6 @@
                     // Store in sessionStorage (persists during browser session only)
                     sessionStorage.setItem('lastSelectedStudent', selectedStudent);
                     sessionStorage.setItem('lastSelectedDate', selectedDate);
-                    sessionStorage.setItem('formInUse', 'true');
                     location.reload();
                 } else {
                     alert('Error creating lesson: ' + (data.message || 'Please check all required fields'));
@@ -137,53 +130,30 @@
         }
     });
 
-    // Restore form values after page load (only during active session)
+    // Restore form values after page load
     document.addEventListener('DOMContentLoaded', function() {
-        const formInUse = sessionStorage.getItem('formInUse');
+        const lastStudent = sessionStorage.getItem('lastSelectedStudent');
+        const lastDate = sessionStorage.getItem('lastSelectedDate');
         
-        if (formInUse === 'true') {
-            const lastStudent = sessionStorage.getItem('lastSelectedStudent');
-            const lastDate = sessionStorage.getItem('lastSelectedDate');
-            
-            // Restore student
-            if (lastStudent) {
-                const studentSelect = document.querySelector('#newLessonForm select[name="student_id"]');
-                if (studentSelect) {
-                    studentSelect.value = lastStudent;
-                }
+        // Restore student
+        if (lastStudent) {
+            const studentSelect = document.querySelector('#newLessonForm select[name="student_id"]');
+            if (studentSelect) {
+                studentSelect.value = lastStudent;
             }
-            
-            // Restore date in Alpine component
-            if (lastDate) {
-                // Wait for Alpine to initialize
-                setTimeout(() => {
-                    const calendarContainer = document.querySelector('.calendar-container');
-                    if (calendarContainer && calendarContainer._x_dataStack) {
-                        const alpineData = calendarContainer._x_dataStack[0];
-                        if (alpineData) {
-                            alpineData.selected = lastDate;
-                        }
+        }
+        
+        // Restore date in Alpine component
+        if (lastDate) {
+            setTimeout(() => {
+                const calendarContainer = document.querySelector('.calendar-container');
+                if (calendarContainer && calendarContainer._x_dataStack) {
+                    const alpineData = calendarContainer._x_dataStack[0];
+                    if (alpineData) {
+                        alpineData.selected = lastDate;
                     }
-                }, 100);
-            }
-        }
-    });
-
-    // Clear session data when user navigates away or closes form
-    window.addEventListener('beforeunload', function() {
-        // Only clear if user is navigating away (not reloading after save)
-        if (!sessionStorage.getItem('formInUse')) {
-            sessionStorage.removeItem('lastSelectedStudent');
-            sessionStorage.removeItem('lastSelectedDate');
-        }
-    });
-
-    // Clear when form is cancelled or hidden
-    document.addEventListener('click', function(e) {
-        if (e.target.textContent === 'Cancel' || e.target.textContent === '▼ New Lesson') {
-            sessionStorage.removeItem('lastSelectedStudent');
-            sessionStorage.removeItem('lastSelectedDate');
-            sessionStorage.removeItem('formInUse');
+                }
+            }, 100);
         }
     });
 

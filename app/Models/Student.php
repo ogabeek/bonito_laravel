@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
 class Student extends Model
@@ -30,13 +32,13 @@ class Student extends Model
     }
 
     // Relationship: a student has many lessons
-    public function lessons()
+    public function lessons(): HasMany
     {
         return $this->hasMany(Lesson::class);
     }
 
     // Relationship: a student belongs to many teachers (many-to-many)
-    public function teachers()
+    public function teachers(): BelongsToMany
     {
         return $this->belongsToMany(Teacher::class);
     }
