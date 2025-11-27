@@ -9,23 +9,14 @@
 ])
 
 @php
-    $bgColors = [
-        'completed' => $coloredBg ? 'bg-green-50' : '',
-        'student_absent' => $coloredBg ? 'bg-red-50' : '',
-        'teacher_cancelled' => $coloredBg ? 'bg-orange-50' : '',
-    ];
-    
-    $borderColors = [
-        'completed' => 'border-green-500',
-        'student_absent' => 'border-red-500',
-        'teacher_cancelled' => 'border-orange-500',
-    ];
-    
-    $bgClass = $bgColors[$lesson->status] ?? '';
-    $borderClass = $borderColors[$lesson->status] ?? 'border-gray-300';
+    // Use CSS variables for consistency with app.css
+    // If coloredBg is false, we don't set a background color
+    $style = $coloredBg 
+        ? "background-color: var(--color-status-{$lesson->status}-bg); border-color: var(--color-status-{$lesson->status}-border);"
+        : "border-color: var(--color-status-{$lesson->status}-border);";
 @endphp
 
-<div class="border-l-4 {{ $borderClass }} pl-4 {{ $compact ? 'py-2' : 'py-3' }} {{ $bgClass }}">
+<div class="border-l-4 pl-4 {{ $compact ? 'py-2' : 'py-3' }}" style="{{ $style }}">
     @if($compact)
             {{-- COMPACT LAYOUT (Teacher Portal) --}}
             <div class="flex justify-between items-start gap-4">
