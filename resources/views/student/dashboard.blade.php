@@ -34,11 +34,22 @@
         </x-card>
     @endif
 
-    <x-card :title="'📚 Past Lessons (' . $pastLessons->count() . ')'">
-        @if($pastLessons->count() > 0)
-            <div class="space-y-2">
-                @foreach($pastLessons as $lesson)
-                    <x-lesson-card :lesson="$lesson" :showTeacher="true" />
+    <x-card :title="'📚 Past Lessons (' . $pastLessons->flatten()->count() . ')'">
+        @if($pastLessons->isNotEmpty())
+            <div class="space-y-4">
+                @foreach($pastLessons as $month => $lessons)
+                    @php
+                        [$year, $monthNum] = explode('-', $month);
+                        $monthName = \Carbon\Carbon::createFromDate($year, $monthNum, 1)->format('F Y');
+                    @endphp
+                    <div>
+                        <div class="text-sm font-semibold text-gray-700 mb-2">{{ $monthName }}</div>
+                        <div class="space-y-2">
+                            @foreach($lessons as $lesson)
+                                <x-lesson-card :lesson="$lesson" :showTeacher="true" />
+                            @endforeach
+                        </div>
+                    </div>
                 @endforeach
             </div>
         @else

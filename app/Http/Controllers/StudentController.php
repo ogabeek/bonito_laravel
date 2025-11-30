@@ -13,7 +13,8 @@ class StudentController extends Controller
     {
         // Get upcoming and past lessons for this student
         $upcomingLessons = $lessonRepo->getUpcomingForStudent($student->id);
-        $pastLessons = $lessonRepo->getPastForStudent($student->id);
+        $pastLessons = $lessonRepo->getPastForStudent($student->id)
+            ->groupBy(fn($lesson) => $lesson->class_date->format('Y-m'));
 
         return view('student.dashboard', compact('student', 'upcomingLessons', 'pastLessons'));
     }
