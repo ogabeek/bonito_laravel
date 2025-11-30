@@ -5,7 +5,7 @@
     <x-calendar-picker name="class_date" />
 
     <!-- Right Side: Student, Status, and Details -->
-    <div class="flex-1 flex flex-col gap-4">
+    <div class="flex-1 flex flex-col gap-4" x-data>
         <div>
             <div class="flex gap-3 items-end">
                 <div class="flex-1">
@@ -38,7 +38,7 @@
         </div>
 
         <!-- Completed Details -->
-        <div class="completed-section flex flex-col gap-3" x-data="{ showNotes: false }">
+        <div class="completed-section flex flex-col gap-3">
             <div>
                 <label class="form-label">Topic *</label>
                 <input 
@@ -59,46 +59,18 @@
                     class="form-input w-full"
                 ></textarea>
             </div>
-            
-            <div x-show="!showNotes">
-                <button type="button" @click="showNotes = true" class="text-xs text-blue-600 hover:underline">+ Add Notes</button>
-            </div>
-            
-            <div x-show="showNotes">
-                <label class="form-label">Notes</label>
-                <textarea 
-                    name="comments" 
-                    rows="2" 
-                    placeholder="Optional"
-                    class="form-input w-full"
-                ></textarea>
-            </div>
         </div>
 
-        <!-- Student Absent Details -->
-        <div class="absent-section hidden">
-            <div>
-                <label class="form-label">Notes (optional)</label>
-                <textarea 
-                    name="comments" 
-                    rows="2" 
-                    placeholder="Why did the student miss?"
-                    class="form-input w-full"
-                ></textarea>
-            </div>
-        </div>
-
-        <!-- Teacher Cancelled Details -->
-        <div class="cancelled-section hidden">
-            <div>
-                <label class="form-label">Reason *</label>
-                <textarea 
-                    name="comments" 
-                    rows="2" 
-                    placeholder="Why was it cancelled?"
-                    class="form-input w-full"
-                ></textarea>
-            </div>
+        <!-- Shared notes/reason field -->
+        <div class="comments-section">
+            <label class="form-label" data-comments-label>Notes (optional)</label>
+            <textarea 
+                name="comments" 
+                rows="2" 
+                placeholder="Add notes or cancellation reason"
+                class="form-input w-full"
+                data-comments-field
+            ></textarea>
         </div>
     </div>
 </div>
@@ -110,33 +82,38 @@
         if (e.target.classList.contains('status-radio')) {
             const form = e.target.closest('form');
             const completedSection = form.querySelector('.completed-section');
-            const absentSection = form.querySelector('.absent-section');
-            const cancelledSection = form.querySelector('.cancelled-section');
+            const commentsField = form.querySelector('[name="comments"]');
+            const commentsLabel = form.querySelector('[data-comments-label]');
             
             // Get all required fields
             const topicField = completedSection ? completedSection.querySelector('[name="topic"]') : null;
-            const cancelledCommentsField = cancelledSection ? cancelledSection.querySelector('[name="comments"]') : null;
             
-            // Hide all sections and remove required
-            if (completedSection) {
+            // Hide completed details by default and remove required
+            if (completedSection && topicField) {
                 completedSection.classList.add('hidden');
-                if (topicField) topicField.removeAttribute('required');
-            }
-            if (absentSection) absentSection.classList.add('hidden');
-            if (cancelledSection) {
-                cancelledSection.classList.add('hidden');
-                if (cancelledCommentsField) cancelledCommentsField.removeAttribute('required');
+                topicField.removeAttribute('required');
             }
             
             // Show relevant section and set required
-            if (e.target.value === 'completed' && completedSection) {
+            if (e.target.value === 'completed' && completedSection && topicField) {
                 completedSection.classList.remove('hidden');
-                if (topicField) topicField.setAttribute('required', 'required');
-            } else if (e.target.value === 'student_absent' && absentSection) {
-                absentSection.classList.remove('hidden');
-            } else if (e.target.value === 'teacher_cancelled' && cancelledSection) {
-                cancelledSection.classList.remove('hidden');
-                if (cancelledCommentsField) cancelledCommentsField.setAttribute('required', 'required');
+                topicField.setAttribute('required', 'required');
+            }
+
+            if (commentsField) {
+                if (e.target.value === 'teacher_cancelled') {
+                    commentsField.setAttribute('required', 'required');
+                    commentsField.placeholder = 'Why was it cancelled?';
+                } else {
+                    commentsField.removeAttribute('required');
+                    commentsField.placeholder = 'Add notes (optional)';
+                }
+            }
+
+            if (commentsLabel) {
+                commentsLabel.textContent = e.target.value === 'teacher_cancelled'
+                    ? 'Reason *'
+                    : 'Notes (optional)';
             }
         }
     });
