@@ -10,7 +10,9 @@ Route::get('/', function () {
 Route::prefix('teacher')->name('teacher.')->group(function () {
     // Authentication
     Route::get('/{teacher}', [TeacherController::class, 'showLogin'])->name('login');
-    Route::post('/{teacher}/login', [TeacherController::class, 'login'])->name('login.submit');
+    Route::post('/{teacher}/login', [TeacherController::class, 'login'])
+        ->middleware('throttle:5,1')
+        ->name('login.submit');
     Route::post('/logout', [TeacherController::class, 'logout'])->name('logout');
 
     // Protected routes (require teacher authentication)
@@ -35,7 +37,9 @@ Route::prefix('student')->name('student.')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     // Auth routes (public)
     Route::get('/login', [\App\Http\Controllers\AdminController::class, 'showLogin'])->name('login');
-    Route::post('/login', [\App\Http\Controllers\AdminController::class, 'login'])->name('login.submit');
+    Route::post('/login', [\App\Http\Controllers\AdminController::class, 'login'])
+        ->middleware('throttle:5,1')
+        ->name('login.submit');
     Route::post('/logout', [\App\Http\Controllers\AdminController::class, 'logout'])->name('logout');
     
     // Protected routes (require session)

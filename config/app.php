@@ -4,6 +4,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Admin Password
+    |--------------------------------------------------------------------------
+    |
+    | Simple shared secret used for the admin login flow. Set via ENV to avoid
+    | committing credentials and to allow environment-specific values.
+    |
+    */
+    'admin_password' => env('ADMIN_PASSWORD', 'admin13'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Name
     |--------------------------------------------------------------------------
     |

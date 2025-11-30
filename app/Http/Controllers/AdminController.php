@@ -11,13 +11,11 @@ use App\Services\LessonStatisticsService;
 use App\Http\Requests\CreateStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 class AdminController extends Controller
 {
-
-    // Admin password (in production, store this in .env or database)
-    private const ADMIN_PASSWORD = 'admin13';
 
     // Show login form
     public function showLogin()
@@ -34,10 +32,17 @@ class AdminController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'password' => 'required|string',
+            'password' => 'required|string|min:4',
         ]);
 
-        if ($request->password === self::ADMIN_PASSWORD) {
+        $configuredPassword = (string) config('app.admin_password', '');
+
+        $isHashed = Hash::info($configuredPassword)['algo'] !== null;
+        $valid = $isHashed
+            ? Hash::check($request->password, $configuredPassword)
+            : hash_equals($configuredPassword, $request->password);
+
+        if ($configuredPassword !== '' && $valid) {
             session(['admin_authenticated' => true]);
             return redirect()->route('admin.dashboard');
         }
@@ -102,7 +107,7 @@ class AdminController extends Controller
 
         Teacher::create([
             'name' => $request->name,
-            'password' => $request->password,
+            'password' => Hash::make($request->password),
         ]);
 
         return redirect()->route('admin.dashboard')->with('success', 'Teacher created successfully!');

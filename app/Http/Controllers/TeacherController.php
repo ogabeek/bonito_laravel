@@ -11,6 +11,7 @@ use App\Repositories\LessonRepository;
 use App\Http\Requests\CreateLessonRequest;
 use App\Http\Requests\UpdateLessonRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 
@@ -25,9 +26,22 @@ class TeacherController extends Controller
     // Handle login
     public function login(Request $request, Teacher $teacher)
     {
-        // Simple password check
-        if ($request->password === $teacher->password) {
-            // Store teacher ID in session
+        $request->validate([
+            'password' => 'required|string|min:4',
+        ]);
+
+        $storedPassword = $teacher->password;
+        $isHashed = Hash::info($storedPassword)['algo'] !== null;
+        $valid = $isHashed
+            ? Hash::check($request->password, $storedPassword)
+            : hash_equals($storedPassword, $request->password);
+
+        if ($valid) {
+            // Upgrade legacy plain-text passwords transparently
+            if (!$isHashed) {
+                $teacher->update(['password' => Hash::make($request->password)]);
+            }
+            
             session(['teacher_id' => $teacher->id]);
             return redirect()->route('teacher.dashboard', $teacher->id);
         }
