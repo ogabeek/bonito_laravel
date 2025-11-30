@@ -67,7 +67,10 @@
         </div>
 
         <!-- Shared notes/reason field -->
-        <div class="comments-section">
+        <div class="comments-toggle text-xs">
+            <button type="button" data-comments-toggle class="text-blue-600 hover:underline">+ Add notes</button>
+        </div>
+        <div class="comments-section hidden" data-comments-section>
             <label class="form-label" data-comments-label>Notes (optional)</label>
             <textarea 
                 name="comments" 
@@ -82,43 +85,69 @@
 
 @once
 <script>
+    const updateCommentsUI = (form, status) => {
+        const completedSection = form.querySelector('.completed-section');
+        const commentsField = form.querySelector('[name="comments"]');
+        const commentsLabel = form.querySelector('[data-comments-label]');
+        const commentsSection = form.querySelector('[data-comments-section]');
+        const commentsToggle = form.querySelector('[data-comments-toggle]');
+        const topicField = completedSection ? completedSection.querySelector('[name="topic"]') : null;
+
+        // Completed fields visibility/required
+        if (completedSection && topicField) {
+            const showCompleted = status === 'completed';
+            completedSection.classList.toggle('hidden', !showCompleted);
+            topicField.toggleAttribute('required', showCompleted);
+        }
+
+        // Comments field requirements and visibility
+        if (commentsField) {
+            const isTeacherCancelled = status === 'teacher_cancelled';
+            commentsField.toggleAttribute('required', isTeacherCancelled);
+            commentsField.placeholder = isTeacherCancelled ? 'Why was it cancelled?' : 'Add notes (optional)';
+        }
+
+        if (commentsLabel) {
+            commentsLabel.textContent = status === 'teacher_cancelled' ? 'Reason *' : 'Notes (optional)';
+        }
+
+        if (commentsSection && commentsToggle) {
+            if (status === 'teacher_cancelled') {
+                commentsSection.classList.remove('hidden');
+                commentsToggle.classList.add('hidden');
+            } else if (status === 'completed') {
+                commentsSection.classList.add('hidden');
+                commentsToggle.classList.remove('hidden');
+            } else {
+                commentsSection.classList.remove('hidden');
+                commentsToggle.classList.add('hidden');
+            }
+        }
+    };
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('newLessonForm');
+        const checked = form?.querySelector('.status-radio:checked');
+        if (form && checked) updateCommentsUI(form, checked.value);
+    });
+
     // Show/hide details based on status selection
     document.addEventListener('change', function(e) {
         if (e.target.classList.contains('status-radio')) {
             const form = e.target.closest('form');
-            const completedSection = form.querySelector('.completed-section');
-            const commentsField = form.querySelector('[name="comments"]');
-            const commentsLabel = form.querySelector('[data-comments-label]');
-            
-            // Get all required fields
-            const topicField = completedSection ? completedSection.querySelector('[name="topic"]') : null;
-            
-            // Hide completed details by default and remove required
-            if (completedSection && topicField) {
-                completedSection.classList.add('hidden');
-                topicField.removeAttribute('required');
-            }
-            
-            // Show relevant section and set required
-            if (e.target.value === 'completed' && completedSection && topicField) {
-                completedSection.classList.remove('hidden');
-                topicField.setAttribute('required', 'required');
-            }
+            updateCommentsUI(form, e.target.value);
+        }
+    });
 
-            if (commentsField) {
-                if (e.target.value === 'teacher_cancelled') {
-                    commentsField.setAttribute('required', 'required');
-                    commentsField.placeholder = 'Why was it cancelled?';
-                } else {
-                    commentsField.removeAttribute('required');
-                    commentsField.placeholder = 'Add notes (optional)';
-                }
-            }
-
-            if (commentsLabel) {
-                commentsLabel.textContent = e.target.value === 'teacher_cancelled'
-                    ? 'Reason *'
-                    : 'Notes (optional)';
+    // Toggle optional notes visibility (for "Done" state)
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('[data-comments-toggle]')) {
+            const form = e.target.closest('form');
+            const commentsSection = form?.querySelector('[data-comments-section]');
+            if (commentsSection) {
+                commentsSection.classList.remove('hidden');
+                e.target.classList.add('hidden');
             }
         }
     });
