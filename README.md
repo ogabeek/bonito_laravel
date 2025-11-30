@@ -22,6 +22,7 @@ This is a pragmatic MVP built in 2 weeks focusing on core functionality over arc
 
 **Dependencies:** `composer install && npm install`  
 **Environment:** `cp .env.example .env && php artisan key:generate`  
+**Admin auth:** Set `ADMIN_PASSWORD=your_secret` in `.env` (no default)  
 **Database:** `php artisan migrate`  
 **Build:** `npm run build`  
 **Access:** `http://boniato_check.test` (Herd auto-serves)
@@ -72,4 +73,3 @@ This is a pragmatic MVP built in 2 weeks focusing on core functionality over arc
 - `public/css/app.css` - Design system (CSS variables)
 
 <img src="image-1.png" alt="Alt Text" width="200" >
-
