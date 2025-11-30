@@ -43,6 +43,7 @@
     </x-card>
 
     <x-card class="mb-6">
+        <div id="lessonFormErrors" class="mb-4 hidden bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded"></div>
         <form id="newLessonForm">
             <x-lesson-form :students="$students" />
             <div class="mt-6">
@@ -68,6 +69,19 @@
 
 @push('scripts')
 <script>
+    const lessonErrorBox = document.getElementById('lessonFormErrors');
+    const clearLessonErrors = () => {
+        if (!lessonErrorBox) return;
+        lessonErrorBox.innerHTML = '';
+        lessonErrorBox.classList.add('hidden');
+    };
+    const showLessonErrors = (messages) => {
+        if (!lessonErrorBox) return;
+        const list = Array.isArray(messages) ? messages : [messages];
+        lessonErrorBox.innerHTML = '<ul class="list-disc pl-4">' + list.map(m => `<li>${m}</li>`).join('') + '</ul>';
+        lessonErrorBox.classList.remove('hidden');
+    };
+
     // Create new lesson - use event delegation
     document.addEventListener('submit', function(e) {
         if (e.target.id === 'newLessonForm') {
@@ -75,6 +89,7 @@
             
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
+            clearLessonErrors();
             
             // Remember the selected student and date
             const selectedStudent = data.student_id;
@@ -84,6 +99,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify(data)
@@ -95,13 +111,15 @@
                     sessionStorage.setItem('lastSelectedStudent', selectedStudent);
                     sessionStorage.setItem('lastSelectedDate', selectedDate);
                     location.reload();
+                } else if (data.errors) {
+                    showLessonErrors(Object.values(data.errors).flat());
                 } else {
-                    alert('Error creating lesson: ' + (data.message || 'Please check all required fields'));
+                    showLessonErrors(data.message || 'Please check all required fields');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error creating lesson. Please try again.');
+                showLessonErrors('Error creating lesson. Please try again.');
             });
         }
     });
@@ -143,6 +161,7 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             }
         })
