@@ -67,8 +67,9 @@ class TeacherController extends Controller
 
         // Calculate stats
         $stats = $statsService->calculateStats($lessons);
+        $studentStats = $statsService->calculateStatsByStudent($lessons);
 
-        return view('teacher.dashboard', compact('teacher', 'lessons', 'date', 'stats', 'students', 'prevMonth', 'nextMonth'));
+        return view('teacher.dashboard', compact('teacher', 'lessons', 'date', 'stats', 'studentStats', 'students', 'prevMonth', 'nextMonth'));
     }
 
     // Logout

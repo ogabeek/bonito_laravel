@@ -36,6 +36,9 @@ class LessonStatisticsService
             return [
                 'total' => $studentLessons->count(),
                 'completed' => $studentLessons->filter(fn($lesson) => $lesson->status === LessonStatus::COMPLETED)->count(),
+                'student_absent' => $studentLessons->filter(fn($lesson) => $lesson->status === LessonStatus::STUDENT_ABSENT)->count(),
+                'student_cancelled' => $studentLessons->filter(fn($lesson) => $lesson->status === LessonStatus::STUDENT_CANCELLED)->count(),
+                'teacher_cancelled' => $studentLessons->filter(fn($lesson) => $lesson->status === LessonStatus::TEACHER_CANCELLED)->count(),
             ];
         });
     }

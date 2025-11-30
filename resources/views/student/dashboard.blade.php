@@ -10,6 +10,32 @@
         :subtitle="$student->goal ? 'Goal: ' . $student->goal : null" 
     />
 
+    <x-card class="mb-6">
+        <div class="flex justify-center gap-4">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-bold text-gray-800">{{ $stats['total'] }}</span>
+                <span class="text-sm text-gray-500">Total</span>
+            </div>
+            <div class="border-l border-gray-300"></div>
+            <div class="flex items-center gap-2">
+                <span class="text-xl font-semibold" style="color: var(--color-status-completed);">{{ $stats['completed'] }}</span>
+                <span class="text-sm text-gray-600">Completed</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xl font-semibold" style="color: var(--color-status-student-cancelled);">{{ $stats['student_cancelled'] }}</span>
+                <span class="text-sm text-gray-600">Student Cancelled</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xl font-semibold" style="color: var(--color-status-cancelled);">{{ $stats['teacher_cancelled'] }}</span>
+                <span class="text-sm text-gray-600">Teacher Cancelled</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xl font-semibold" style="color: var(--color-status-absent);">{{ $stats['student_absent'] }}</span>
+                <span class="text-sm text-gray-600">Absent</span>
+            </div>
+        </div>
+    </x-card>
+
     @if($upcomingLessons->count() > 0)
         <x-card title="📅 Upcoming Lessons" class="mb-6">
             <div class="space-y-3">
