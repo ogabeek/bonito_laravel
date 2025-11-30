@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Rule;
+
 class CreateLessonRequest extends LessonRequest
 {
     /**
@@ -20,7 +22,12 @@ class CreateLessonRequest extends LessonRequest
     public function rules(): array
     {
         return array_merge(parent::rules(), [
-            'student_id' => 'required|exists:students,id',
+            'student_id' => [
+                'required',
+                'exists:students,id',
+                Rule::exists('student_teacher', 'student_id')
+                    ->where('teacher_id', session('teacher_id')),
+            ],
             'class_date' => 'required|date',
         ]);
     }

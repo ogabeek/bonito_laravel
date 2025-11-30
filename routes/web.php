@@ -23,10 +23,13 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
 });
 
 // Lesson routes (shared, with model binding)
-Route::prefix('lesson')->name('lesson.')->group(function () {
-    Route::post('/{lesson}/update', [TeacherController::class, 'updateLesson'])->name('update');
-    Route::post('/{lesson}/delete', [TeacherController::class, 'deleteLesson'])->name('delete');
-});
+Route::middleware('teacher.auth')
+    ->prefix('lesson')
+    ->name('lesson.')
+    ->group(function () {
+        Route::post('/{lesson}/update', [TeacherController::class, 'updateLesson'])->name('update');
+        Route::post('/{lesson}/delete', [TeacherController::class, 'deleteLesson'])->name('delete');
+    });
 
 // Student routes (UUID-based access)
 Route::prefix('student')->name('student.')->group(function () {
