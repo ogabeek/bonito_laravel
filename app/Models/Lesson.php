@@ -5,9 +5,12 @@ namespace App\Models;
 use App\Enums\LessonStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Lesson extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'teacher_id',
         'student_id',
