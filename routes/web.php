@@ -61,5 +61,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/students/{student}/status', [\App\Http\Controllers\AdminController::class, 'updateStudentStatus'])->name('students.status.update');
         Route::post('/students/{student}/assign-teacher', [\App\Http\Controllers\AdminController::class, 'assignTeacherToStudent'])->name('student.assign.teacher');
         Route::delete('/students/{student}/teachers/{teacher}', [\App\Http\Controllers\AdminController::class, 'unassignStudent'])->name('teachers.students.unassign');
+
+        // Activity log
+        Route::get('/logs', [\App\Http\Controllers\AdminController::class, 'logs'])->name('logs');
     });
 });

@@ -7,10 +7,13 @@
             <p class="text-gray-700 mt-2 text-sm">{{ $subtitle }}</p>
         @endif
     </div>
-    @if($logoutRoute)
-        <form method="POST" action="{{ $logoutRoute }}">
-            @csrf
-            <button class="text-gray-600 hover:text-gray-800">Logout</button>
-        </form>
-    @endif
+    <div class="flex items-center gap-4">
+        {{ $slot }}
+        @if($logoutRoute)
+            <form method="POST" action="{{ $logoutRoute }}">
+                @csrf
+                <button class="text-gray-600 hover:text-gray-800">Logout</button>
+            </form>
+        @endif
+    </div>
 </div>

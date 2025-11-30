@@ -13,10 +13,15 @@ const showLessonErrors = (messages) => {
     lessonErrorBox.classList.remove('hidden');
 };
 
+let lessonSubmitting = false;
+
 // Create new lesson
 document.addEventListener('submit', function(e) {
     if (e.target.id === 'newLessonForm') {
         e.preventDefault();
+
+        if (lessonSubmitting) return;
+        lessonSubmitting = true;
         
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData.entries());
@@ -42,13 +47,16 @@ document.addEventListener('submit', function(e) {
                 location.reload();
             } else if (data.errors) {
                 showLessonErrors(Object.values(data.errors).flat());
+                lessonSubmitting = false;
             } else {
                 showLessonErrors(data.message || 'Please check all required fields');
+                lessonSubmitting = false;
             }
         })
         .catch(error => {
             console.error('Error:', error);
             showLessonErrors('Error creating lesson. Please try again.');
+            lessonSubmitting = false;
         });
     }
 });

@@ -6,16 +6,19 @@ use App\Enums\LessonStatus;
 use App\Models\Teacher;
 use App\Models\Student;
 use App\Models\Lesson;
+use App\Concerns\LogsActivityActions;
 use App\Services\CalendarService;
 use App\Services\LessonStatisticsService;
 use App\Http\Requests\CreateStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Activitylog\Models\Activity;
 use Carbon\Carbon;
 
 class AdminController extends Controller
 {
+    use LogsActivityActions;
 
     // Show login form
     public function showLogin()
@@ -67,6 +70,8 @@ class AdminController extends Controller
     // Dashboard
     public function dashboard(Request $request, CalendarService $calendar, LessonStatisticsService $statsService)
     {
+        $billing = $request->boolean('billing');
+
         // Get calendar data
         $calendarData = $calendar->getMonthData($request);
         $currentMonth = $calendarData['currentMonth'];
@@ -83,10 +88,20 @@ class AdminController extends Controller
             return $lesson->student_id . '_' . $lesson->class_date->format('Y-m-d');
         });
 
-        // Stats for current month
-        $monthStats = $statsService->calculateStats($monthLessons);
-        $studentStats = $statsService->calculateStatsByStudent($monthLessons);
-        $teacherStats = $statsService->calculateStatsByTeacher($monthLessons);
+        // Stats period: calendar month or billing (26 -> 25)
+        if ($billing) {
+            $periodStart = $currentMonth->copy()->day(26);
+            $periodEnd = $currentMonth->copy()->addMonthNoOverflow()->day(25)->endOfDay();
+            $periodLessons = Lesson::with(['teacher', 'student'])
+                ->whereBetween('class_date', [$periodStart, $periodEnd])
+                ->get();
+        } else {
+            $periodLessons = $monthLessons;
+        }
+
+        $periodStats = $statsService->calculateStats($periodLessons);
+        $studentStats = $statsService->calculateStatsByStudent($periodLessons);
+        $teacherStats = $statsService->calculateStatsByTeacher($periodLessons);
 
         $stats = [
             'teachers' => Teacher::count(),
@@ -103,7 +118,22 @@ class AdminController extends Controller
         // Get archived (soft-deleted) teachers for restore functionality
         $archivedTeachers = Teacher::onlyTrashed()->get();
 
-        return view('admin.dashboard', compact('stats', 'teachers', 'students', 'currentMonth', 'daysInMonth', 'monthStart', 'lessonsThisMonth', 'prevMonth', 'nextMonth', 'archivedTeachers', 'monthStats', 'studentStats', 'teacherStats'));
+        return view('admin.dashboard', compact(
+            'stats',
+            'teachers',
+            'students',
+            'currentMonth',
+            'daysInMonth',
+            'monthStart',
+            'lessonsThisMonth',
+            'prevMonth',
+            'nextMonth',
+            'archivedTeachers',
+            'periodStats',
+            'studentStats',
+            'teacherStats',
+            'billing'
+        ));
     }
 
     // Teachers Management
@@ -114,10 +144,12 @@ class AdminController extends Controller
             'password' => 'required|string|min:4',
         ]);
 
-        Teacher::create([
+        $teacher = Teacher::create([
             'name' => $request->name,
             'password' => Hash::make($request->password),
         ]);
+
+        $this->logActivity($teacher, 'teacher_created');
 
         return redirect()->route('admin.dashboard')->with('success', 'Teacher created successfully!');
     }
@@ -125,6 +157,7 @@ class AdminController extends Controller
     public function deleteTeacher(Teacher $teacher)
     {
         $teacher->delete();
+        $this->logActivity($teacher, 'teacher_archived');
         return redirect()->route('admin.dashboard')->with('success', 'Teacher archived successfully!');
     }
 
@@ -132,13 +165,16 @@ class AdminController extends Controller
     {
         $teacher = Teacher::withTrashed()->findOrFail($id);
         $teacher->restore();
+        $this->logActivity($teacher, 'teacher_restored');
         return redirect()->route('admin.dashboard')->with('success', 'Teacher restored successfully!');
     }
 
     // Students Management
     public function createStudent(CreateStudentRequest $request)
     {
-        Student::create($request->validated());
+        $student = Student::create($request->validated());
+
+        $this->logActivity($student, 'student_created');
 
         return redirect()->route('admin.dashboard')->with('success', 'Student created successfully!');
     }
@@ -153,7 +189,14 @@ class AdminController extends Controller
 
     public function updateStudent(UpdateStudentRequest $request, Student $student)
     {
+        $original = $student->getOriginal();
         $student->update($request->validated());
+
+        $this->logActivity(
+            $student,
+            'student_updated',
+            ['changes' => $student->getChanges(), 'original' => $original]
+        );
 
         return redirect()->route('admin.students.edit', $student)->with('success', 'Student updated successfully!');
     }
@@ -164,7 +207,14 @@ class AdminController extends Controller
             'status' => 'required|in:' . implode(',', \App\Enums\StudentStatus::values()),
         ]);
 
+        $original = $student->status;
         $student->update(['status' => $request->status]);
+
+        $this->logActivity(
+            $student,
+            'student_status_updated',
+            ['from' => $original, 'to' => $request->status]
+        );
 
         return back()->with('success', 'Student status updated successfully!');
     }
@@ -176,6 +226,12 @@ class AdminController extends Controller
         // Avoid duplicate pivot insert (unique constraint)
         $student->teachers()->syncWithoutDetaching([$request->teacher_id]);
 
+        $this->logActivity(
+            $student,
+            'student_teacher_assigned',
+            ['teacher_id' => $request->teacher_id]
+        );
+
         return back()->with('success', 'Teacher assigned successfully!');
     }
 
@@ -183,6 +239,18 @@ class AdminController extends Controller
     {
         $teacher->students()->detach($student->id);
 
+        $this->logActivity(
+            $student,
+            'student_teacher_unassigned',
+            ['teacher_id' => $teacher->id]
+        );
+
         return back()->with('success', 'Student unassigned successfully!');
+    }
+
+    public function logs()
+    {
+        $logs = Activity::latest()->with('subject')->limit(200)->get();
+        return view('admin.logs', compact('logs'));
     }
 }

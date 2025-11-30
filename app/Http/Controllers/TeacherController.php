@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\LessonStatus;
 use App\Models\Teacher;
 use App\Models\Lesson;
+use App\Concerns\LogsActivityActions;
 use App\Services\CalendarService;
 use App\Services\LessonStatisticsService;
 use App\Repositories\LessonRepository;
@@ -12,11 +13,14 @@ use App\Http\Requests\CreateLessonRequest;
 use App\Http\Requests\UpdateLessonRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Activitylog\Models\Activity;
 use Carbon\Carbon;
 
 
 class TeacherController extends Controller
 {
+    use LogsActivityActions;
+
     // Show login form
     public function showLogin(Teacher $teacher)
     {
@@ -84,12 +88,22 @@ class TeacherController extends Controller
      // Update lesson
     public function updateLesson(UpdateLessonRequest $request, Lesson $lesson)
     {
+        $teacherActor = Teacher::find(session('teacher_id'));
+        $original = $lesson->getOriginal();
+
         $lesson->update([
             'status' => $request->status,
             'topic' => $request->topic ?? '',
             'homework' => $request->homework,
             'comments' => $request->comments,
         ]);
+
+        $this->logActivity(
+            $lesson,
+            'lesson_updated',
+            ['changes' => $lesson->getChanges(), 'original' => $original],
+            $teacherActor
+        );
         
         return response()->json(['success' => true, 'lesson' => $lesson->fresh()]);
     }
@@ -97,6 +111,8 @@ class TeacherController extends Controller
     // Create new lesson
     public function createLesson(CreateLessonRequest $request)
     {
+        $teacherActor = Teacher::find(session('teacher_id'));
+
         $lesson = Lesson::create([
             'teacher_id' => session('teacher_id'),
             'student_id' => $request->student_id,
@@ -106,6 +122,17 @@ class TeacherController extends Controller
             'homework' => $request->homework,
             'comments' => $request->comments,
         ]);
+
+        $this->logActivity(
+            $lesson,
+            'lesson_created',
+            [
+                'student_id' => $request->student_id,
+                'status' => $request->status,
+                'class_date' => $request->class_date,
+            ],
+            $teacherActor
+        );
         
         return response()->json(['success' => true, 'lesson' => $lesson]);
     }
@@ -113,12 +140,22 @@ class TeacherController extends Controller
     // Delete lesson
     public function deleteLesson(Lesson $lesson)
     {
+        $teacherActor = Teacher::find(session('teacher_id'));
+        $snapshot = $lesson->toArray();
+
         // Check teacher owns this lesson
         if ($lesson->teacher_id !== session('teacher_id')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         
         $lesson->delete();
+
+        $this->logActivity(
+            $lesson,
+            'lesson_deleted',
+            ['snapshot' => $snapshot],
+            $teacherActor
+        );
         
         return response()->json(['success' => true]);
     }

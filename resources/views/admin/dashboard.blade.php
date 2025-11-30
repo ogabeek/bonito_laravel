@@ -5,7 +5,9 @@
 @section('content')
 <div class="p-6 max-w-7xl mx-auto" x-data="{ activeTab: 'calendar', showAddTeacher: false, showAddStudent: false, selectedTeacher: '', selectedStatus: '' }">
     
-    <x-page-header title="Admin Dashboard" :logoutRoute="route('admin.logout')" />
+    <x-page-header title="Admin Dashboard" :logoutRoute="route('admin.logout')">
+        <a href="{{ route('admin.logs') }}" class="text-sm text-blue-600 hover:underline">Activity Logs</a>
+    </x-page-header>
 
 
     <x-card>
@@ -146,13 +148,6 @@
 
             <!-- Teachers Tab -->
             <div x-show="activeTab === 'teachers'" x-cloak>
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold">Teachers</h2>
-                    <button @click="showAddTeacher = !showAddTeacher" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                        <span x-text="showAddTeacher ? 'Cancel' : '+ Add Teacher'"></span>
-                    </button>
-                </div>
-
                 <!-- Add Teacher Form -->
                 <div x-show="showAddTeacher" x-cloak class="bg-gray-50 rounded-lg p-4 mb-4">
                     <form method="POST" action="{{ route('admin.teachers.create') }}" class="flex gap-4">
@@ -184,7 +179,7 @@
                                     $ts = $teacherStats[$teacher->id] ?? ['total' => 0, 'completed' => 0, 'student_cancelled' => 0, 'teacher_cancelled' => 0, 'student_absent' => 0];
                                 @endphp
                                 <td class="px-4 py-2 text-right">
-                                    <x-student-stats-compact :stats="$ts" class="w-20 ml-auto text-gray-500" />
+                                    <x-stats-inline :stats="$ts" class="w-20 ml-auto text-gray-500" />
                                 </td>
                                 <td class="px-4 py-2 text-right">
                                     <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}" onsubmit="return confirm('Archive {{ $teacher->name }}? (Can be restored later)')">
@@ -198,6 +193,12 @@
                     </tbody>
                 </table>
 
+                <div class="flex justify-end items-center mt-4">
+                    <button @click="showAddTeacher = !showAddTeacher" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        <span x-text="showAddTeacher ? 'Cancel' : '+ Add Teacher'"></span>
+                    </button>
+                </div>
+                                
                 <!-- Archived Teachers Section -->
                 @if($archivedTeachers->count() > 0)
                     <div class="mt-8">
