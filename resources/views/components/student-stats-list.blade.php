@@ -23,7 +23,10 @@
         @endphp
         <a href="{{ route('student.dashboard', $student) }}" class="block px-3 py-2 rounded hover:bg-gray-50">
             <div class="flex items-center justify-between gap-3">
-                <div class="font-medium text-sm text-gray-900 truncate">{{ $student->name }}</div>
+                <div class="flex items-center gap-2 min-w-0">
+                    <x-student-status-dot :status="$student->status" />
+                    <div class="font-medium text-sm text-gray-900 truncate">{{ $student->name }}</div>
+                </div>
                 <x-student-stats-compact :stats="$s" class="w-40" />
             </div>
         </a>
