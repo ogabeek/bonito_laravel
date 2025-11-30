@@ -97,15 +97,14 @@
                         <table class="w-full text-sm">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-1.5 py-0.5 text-left border-r sticky left-0 bg-gray-50 min-w-[180px]">Student</th>
-                                    <th class="px-1 py-0.5 text-right min-w-[44px]"></th>
+                                    <th class="px-1.5 py-1 text-left border-r sticky left-0 bg-gray-50 min-w-[170px] text-sm">Student</th>
                                     @for($day = 1; $day <= $daysInMonth; $day++)
                                         @php
                                             $date = $monthStart->copy()->addDays($day - 1);
                                             $isWeekend = $date->isWeekend();
                                             $isToday = $date->isToday();
                                         @endphp
-                                        <th class="px-1 py-0.5 text-center min-w-[34px] border-l {{ $isWeekend ? 'bg-gray-100' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
+                                        <th class="px-1 py-1 text-center min-w-[32px] border-l {{ $isWeekend ? 'bg-gray-100' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
                                             <div class="font-semibold text-[11px]">{{ $day }}</div>
                                             <div class="text-[9px] text-gray-500">{{ $date->format('D') }}</div>
                                         </th>
@@ -115,20 +114,18 @@
                             <tbody>
                                 @foreach($students as $student)
                                     <tr x-show="(selectedTeacher === '' || {{ json_encode($student->teacher_ids) }}.includes(parseInt(selectedTeacher))) && (selectedStatus === '' || selectedStatus === '{{ $student->status->value }}')" class="border-t hover:bg-gray-50">
-                                        <td class="px-1.5 py-1 border-r sticky left-0 bg-white">
+                                        <td class="px-1.5 py-2 border-r sticky left-0 bg-white">
                                             <div class="flex items-center gap-1 min-w-0">
                                                 <x-student-status-dot :status="$student->status" />
-                                                <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-[13px] text-gray-900 hover:text-blue-600 truncate">
+                                                <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-[12px] text-gray-900 hover:text-blue-600 truncate">
                                                     {{ $student->name }}
                                                 </a>
-                                                <x-student-stats-compact :stats="($studentStats[$student->id] ?? null)" class="w-18 ml-auto text-gray-500" />
+                                                <x-student-stats-compact :stats="($studentStats[$student->id] ?? null)" class="w-16 ml-auto text-gray-500" />
+                                                <x-balance-badge :value="$student->class_balance" class="w-10 h-4 text-[7px] ml-1 shrink-0" />
                                             </div>
                                             @if($student->teachers->count() > 0)
                                                 <div class="text-xs text-gray-500 ml-3.5">{{ $student->teachers->pluck('name')->join(', ') }}</div>
                                             @endif
-                                        </td>
-                                        <td class="px-1 py-0.5 border-l align-middle">
-                                            <x-balance-badge :value="$student->class_balance" class="ml-auto w-full" />
                                         </td>
                                         @for($day = 1; $day <= $daysInMonth; $day++)
                                             @php
@@ -138,9 +135,9 @@
                                                 $isWeekend = $date->isWeekend();
                                                 $isToday = $date->isToday();
                                             @endphp
-                                            <td class="px-0.5 py-1 text-center border-l text-[11px] {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
+                                            <td class="px-0.5 py-1.25 text-center border-l text-[10px] {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
                                                 @foreach($lessons as $lesson)
-                                                    <div class="inline-block px-0.75 py-0.25 text-[10px] font-medium rounded"
+                                                    <div class="inline-block px-0.5 py-0.25 text-[9px] font-medium rounded"
                                                          style="background: var(--color-status-{{ $lesson->status->cssClass() }}-bg); color: var(--color-status-{{ $lesson->status->cssClass() }});"
                                                          title="{{ $lesson->teacher->name }} - {{ $lesson->status->label() }}">
                                                         {{ substr($lesson->teacher->name, 0, 1) }}
