@@ -5,7 +5,7 @@
     <x-calendar-picker name="class_date" />
 
     <!-- Right Side: Student, Status, and Details -->
-    <div class="flex-1 flex flex-col gap-4" x-data>
+    <div class="flex-1 flex flex-col gap-4 min-h-[210px]" x-data>
         <div>
             <div class="flex gap-3 items-end">
                 <div class="flex-1">
@@ -19,24 +19,24 @@
                 </div>
 
                 <div class="flex gap-2">
-                    <label class="status-btn-completed flex items-center gap-1 border rounded cursor-pointer transition p-2 text-sm font-medium" title="Lesson completed successfully">
+                    <label class="status-btn-completed flex items-center justify-center w-16 border rounded cursor-pointer transition p-2 text-sm font-medium" title="Lesson completed successfully">
                         <input type="radio" name="status" value="completed" class="status-radio hidden" checked>
-                        <span>✓ Done</span>
-                    </label>
-                    
-                    <label class="status-btn-absent flex items-center gap-1 border rounded cursor-pointer transition p-2 text-sm font-medium" title="Student was absent">
-                        <input type="radio" name="status" value="student_absent" class="status-radio hidden">
-                        <span>⚠ SA</span>
+                        <span>Done</span>
                     </label>
 
-                    <label class="status-btn-student-cancelled flex items-center gap-1 border rounded cursor-pointer transition p-2 text-sm font-medium" title="Cancelled by student/parent (agreed)">
+                    <label class="status-btn-student-cancelled flex items-center justify-center w-16 border rounded cursor-pointer transition p-2 text-sm font-medium" title="Cancelled by student/parent (agreed)">
                         <input type="radio" name="status" value="student_cancelled" class="status-radio hidden">
                         <span>C</span>
                     </label>
                     
-                    <label class="status-btn-cancelled flex items-center gap-1 border rounded cursor-pointer transition p-2 text-sm font-medium" title="Cancelled by teacher">
+                    <label class="status-btn-cancelled flex items-center justify-center w-16 border rounded cursor-pointer transition p-2 text-sm font-medium" title="Cancelled by teacher">
                         <input type="radio" name="status" value="teacher_cancelled" class="status-radio hidden">
-                        <span>🚫 CT</span>
+                        <span>CT</span>
+                    </label>
+
+                    <label class="status-btn-absent flex items-center justify-center w-16 border rounded cursor-pointer transition p-2 text-sm font-medium" title="Student was absent">
+                        <input type="radio" name="status" value="student_absent" class="status-radio hidden">
+                        <span>A</span>
                     </label>
                 </div>
             </div>
