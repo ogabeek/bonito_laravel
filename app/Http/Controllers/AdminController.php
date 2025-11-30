@@ -35,14 +35,19 @@ class AdminController extends Controller
             'password' => 'required|string|min:4',
         ]);
 
-        $configuredPassword = (string) config('app.admin_password', '');
+        $configuredPassword = config('app.admin_password');
 
-        $isHashed = Hash::info($configuredPassword)['algo'] !== null;
+        if (empty($configuredPassword)) {
+            return back()->with('error', 'Admin password is not configured.');
+        }
+
+        $isHashed = Hash::info((string) $configuredPassword)['algo'] !== null;
         $valid = $isHashed
             ? Hash::check($request->password, $configuredPassword)
-            : hash_equals($configuredPassword, $request->password);
+            : hash_equals((string) $configuredPassword, $request->password);
 
-        if ($configuredPassword !== '' && $valid) {
+        if ($valid) {
+            $request->session()->regenerate();
             session(['admin_authenticated' => true]);
             return redirect()->route('admin.dashboard');
         }
@@ -51,8 +56,10 @@ class AdminController extends Controller
     }
 
     // Handle logout
-    public function logout()
+    public function logout(Request $request)
     {
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         session()->forget('admin_authenticated');
         return redirect()->route('admin.login')->with('success', 'Logged out successfully');
     }

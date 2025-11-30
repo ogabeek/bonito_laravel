@@ -11,7 +11,7 @@ return [
     | committing credentials and to allow environment-specific values.
     |
     */
-    'admin_password' => env('ADMIN_PASSWORD', 'admin13'),
+    'admin_password' => env('ADMIN_PASSWORD'),
 
     /*
     |--------------------------------------------------------------------------

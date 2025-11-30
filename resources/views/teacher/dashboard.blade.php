@@ -156,6 +156,8 @@
         if (!confirm('Are you sure you want to delete this lesson? This cannot be undone.')) {
             return;
         }
+
+        clearLessonErrors();
         
         fetch('/lesson/' + lessonId + '/delete', {
             method: 'POST',
@@ -169,13 +171,15 @@
         .then(data => {
             if (data.success) {
                 location.reload();
+            } else if (data.errors) {
+                showLessonErrors(Object.values(data.errors).flat());
             } else {
-                alert('Error deleting lesson');
+                showLessonErrors(data.message || 'Error deleting lesson');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Error deleting lesson. Please try again.');
+            showLessonErrors('Error deleting lesson. Please try again.');
         });
     }
 </script>

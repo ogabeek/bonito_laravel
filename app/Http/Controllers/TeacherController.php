@@ -41,7 +41,8 @@ class TeacherController extends Controller
             if (!$isHashed) {
                 $teacher->update(['password' => Hash::make($request->password)]);
             }
-            
+
+            $request->session()->regenerate();
             session(['teacher_id' => $teacher->id]);
             return redirect()->route('teacher.dashboard', $teacher->id);
         }
@@ -71,8 +72,10 @@ class TeacherController extends Controller
     }
 
     // Logout
-    public function logout()
+    public function logout(Request $request)
     {
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         session()->forget('teacher_id');
         return redirect('/');
     }
