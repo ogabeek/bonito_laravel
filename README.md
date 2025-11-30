@@ -71,24 +71,5 @@ This is a pragmatic MVP built in 2 weeks focusing on core functionality over arc
 - `resources/views/components/` - Reusable UI (lesson-card, lesson-form, status-badge, calendar-picker, login-card)
 - `public/css/app.css` - Design system (CSS variables)
 
----
-
-### For AI Assistants
-
-**About me:**
-I am doing my first steps on php and laravel, i use herd and just started, so help to go next, explain steps I want to understand. 
-I don't want you to agentically create or modify something, just tell me how to and why and I will. 
-Feel free to use best practices on teaching to help with it 
-
-**When helping with this codebase:**
-- Assume we want the simplest solution that works
-- Avoid suggesting major refactors unless critical
-- Keep solutions compatible with existing denormalized structure
-- Prioritize solutions that can be implemented in hours, not days
-- Remember that Google Sheets handles complex financial calculations
-
-**Current pain points:**
-Make a platform for Teachers to mark attendance, topic, HW  -> student see it -> admin have calculation of all classes
-
 <img src="image-1.png" alt="Alt Text" width="200" >
 
