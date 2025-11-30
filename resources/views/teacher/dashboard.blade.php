@@ -10,18 +10,19 @@
         :logoutRoute="route('teacher.logout')" 
     />
 
-    <x-lesson-stats-summary 
-        :stats="$stats" 
-        :date="$date" 
-        :prevMonth="$prevMonth" 
-        :nextMonth="$nextMonth" 
-        routeName="teacher.dashboard" 
-        :routeParams="['teacher' => $teacher->id]" 
-    />
-
-    <x-card title="Students" class="mb-6">
+    <x-card class="mb-6">
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="text-xl font-semibold">{{ $date->format('F Y') }}</h2>
+            <x-month-nav 
+                :currentMonth="$date" 
+                :prevMonth="$prevMonth" 
+                :nextMonth="$nextMonth" 
+                routeName="teacher.dashboard" 
+                :routeParams="['teacher' => $teacher->id]" 
+            />
+        </div>
         @if($students->count() > 0)
-            <x-student-stats-list :students="$students" :stats="$studentStats" />
+            <x-student-stats-list :students="$students" :stats="$studentStats" :totalStats="$stats" />
         @else
             <x-empty-state message="No students assigned" />
         @endif
