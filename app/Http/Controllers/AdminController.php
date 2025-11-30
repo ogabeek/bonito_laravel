@@ -112,9 +112,23 @@ class AdminController extends Controller
 
         $teachers = Teacher::withFullDetails()->get();
         $balances = $balanceService->getBalances();
-        $students = Student::withFullDetails()->get()->map(function($student) use ($balances) {
+
+        // Usage counts up to today for chargeable lessons (completed + student_absent)
+        $chargeableStatuses = [
+            LessonStatus::COMPLETED,
+            LessonStatus::STUDENT_ABSENT,
+        ];
+        $usedCounts = Lesson::whereDate('class_date', '<=', now()->toDateString())
+            ->whereIn('status', $chargeableStatuses)
+            ->selectRaw('student_id, count(*) as used')
+            ->groupBy('student_id')
+            ->pluck('used', 'student_id');
+
+        $students = Student::withFullDetails()->get()->map(function($student) use ($balances, $usedCounts) {
             $student->teacher_ids = $student->teachers->pluck('id')->toArray();
-            $student->class_balance = $balances[$student->uuid] ?? null;
+            $paid = $balances[$student->uuid] ?? null;
+            $used = $usedCounts[$student->id] ?? 0;
+            $student->class_balance = $paid !== null ? ($paid - $used) : null;
             return $student;
         });
 
