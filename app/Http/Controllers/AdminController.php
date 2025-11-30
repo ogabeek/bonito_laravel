@@ -164,8 +164,8 @@ class AdminController extends Controller
     {
         $request->validate(['teacher_id' => 'required|exists:teachers,id']);
 
-        // Attach teacher to student
-        $student->teachers()->attach($request->teacher_id);
+        // Avoid duplicate pivot insert (unique constraint)
+        $student->teachers()->syncWithoutDetaching([$request->teacher_id]);
 
         return back()->with('success', 'Teacher assigned successfully!');
     }
