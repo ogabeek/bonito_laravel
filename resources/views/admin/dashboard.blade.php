@@ -26,28 +26,38 @@
                 <div class="flex justify-between items-start gap-4 mb-4">
                     <div class="flex items-center gap-4">
                         <h2 class="text-xl font-semibold">{{ $currentMonth->format('F Y') }}</h2>
-                        <x-month-nav :currentMonth="$currentMonth" :prevMonth="$prevMonth" :nextMonth="$nextMonth" routeName="admin.dashboard" />
+                        <x-month-nav 
+                            :currentMonth="$currentMonth" 
+                            :prevMonth="$prevMonth" 
+                            :nextMonth="$nextMonth" 
+                            routeName="admin.dashboard" 
+                            :routeParams="['billing' => $billing ? 1 : null]"
+                        />
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('admin.dashboard', ['year' => $currentMonth->year, 'month' => $currentMonth->month]) }}" class="px-3 py-1 text-xs rounded {{ $billing ? 'text-gray-600 bg-gray-100' : 'bg-blue-100 text-blue-700' }}">Calendar</a>
+                            <a href="{{ route('admin.dashboard', ['year' => $currentMonth->year, 'month' => $currentMonth->month, 'billing' => 1]) }}" class="px-3 py-1 text-xs rounded {{ $billing ? 'bg-blue-100 text-blue-700' : 'text-gray-600 bg-gray-100' }}">26-25</a>
+                        </div>
                     </div>
                     <div class="flex items-center gap-3">
                         <div class="grid grid-cols-5 gap-3 text-xs text-gray-600 bg-gray-50 rounded px-3 py-2">
                             <div class="text-center">
-                                <div class="font-semibold" style="color: var(--color-status-completed);">{{ $monthStats['completed'] }}</div>
+                                <div class="font-semibold" style="color: var(--color-status-completed);">{{ $periodStats['completed'] }}</div>
                                 <div>Done</div>
                             </div>
                             <div class="text-center">
-                                <div class="font-semibold" style="color: var(--color-status-student-cancelled);">{{ $monthStats['student_cancelled'] }}</div>
+                                <div class="font-semibold" style="color: var(--color-status-student-cancelled);">{{ $periodStats['student_cancelled'] }}</div>
                                 <div>C</div>
                             </div>
                             <div class="text-center">
-                                <div class="font-semibold" style="color: var(--color-status-cancelled);">{{ $monthStats['teacher_cancelled'] }}</div>
+                                <div class="font-semibold" style="color: var(--color-status-cancelled);">{{ $periodStats['teacher_cancelled'] }}</div>
                                 <div>CT</div>
                             </div>
                             <div class="text-center">
-                                <div class="font-semibold" style="color: var(--color-status-absent);">{{ $monthStats['student_absent'] }}</div>
+                                <div class="font-semibold" style="color: var(--color-status-absent);">{{ $periodStats['student_absent'] }}</div>
                                 <div>A</div>
                             </div>
                             <div class="text-center">
-                                <div class="font-semibold text-gray-900">{{ $monthStats['total'] }}</div>
+                                <div class="font-semibold text-gray-900">{{ $periodStats['total'] }}</div>
                                 <div>Total</div>
                             </div>
                         </div>

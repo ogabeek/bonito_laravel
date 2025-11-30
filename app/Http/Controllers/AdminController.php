@@ -90,8 +90,9 @@ class AdminController extends Controller
 
         // Stats period: calendar month or billing (26 -> 25)
         if ($billing) {
-            $periodStart = $currentMonth->copy()->day(26);
-            $periodEnd = $currentMonth->copy()->addMonthNoOverflow()->day(25)->endOfDay();
+            // Billing period spans 26th of previous month to 25th of current month
+            $periodStart = $currentMonth->copy()->subMonthNoOverflow()->day(26);
+            $periodEnd = $currentMonth->copy()->day(25)->endOfDay();
             $periodLessons = Lesson::with(['teacher', 'student'])
                 ->whereBetween('class_date', [$periodStart, $periodEnd])
                 ->get();
