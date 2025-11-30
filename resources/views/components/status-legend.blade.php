@@ -8,6 +8,10 @@
         <span>Student Absent</span>
     </div>
     <div class="flex items-center gap-2">
+        <div class="w-6 h-4 rounded" style="background: var(--color-status-student-cancelled-bg);"></div>
+        <span>Student Cancelled</span>
+    </div>
+    <div class="flex items-center gap-2">
         <div class="w-6 h-4 rounded" style="background: var(--color-status-cancelled-bg);"></div>
         <span>Teacher Cancelled</span>
     </div>

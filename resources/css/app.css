@@ -16,4 +16,53 @@
     --color-student-holiday: #93c5fd;       /* blue-300 - light blue */
     --color-student-finished: #d8b4fe;      /* purple-300 - light purple */
     --color-student-dropped: #fca5a5;       /* red-300 - light red */
+
+    /* Lesson status colors */
+    --color-status-completed: #16a34a;
+    --color-status-completed-bg: #dcfce7;
+    --color-status-completed-border: #22c55e;
+    
+    --color-status-absent: #dc2626;
+    --color-status-absent-bg: #fee2e2;
+    --color-status-absent-border: #ef4444;
+
+    --color-status-student-cancelled: #2563eb;          /* blue */
+    --color-status-student-cancelled-bg: #dbeafe;
+    --color-status-student-cancelled-border: #60a5fa;
+    
+    --color-status-cancelled: #ea580c;
+    --color-status-cancelled-bg: #ffedd5;
+    --color-status-cancelled-border: #f97316;
+}
+
+/* Custom status buttons (checked styling) */
+.status-btn-completed:has(input:checked),
+.status-btn-absent:has(input:checked),
+.status-btn-student-cancelled:has(input:checked),
+.status-btn-cancelled:has(input:checked) {
+    border-color: var(--color-border, #d1d5db);
+}
+
+.status-btn-completed:has(input:checked) {
+    background-color: var(--color-status-completed-bg);
+    border-color: var(--color-status-completed-border);
+    color: var(--color-status-completed);
+}
+
+.status-btn-absent:has(input:checked) {
+    background-color: var(--color-status-absent-bg);
+    border-color: var(--color-status-absent-border);
+    color: var(--color-status-absent);
+}
+
+.status-btn-student-cancelled:has(input:checked) {
+    background-color: var(--color-status-student-cancelled-bg);
+    border-color: var(--color-status-student-cancelled-border);
+    color: var(--color-status-student-cancelled);
+}
+
+.status-btn-cancelled:has(input:checked) {
+    background-color: var(--color-status-cancelled-bg);
+    border-color: var(--color-status-cancelled-border);
+    color: var(--color-status-cancelled);
 }

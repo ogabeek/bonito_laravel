@@ -28,6 +28,11 @@
                         <input type="radio" name="status" value="student_absent" class="status-radio hidden">
                         <span>⚠ SA</span>
                     </label>
+
+                    <label class="status-btn-student-cancelled flex items-center gap-1 border rounded cursor-pointer transition p-2 text-sm font-medium" title="Cancelled by student/parent (agreed)">
+                        <input type="radio" name="status" value="student_cancelled" class="status-radio hidden">
+                        <span>C</span>
+                    </label>
                     
                     <label class="status-btn-cancelled flex items-center gap-1 border rounded cursor-pointer transition p-2 text-sm font-medium" title="Cancelled by teacher">
                         <input type="radio" name="status" value="teacher_cancelled" class="status-radio hidden">

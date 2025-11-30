@@ -36,6 +36,10 @@
                     <span class="text-sm text-gray-600">Absent</span>
                 </div>
                 <div class="flex items-center gap-2">
+                    <span class="text-xl font-semibold" style="color: var(--color-status-student-cancelled);">{{ $stats['student_cancelled'] }}</span>
+                    <span class="text-sm text-gray-600">Student Cancelled</span>
+                </div>
+                <div class="flex items-center gap-2">
                     <span class="text-xl font-semibold" style="color: var(--color-status-cancelled);">{{ $stats['teacher_cancelled'] }}</span>
                     <span class="text-sm text-gray-600">Cancelled</span>
                 </div>

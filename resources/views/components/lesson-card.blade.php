@@ -23,7 +23,13 @@
             @if($lesson->homework)<div><span class="text-gray-500">HW:</span> {{ $lesson->homework }}</div>@endif
         @else
             <div style="color: var(--color-status-{{ $lesson->status->cssClass() }});">
-                {{ $lesson->status->value === 'student_absent' ? '⚠ Student Absent' : '🚫 Cancelled' }}
+                @if($lesson->status->value === 'student_absent')
+                    ⚠ Student Absent
+                @elseif($lesson->status->value === 'student_cancelled')
+                    📘 Student Cancelled
+                @else
+                    🚫 Cancelled
+                @endif
             </div>
             @if($lesson->comments)<div class="text-gray-500 text-xs">{{ $lesson->comments }}</div>@endif
         @endif
