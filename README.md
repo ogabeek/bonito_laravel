@@ -13,7 +13,7 @@ This is a pragmatic MVP built in 2 weeks focusing on core functionality over arc
 - **Local Development:** Laravel Herd
 - **Database:** SQLite (dev) -> Connected to TablePlus for gui 
 - **Auth:** UUID-based direct links (no password system currently)
-- **Sheets Integration:** revolution/laravel-google-sheets
+- **Sheets Integration:** Native Google API client in `BalanceService` (service account + sheet with `uuid`/`balance`)
 - **CSS:** Tailwind and app.css file as a design references
 
 ---
@@ -69,7 +69,7 @@ This is a pragmatic MVP built in 2 weeks focusing on core functionality over arc
 - `app/Http/Requests/` - Form validation (CreateLessonRequest, UpdateLessonRequest)
 - `app/Models/` - Teacher, Student, Lesson (with relationships)
 - `resources/views/layouts/app.blade.php` - Base layout for all pages
-- `resources/views/components/` - Reusable UI (lesson-card, lesson-form, status-badge, calendar-picker, login-card)
+- `resources/views/components/` - Reusable UI (lesson-card, lesson-form, calendar-picker, login-card)
 - `public/css/app.css` - Design system (CSS variables)
 
 <img src="image-1.png" alt="Alt Text" width="200" >

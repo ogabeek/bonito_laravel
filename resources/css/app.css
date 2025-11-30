@@ -10,6 +10,12 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
+    /* Calendar sizing */
+    --cal-pad-x: 6px;
+    --cal-pad-y: 10px;
+    --cal-text: 11px;
+    --cal-subtext: 9px;
+
     /* Student Status Colors - Light color schema for status dots */
     --color-student-active: #86efac;        /* green-300 - light green */
     --color-student-inactive: #d1d5db;      /* gray-300 - light gray */
@@ -65,4 +71,28 @@
     background-color: var(--color-status-cancelled-bg);
     border-color: var(--color-status-cancelled-border);
     color: var(--color-status-cancelled);
+}
+
+/* Calendar helper classes */
+.cal-cell {
+    padding: var(--cal-pad-y) var(--cal-pad-x);
+    font-size: var(--cal-text);
+}
+.cal-sub {
+    font-size: var(--cal-subtext);
+    color: var(--color-text-secondary, #6b7280);
+    line-height: 1.1;
+}
+.cal-day {
+    min-width: 32px;
+    text-align: center;
+}
+.cal-sticky {
+    position: sticky;
+    left: 0;
+    background: #fff;
+}
+.cal-balance {
+    min-width: 38px;
+    text-align: right;
 }

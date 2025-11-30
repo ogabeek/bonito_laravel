@@ -13,7 +13,6 @@ use App\Http\Requests\CreateLessonRequest;
 use App\Http\Requests\UpdateLessonRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Activitylog\Models\Activity;
 use Carbon\Carbon;
 
 

@@ -3,7 +3,7 @@
 @section('title', 'Admin Dashboard')
 
 @section('content')
-<div class="p-6 max-w-7xl mx-auto" x-data="{ activeTab: 'calendar', showAddTeacher: false, showAddStudent: false, selectedTeacher: '', selectedStatus: '' }">
+<div class="p-6 w-full mx-auto" x-data="{ activeTab: 'calendar', showAddTeacher: false, showAddStudent: false, selectedTeacher: '', selectedStatus: '' }">
     
     <x-page-header title="Admin Dashboard" :logoutRoute="route('admin.logout')">
         <a href="{{ route('admin.logs') }}" class="text-sm text-blue-600 hover:underline">Activity Logs</a>
@@ -97,17 +97,17 @@
                         <table class="w-full text-sm">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-1.5 py-1.5 text-left border-r sticky left-0 bg-gray-50 min-w-[170px] text-sm">Student</th>
-                                    <th class="px-1 py-1.5 text-right min-w-[38px] text-[10px]"></th>
+                                    <th class="cal-cell cal-sticky border-r bg-gray-50 min-w-[170px] text-sm">Student</th>
+                                    <th class="cal-cell cal-balance border-l bg-gray-50 text-[10px]"></th>
                                     @for($day = 1; $day <= $daysInMonth; $day++)
                                         @php
                                             $date = $monthStart->copy()->addDays($day - 1);
-        +                                   $isWeekend = $date->isWeekend();
+                                            $isWeekend = $date->isWeekend();
                                             $isToday = $date->isToday();
                                         @endphp
-                                        <th class="px-1 py-1 text-center min-w-[32px] border-l {{ $isWeekend ? 'bg-gray-100' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
-                                            <div class="font-semibold text-[11px]">{{ $day }}</div>
-                                            <div class="text-[9px] text-gray-500">{{ $date->format('D') }}</div>
+                                        <th class="cal-cell cal-day border-l {{ $isWeekend ? 'bg-gray-100' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
+                                            <div class="font-semibold text-[10px]">{{ $day }}</div>
+                                            <div class="cal-sub text-[8px]">{{ substr($date->format('D'), 0, 2) }}</div>
                                         </th>
                                     @endfor
                                 </tr>
@@ -115,7 +115,7 @@
                             <tbody>
                                 @foreach($students as $student)
                                     <tr x-show="(selectedTeacher === '' || {{ json_encode($student->teacher_ids) }}.includes(parseInt(selectedTeacher))) && (selectedStatus === '' || selectedStatus === '{{ $student->status->value }}')" class="border-t hover:bg-gray-50">
-                                        <td class="px-1.5 py-2 border-r sticky left-0 bg-white align-middle">
+                                        <td class="cal-cell cal-sticky border-r bg-white align-middle">
                                             <div class="flex items-center gap-1 min-w-0">
                                                 <x-student-status-dot :status="$student->status" />
                                                 <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-[12px] text-gray-900 hover:text-blue-600 truncate">
@@ -127,7 +127,7 @@
                                                 <div class="text-xs text-gray-500 ml-3.5">{{ $student->teachers->pluck('name')->join(', ') }}</div>
                                             @endif
                                         </td>
-                                        <td class="px-1 py-1.5 text-right border-l align-middle">
+                                        <td class="cal-cell cal-balance border-l align-middle">
                                             <x-balance-badge :value="$student->class_balance" class="mx-auto" />
                                         </td>
                                         @for($day = 1; $day <= $daysInMonth; $day++)
@@ -137,13 +137,13 @@
                                                 $lessons = $lessonsThisMonth->get($dateKey, collect());
                                                 $isWeekend = $date->isWeekend();
                                                 $isToday = $date->isToday();
-                                            @endphp
-                                            <td class="px-0.5 py-1.25 text-center border-l text-[10px] {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
-                                                @foreach($lessons as $lesson)
-                                                    <div class="inline-block px-0.5 py-0.25 text-[9px] font-medium rounded"
-                                                         style="background: var(--color-status-{{ $lesson->status->cssClass() }}-bg); color: var(--color-status-{{ $lesson->status->cssClass() }});"
-                                                         title="{{ $lesson->teacher->name }} - {{ $lesson->status->label() }}">
-                                                        {{ substr($lesson->teacher->name, 0, 1) }}
+                                        @endphp
+                                        <td class="cal-cell cal-day text-[10px] text-center border-l {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
+                                            @foreach($lessons as $lesson)
+                                                <div class="inline-block px-0.5 py-0.25 text-[9px] font-medium rounded"
+                                                     style="background: var(--color-status-{{ $lesson->status->cssClass() }}-bg); color: var(--color-status-{{ $lesson->status->cssClass() }});"
+                                                     title="{{ $lesson->teacher->name }} - {{ $lesson->status->label() }}">
+                                                    {{ substr($lesson->teacher->name, 0, 1) }}
                                                     </div>
                                                 @endforeach
                                             </td>
