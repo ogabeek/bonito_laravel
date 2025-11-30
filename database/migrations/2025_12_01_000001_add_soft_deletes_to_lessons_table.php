@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('students', 'status')) {
-            Schema::table('students', function (Blueprint $table) {
-                $table->string('status')->default('active')->after('description');
+        if (!Schema::hasColumn('lessons', 'deleted_at')) {
+            Schema::table('lessons', function (Blueprint $table) {
+                $table->softDeletes();
             });
         }
     }
@@ -23,9 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('students', function (Blueprint $table) {
-            $table->dropColumn('status');
-            $table->softDeletes();
-        });
+        if (Schema::hasColumn('lessons', 'deleted_at')) {
+            Schema::table('lessons', function (Blueprint $table) {
+                $table->dropSoftDeletes();
+            });
+        }
     }
 };
