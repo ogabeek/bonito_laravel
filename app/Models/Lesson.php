@@ -23,13 +23,13 @@ class Lesson extends Model
         'status' => LessonStatus::class,
     ];
 
-    //Relationship: A lesson belongs to a teacher
+    //Relationship: A lesson belongs to a teacher (includes soft-deleted teachers)
     public function teacher(): BelongsTo
     {
-        return $this ->belongsTo(Teacher::class);
+        return $this->belongsTo(Teacher::class)->withTrashed();
     }
 
-    // Relationship: A lesson belongs to a student
+    // Relationship: A lesson belongs to a student (all statuses included)
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);

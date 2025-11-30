@@ -86,7 +86,10 @@ class AdminController extends Controller
             return $student;
         });
 
-        return view('admin.dashboard', compact('stats', 'teachers', 'students', 'currentMonth', 'daysInMonth', 'monthStart', 'lessonsThisMonth', 'prevMonth', 'nextMonth', 'studentLessonStats'));
+        // Get archived (soft-deleted) teachers for restore functionality
+        $archivedTeachers = Teacher::onlyTrashed()->get();
+
+        return view('admin.dashboard', compact('stats', 'teachers', 'students', 'currentMonth', 'daysInMonth', 'monthStart', 'lessonsThisMonth', 'prevMonth', 'nextMonth', 'studentLessonStats', 'archivedTeachers'));
     }
 
     // Teachers Management
@@ -108,7 +111,14 @@ class AdminController extends Controller
     public function deleteTeacher(Teacher $teacher)
     {
         $teacher->delete();
-        return redirect()->route('admin.dashboard')->with('success', 'Teacher deleted successfully!');
+        return redirect()->route('admin.dashboard')->with('success', 'Teacher archived successfully!');
+    }
+
+    public function restoreTeacher($id)
+    {
+        $teacher = Teacher::withTrashed()->findOrFail($id);
+        $teacher->restore();
+        return redirect()->route('admin.dashboard')->with('success', 'Teacher restored successfully!');
     }
 
     // Students Management
@@ -134,10 +144,15 @@ class AdminController extends Controller
         return redirect()->route('admin.students.edit', $student)->with('success', 'Student updated successfully!');
     }
 
-    public function deleteStudent(Student $student)
+    public function updateStudentStatus(Request $request, Student $student)
     {
-        $student->delete();
-        return redirect()->route('admin.dashboard')->with('success', 'Student deleted successfully!');
+        $request->validate([
+            'status' => 'required|in:' . implode(',', \App\Enums\StudentStatus::values()),
+        ]);
+
+        $student->update(['status' => $request->status]);
+
+        return back()->with('success', 'Student status updated successfully!');
     }
 
     public function assignTeacherToStudent(Request $request, Student $student)

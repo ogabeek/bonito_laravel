@@ -52,12 +52,13 @@
         </form>
     </x-card>
 
-    <div class="bg-red-50 border border-red-200 rounded-lg p-6">
-        <form method="POST" action="{{ route('admin.students.delete', $student) }}" onsubmit="return confirm('Delete {{ $student->name }}? This cannot be undone.')">
+    <x-card title="Status" class="mb-6">
+        <form method="POST" action="{{ route('admin.students.status.update', $student) }}" class="flex gap-2 items-center">
             @csrf
-            @method('DELETE')
-            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Delete Student</button>
+            <x-student-status-dot :status="$student->status" :size="10" class="flex-shrink-0" />
+            <x-student-status-select :selected="$student->status" name="status" required class="flex-1 text-sm" />
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Update</button>
         </form>
-    </div>
+    </x-card>
 </div>
 @endsection

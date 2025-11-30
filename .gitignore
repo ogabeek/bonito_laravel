@@ -1,4 +1,6 @@
 *.log
+*.backup
+*.bak
 .DS_Store
 .env
 .env.backup
@@ -28,4 +30,5 @@ CREDENTIALS.md
 hidden
 Presentation
 .claude
+CLAUDE.md
 

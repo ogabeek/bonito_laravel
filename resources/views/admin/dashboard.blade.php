@@ -3,7 +3,7 @@
 @section('title', 'Admin Dashboard')
 
 @section('content')
-<div class="p-6 max-w-7xl mx-auto" x-data="{ activeTab: 'calendar', showAddTeacher: false, showAddStudent: false, selectedTeacher: '' }">
+<div class="p-6 max-w-7xl mx-auto" x-data="{ activeTab: 'calendar', showAddTeacher: false, showAddStudent: false, selectedTeacher: '', selectedStatus: '' }">
     
     <x-page-header title="Admin Dashboard" :logoutRoute="route('admin.logout')" />
 
@@ -55,12 +55,18 @@
                     </form>
                 </div>
 
-                <!-- Filter -->
-                <div class="mb-4">
+                <!-- Filters -->
+                <div class="mb-4 flex gap-3">
                     <select x-model="selectedTeacher" class="pl-3 pr-8 py-2 border rounded">
                         <option value="">All Teachers</option>
                         @foreach($teachers as $teacher)
                             <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                        @endforeach
+                    </select>
+                    <select x-model="selectedStatus" class="pl-3 pr-8 py-2 border rounded">
+                        <option value="">All Statuses</option>
+                        @foreach(\App\Enums\StudentStatus::cases() as $statusOption)
+                            <option value="{{ $statusOption->value }}">{{ $statusOption->label() }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -86,13 +92,16 @@
                         </thead>
                         <tbody>
                             @foreach($students as $student)
-                                <tr x-show="selectedTeacher === '' || {{ json_encode($student->teacher_ids) }}.includes(parseInt(selectedTeacher))" class="border-t hover:bg-gray-50">
+                                <tr x-show="(selectedTeacher === '' || {{ json_encode($student->teacher_ids) }}.includes(parseInt(selectedTeacher))) && (selectedStatus === '' || selectedStatus === '{{ $student->status->value }}')" class="border-t hover:bg-gray-50">
                                     <td class="px-3 py-2 border-r sticky left-0 bg-white">
-                                        <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-gray-900 hover:text-blue-600">
-                                            {{ $student->name }}
-                                        </a>
+                                        <div class="flex items-center gap-1.5">
+                                            <x-student-status-dot :status="$student->status" />
+                                            <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-gray-900 hover:text-blue-600">
+                                                {{ $student->name }}
+                                            </a>
+                                        </div>
                                         @if($student->teachers->count() > 0)
-                                            <div class="text-xs text-gray-500">{{ $student->teachers->pluck('name')->join(', ') }}</div>
+                                            <div class="text-xs text-gray-500 ml-3.5">{{ $student->teachers->pluck('name')->join(', ') }}</div>
                                         @endif
                                     </td>
                                     @for($day = 1; $day <= $daysInMonth; $day++)
@@ -160,16 +169,36 @@
                                 <td class="px-4 py-2">{{ $teacher->students_count }}</td>
                                 <td class="px-4 py-2">{{ $teacher->lessons_count }}</td>
                                 <td class="px-4 py-2 text-right">
-                                    <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}" onsubmit="return confirm('Delete {{ $teacher->name }}?')">
+                                    <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}" onsubmit="return confirm('Archive {{ $teacher->name }}? (Can be restored later)')">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="text-red-600 hover:text-red-800">Delete</button>
+                                        <button class="text-orange-600 hover:text-orange-800">Archive</button>
                                     </form>
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
+
+                <!-- Archived Teachers Section -->
+                @if($archivedTeachers->count() > 0)
+                    <div class="mt-8">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-700">📦 Archived Teachers</h3>
+                        <div class="space-y-2">
+                            @foreach($archivedTeachers as $teacher)
+                                <div class="flex items-center justify-between bg-gray-50 p-3 rounded">
+                                    <span class="text-gray-600">{{ $teacher->name }}</span>
+                                    <form method="POST" action="{{ route('admin.teachers.restore', $teacher->id) }}">
+                                        @csrf
+                                        <button type="submit" class="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+                                            Restore
+                                        </button>
+                                    </form>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </x-card>

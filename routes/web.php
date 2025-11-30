@@ -45,12 +45,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Teachers
         Route::post('/teachers', [\App\Http\Controllers\AdminController::class, 'createTeacher'])->name('teachers.create');
         Route::delete('/teachers/{teacher}', [\App\Http\Controllers\AdminController::class, 'deleteTeacher'])->name('teachers.delete');
-        
+        Route::post('/teachers/{id}/restore', [\App\Http\Controllers\AdminController::class, 'restoreTeacher'])->name('teachers.restore');
+
         // Students
         Route::post('/students', [\App\Http\Controllers\AdminController::class, 'createStudent'])->name('students.store');
         Route::get('/students/{student}/edit', [\App\Http\Controllers\AdminController::class, 'editStudentForm'])->name('students.edit');
         Route::put('/students/{student}', [\App\Http\Controllers\AdminController::class, 'updateStudent'])->name('students.update');
-        Route::delete('/students/{student}', [\App\Http\Controllers\AdminController::class, 'deleteStudent'])->name('students.delete');
+        Route::post('/students/{student}/status', [\App\Http\Controllers\AdminController::class, 'updateStudentStatus'])->name('students.status.update');
         Route::post('/students/{student}/assign-teacher', [\App\Http\Controllers\AdminController::class, 'assignTeacherToStudent'])->name('student.assign.teacher');
         Route::delete('/students/{student}/teachers/{teacher}', [\App\Http\Controllers\AdminController::class, 'unassignStudent'])->name('teachers.students.unassign');
     });
