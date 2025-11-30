@@ -97,11 +97,12 @@
                         <table class="w-full text-sm">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-1.5 py-1 text-left border-r sticky left-0 bg-gray-50 min-w-[170px] text-sm">Student</th>
+                                    <th class="px-1.5 py-1.5 text-left border-r sticky left-0 bg-gray-50 min-w-[170px] text-sm">Student</th>
+                                    <th class="px-1 py-1.5 text-right min-w-[38px] text-[10px]"></th>
                                     @for($day = 1; $day <= $daysInMonth; $day++)
                                         @php
                                             $date = $monthStart->copy()->addDays($day - 1);
-                                            $isWeekend = $date->isWeekend();
+        +                                   $isWeekend = $date->isWeekend();
                                             $isToday = $date->isToday();
                                         @endphp
                                         <th class="px-1 py-1 text-center min-w-[32px] border-l {{ $isWeekend ? 'bg-gray-100' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
@@ -114,18 +115,20 @@
                             <tbody>
                                 @foreach($students as $student)
                                     <tr x-show="(selectedTeacher === '' || {{ json_encode($student->teacher_ids) }}.includes(parseInt(selectedTeacher))) && (selectedStatus === '' || selectedStatus === '{{ $student->status->value }}')" class="border-t hover:bg-gray-50">
-                                        <td class="px-1.5 py-2 border-r sticky left-0 bg-white">
+                                        <td class="px-1.5 py-2 border-r sticky left-0 bg-white align-middle">
                                             <div class="flex items-center gap-1 min-w-0">
                                                 <x-student-status-dot :status="$student->status" />
                                                 <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-[12px] text-gray-900 hover:text-blue-600 truncate">
                                                     {{ $student->name }}
                                                 </a>
                                                 <x-student-stats-compact :stats="($studentStats[$student->id] ?? null)" class="w-16 ml-auto text-gray-500" />
-                                                <x-balance-badge :value="$student->class_balance" class="w-10 h-4 text-[7px] ml-1 shrink-0" />
                                             </div>
                                             @if($student->teachers->count() > 0)
                                                 <div class="text-xs text-gray-500 ml-3.5">{{ $student->teachers->pluck('name')->join(', ') }}</div>
                                             @endif
+                                        </td>
+                                        <td class="px-1 py-1.5 text-right border-l align-middle">
+                                            <x-balance-badge :value="$student->class_balance" class="mx-auto" />
                                         </td>
                                         @for($day = 1; $day <= $daysInMonth; $day++)
                                             @php
