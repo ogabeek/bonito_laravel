@@ -3,7 +3,7 @@
 @section('title', 'Admin Dashboard')
 
 @section('content')
-<div class="p-6 max-w-7xl mx-auto" x-data="{ activeTab: 'calendar', showAddTeacher: false, showAddStudent: false, selectedTeacher: '' }">
+<div class="p-6 max-w-7xl mx-auto" x-data="{ activeTab: 'calendar', showAddTeacher: false, showAddStudent: false, selectedTeacher: '', selectedStatus: '' }">
     
     <x-page-header title="Admin Dashboard" :logoutRoute="route('admin.logout')" />
 
@@ -48,25 +48,25 @@
 
                 <!-- Add Student Form -->
                 <div x-show="showAddStudent" x-cloak class="bg-gray-50 rounded-lg p-4 mb-4">
-                    <form method="POST" action="{{ route('admin.students.store') }}" class="space-y-3">
+                    <form method="POST" action="{{ route('admin.students.store') }}">
                         @csrf
-                        <div class="grid grid-cols-2 gap-4">
-                            <input type="text" name="name" placeholder="Student Name *" required class="px-3 py-2 border rounded">
-                            <input type="text" name="parent_name" placeholder="Parent Name" class="px-3 py-2 border rounded">
-                            <input type="email" name="email" placeholder="Email" class="px-3 py-2 border rounded">
-                            <input type="text" name="goal" placeholder="Goal" class="px-3 py-2 border rounded">
-                        </div>
-                        <textarea name="description" placeholder="Description" rows="2" class="w-full px-3 py-2 border rounded"></textarea>
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Create Student</button>
+                        <x-student-form mode="create" />
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-3">Create Student</button>
                     </form>
                 </div>
 
-                <!-- Filter -->
-                <div class="mb-4">
+                <!-- Filters -->
+                <div class="mb-4 flex gap-3">
                     <select x-model="selectedTeacher" class="pl-3 pr-8 py-2 border rounded">
                         <option value="">All Teachers</option>
                         @foreach($teachers as $teacher)
                             <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                        @endforeach
+                    </select>
+                    <select x-model="selectedStatus" class="pl-3 pr-8 py-2 border rounded">
+                        <option value="">All Statuses</option>
+                        @foreach(\App\Enums\StudentStatus::cases() as $statusOption)
+                            <option value="{{ $statusOption->value }}">{{ $statusOption->label() }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -92,16 +92,16 @@
                         </thead>
                         <tbody>
                             @foreach($students as $student)
-                                @php
-                                    $studentTeacherIds = $student->teachers->pluck('id')->toArray();
-                                @endphp
-                                <tr x-show="selectedTeacher === '' || {{ json_encode($studentTeacherIds) }}.includes(parseInt(selectedTeacher))" class="border-t hover:bg-gray-50">
+                                <tr x-show="(selectedTeacher === '' || {{ json_encode($student->teacher_ids) }}.includes(parseInt(selectedTeacher))) && (selectedStatus === '' || selectedStatus === '{{ $student->status->value }}')" class="border-t hover:bg-gray-50">
                                     <td class="px-3 py-2 border-r sticky left-0 bg-white">
-                                        <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-gray-900 hover:text-blue-600">
-                                            {{ $student->name }}
-                                        </a>
+                                        <div class="flex items-center gap-1.5">
+                                            <x-student-status-dot :status="$student->status" />
+                                            <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-gray-900 hover:text-blue-600">
+                                                {{ $student->name }}
+                                            </a>
+                                        </div>
                                         @if($student->teachers->count() > 0)
-                                            <div class="text-xs text-gray-500">{{ $student->teachers->pluck('name')->join(', ') }}</div>
+                                            <div class="text-xs text-gray-500 ml-3.5">{{ $student->teachers->pluck('name')->join(', ') }}</div>
                                         @endif
                                     </td>
                                     @for($day = 1; $day <= $daysInMonth; $day++)
@@ -114,12 +114,9 @@
                                         @endphp
                                         <td class="px-1 py-2 text-center border-l {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
                                             @foreach($lessons as $lesson)
-                                                @php
-                                                    $statusClass = ['completed' => 'completed', 'student_absent' => 'absent', 'teacher_cancelled' => 'cancelled'][$lesson->status] ?? 'completed';
-                                                @endphp
-                                                <div class="inline-block px-1.5 py-0.5 text-xs font-medium rounded" 
-                                                     style="background: var(--color-status-{{ $statusClass }}-bg); color: var(--color-status-{{ $statusClass }});"
-                                                     title="{{ $lesson->teacher->name }} - {{ ucfirst(str_replace('_', ' ', $lesson->status)) }}">
+                                                <div class="inline-block px-1.5 py-0.5 text-xs font-medium rounded"
+                                                     style="background: var(--color-status-{{ $lesson->status->cssClass() }}-bg); color: var(--color-status-{{ $lesson->status->cssClass() }});"
+                                                     title="{{ $lesson->teacher->name }} - {{ $lesson->status->label() }}">
                                                     {{ substr($lesson->teacher->name, 0, 1) }}
                                                 </div>
                                             @endforeach
@@ -172,16 +169,36 @@
                                 <td class="px-4 py-2">{{ $teacher->students_count }}</td>
                                 <td class="px-4 py-2">{{ $teacher->lessons_count }}</td>
                                 <td class="px-4 py-2 text-right">
-                                    <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}" onsubmit="return confirm('Delete {{ $teacher->name }}?')">
+                                    <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}" onsubmit="return confirm('Archive {{ $teacher->name }}? (Can be restored later)')">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="text-red-600 hover:text-red-800">Delete</button>
+                                        <button class="text-orange-600 hover:text-orange-800">Archive</button>
                                     </form>
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
+
+                <!-- Archived Teachers Section -->
+                @if($archivedTeachers->count() > 0)
+                    <div class="mt-8">
+                        <h3 class="text-lg font-semibold mb-4 text-gray-700">📦 Archived Teachers</h3>
+                        <div class="space-y-2">
+                            @foreach($archivedTeachers as $teacher)
+                                <div class="flex items-center justify-between bg-gray-50 p-3 rounded">
+                                    <span class="text-gray-600">{{ $teacher->name }}</span>
+                                    <form method="POST" action="{{ route('admin.teachers.restore', $teacher->id) }}">
+                                        @csrf
+                                        <button type="submit" class="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+                                            Restore
+                                        </button>
+                                    </form>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </x-card>

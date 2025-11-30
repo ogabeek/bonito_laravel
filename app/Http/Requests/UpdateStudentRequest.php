@@ -2,15 +2,13 @@
 
 namespace App\Http\Requests;
 
-class UpdateLessonRequest extends LessonRequest
+class UpdateStudentRequest extends StudentRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        $lesson = $this->route('lesson');
-        return session('teacher_id') == $lesson->teacher_id;
+        return session()->has('admin_authenticated');
     }
-
 }

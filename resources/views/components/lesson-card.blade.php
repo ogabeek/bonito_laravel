@@ -6,12 +6,8 @@
     'dateFormat' => 'D, M d',
 ])
 
-@php
-    $css = ['completed' => 'completed', 'student_absent' => 'absent', 'teacher_cancelled' => 'cancelled'][$lesson->status] ?? 'completed';
-@endphp
-
 <div {{ $attributes->merge(['class' => 'lesson-card group border-l-4 pl-4 pr-2 py-2 rounded-r flex gap-4 min-h-[60px] items-center relative']) }}
-     style="background: var(--color-status-{{ $css }}-bg); border-color: var(--color-status-{{ $css }}-border);">
+     style="background: var(--color-status-{{ $lesson->status->cssClass() }}-bg); border-color: var(--color-status-{{ $lesson->status->cssClass() }}-border);">
     
     {{-- Left: Date & Person --}}
     <div class="w-24 shrink-0">
@@ -22,12 +18,18 @@
     
     {{-- Right: Details --}}
     <div class="flex-1 text-sm text-right">
-        @if($lesson->status === 'completed')
+        @if($lesson->status->value === 'completed')
             <div><span class="text-gray-500">Topic:</span> {{ $lesson->topic }}</div>
             @if($lesson->homework)<div><span class="text-gray-500">HW:</span> {{ $lesson->homework }}</div>@endif
         @else
-            <div style="color: var(--color-status-{{ $css }});">
-                {{ $lesson->status === 'student_absent' ? '⚠ Student Absent' : '🚫 Cancelled' }}
+            <div style="color: var(--color-status-{{ $lesson->status->cssClass() }});">
+                @if($lesson->status->value === 'student_absent')
+                    ⚠ Student Absent
+                @elseif($lesson->status->value === 'student_cancelled')
+                    📘 Student Cancelled
+                @else
+                    🚫 Cancelled
+                @endif
             </div>
             @if($lesson->comments)<div class="text-gray-500 text-xs">{{ $lesson->comments }}</div>@endif
         @endif

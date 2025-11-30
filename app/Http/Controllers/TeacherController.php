@@ -2,80 +2,81 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\LessonStatus;
 use App\Models\Teacher;
 use App\Models\Lesson;
+use App\Services\CalendarService;
+use App\Services\LessonStatisticsService;
+use App\Repositories\LessonRepository;
 use App\Http\Requests\CreateLessonRequest;
 use App\Http\Requests\UpdateLessonRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 
 class TeacherController extends Controller
 {
     // Show login form
-    public function showLogin($teacherId)
+    public function showLogin(Teacher $teacher)
     {
-        $teacher = Teacher::findOrFail($teacherId);
         return view('teacher.login', compact('teacher'));
     }
 
     // Handle login
-    public function login(Request $request, $teacherId)
+    public function login(Request $request, Teacher $teacher)
     {
-        $teacher = Teacher::findOrFail($teacherId);
-        
-        // Simple password check
-        if ($request->password === $teacher->password) {
-            // Store teacher ID in session
+        $request->validate([
+            'password' => 'required|string|min:4',
+        ]);
+
+        $storedPassword = $teacher->password;
+        $isHashed = Hash::info($storedPassword)['algo'] !== null;
+        $valid = $isHashed
+            ? Hash::check($request->password, $storedPassword)
+            : hash_equals($storedPassword, $request->password);
+
+        if ($valid) {
+            // Upgrade legacy plain-text passwords transparently
+            if (!$isHashed) {
+                $teacher->update(['password' => Hash::make($request->password)]);
+            }
+
+            $request->session()->regenerate();
             session(['teacher_id' => $teacher->id]);
             return redirect()->route('teacher.dashboard', $teacher->id);
         }
-        
+
         return back()->withErrors(['password' => 'Incorrect password']);
     }
 
     // Show dashboard
-    public function dashboard($teacherId)
+    public function dashboard(Teacher $teacher, CalendarService $calendar, LessonRepository $lessonRepo, LessonStatisticsService $statsService)
     {
-        // Check if logged in
-        if (session('teacher_id') != $teacherId) {
-            return redirect()->route('teacher.login', $teacherId);
-        }
+        // Get calendar data
+        $calendarData = $calendar->getMonthData(request());
+        $date = $calendarData['currentMonth'];
+        $prevMonth = $calendarData['prevMonth'];
+        $nextMonth = $calendarData['nextMonth'];
 
-        $teacher = Teacher::findOrFail($teacherId);
-        
-        // Standardize date handling
-        $year = request('year', now()->year);
-        $month = request('month', now()->month);
-        $date = Carbon::createFromDate($year, $month, 1);
-        
-        $prevMonth = $date->copy()->subMonth();
-        $nextMonth = $date->copy()->addMonth();
-        
         // Get only students assigned to this teacher
         $students = $teacher->students()->orderBy('name')->get();
-        
+
         // Get lessons for this month (newest first)
-        $lessons = Lesson::where('teacher_id', $teacherId)
-            ->forMonth($date)
-            ->with('student')
-            ->orderBy('class_date', 'desc')
-            ->get();
-        
+        $lessons = $lessonRepo->getForTeacher($teacher->id, $date);
+
         // Calculate stats
-        $stats = [
-            'total' => $lessons->count(),
-            'completed' => $lessons->where('status', 'completed')->count(),
-            'student_absent' => $lessons->where('status', 'student_absent')->count(),
-            'teacher_cancelled' => $lessons->where('status', 'teacher_cancelled')->count(),
-        ];
-        
-        return view('teacher.dashboard', compact('teacher', 'lessons', 'date', 'stats', 'students', 'prevMonth', 'nextMonth'));
+        $stats = $statsService->calculateStats($lessons);
+        $studentStats = $statsService->calculateStatsByStudent($lessons);
+
+        return view('teacher.dashboard', compact('teacher', 'lessons', 'date', 'stats', 'studentStats', 'students', 'prevMonth', 'nextMonth'));
     }
 
     // Logout
-    public function logout()
+    public function logout(Request $request)
     {
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         session()->forget('teacher_id');
         return redirect('/');
     }

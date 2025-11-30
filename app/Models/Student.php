@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\StudentStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -16,6 +17,15 @@ class Student extends Model
         'email',
         'goal',
         'description',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => StudentStatus::class,
+    ];
+
+    protected $attributes = [
+        'status' => 'active', // Default status for new students (uses StudentStatus::ACTIVE)
     ];
 
 
@@ -47,5 +57,23 @@ class Student extends Model
     public function getRouteKeyName()
     {
         return 'uuid';
+    }
+
+    // Scope: Load student with full details (teachers and lessons count)
+    public function scopeWithFullDetails($query)
+    {
+        return $query->withCount('teachers', 'lessons')->with('teachers');
+    }
+
+    // Scope: Filter active students only
+    public function scopeActive($query)
+    {
+        return $query->where('status', StudentStatus::ACTIVE);
+    }
+
+    // Scope: Filter enrolled students (active or on holiday)
+    public function scopeEnrolled($query)
+    {
+        return $query->whereIn('status', [StudentStatus::ACTIVE, StudentStatus::HOLIDAY]);
     }
 }

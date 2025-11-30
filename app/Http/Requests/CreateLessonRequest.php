@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class CreateLessonRequest extends FormRequest
+class CreateLessonRequest extends LessonRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,24 +21,14 @@ class CreateLessonRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'student_id' => 'required|exists:students,id',
+        return array_merge(parent::rules(), [
+            'student_id' => [
+                'required',
+                'exists:students,id',
+                Rule::exists('student_teacher', 'student_id')
+                    ->where('teacher_id', session('teacher_id')),
+            ],
             'class_date' => 'required|date',
-            'status' => 'required|in:completed,student_absent,teacher_cancelled',
-            'topic' => 'required_if:status,completed|nullable|string',
-            'homework' => 'nullable|string',
-            'comments' => 'required_if:status,teacher_cancelled|nullable|string',
-        ];
-    }
-
-    /**
-     * Get custom messages for validator errors.
-     */
-    public function messages(): array
-    {
-        return [
-            'topic.required_if' => 'Topic is required for completed lessons.',
-            'comments.required_if' => 'Reason is required when cancelling a lesson.',
-        ];
+        ]);
     }
 }

@@ -4,12 +4,14 @@
     $classes = [
         'completed' => 'status-completed',
         'student_absent' => 'status-absent',
+        'student_cancelled' => 'status-student-cancelled',
         'teacher_cancelled' => 'status-cancelled',
     ];
     
     $labels = [
         'completed' => '✓ Completed',
         'student_absent' => '⚠ Student Absent',
+        'student_cancelled' => '📘 Student Cancelled',
         'teacher_cancelled' => '🚫 Cancelled',
     ];
     

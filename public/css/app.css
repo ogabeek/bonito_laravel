@@ -30,11 +30,23 @@
     --color-status-absent: #dc2626;
     --color-status-absent-bg: #fee2e2;
     --color-status-absent-border: #ef4444;
+
+    /* Student cancelled (agreed, not charged) */
+    --color-status-student-cancelled: #2563eb;
+    --color-status-student-cancelled-bg: #dbeafe;
+    --color-status-student-cancelled-border: #60a5fa;
     
     --color-status-cancelled: #ea580c;
     --color-status-cancelled-bg: #ffedd5;
     --color-status-cancelled-border: #f97316;
-    
+
+    /* STUDENT STATUS COLORS - Light color schema for status dots */
+    --color-student-active: #86efac;        /* green-300 - light green */
+    --color-student-inactive: #d1d5db;      /* gray-300 - light gray */
+    --color-student-holiday: #93c5fd;       /* blue-300 - light blue */
+    --color-student-finished: #d8b4fe;      /* purple-300 - light purple */
+    --color-student-dropped: #fca5a5;       /* red-300 - light red */
+
     /* PRIMARY COLORS - Main brand color (blue) */
     --color-primary: #2563eb;
     --color-primary-hover: #1d4ed8;
@@ -107,6 +119,12 @@
     color: var(--color-status-absent);
 }
 
+.status-student-cancelled {
+    background-color: var(--color-status-student-cancelled-bg);
+    border-color: var(--color-status-student-cancelled-border);
+    color: var(--color-status-student-cancelled);
+}
+
 .status-cancelled {
     background-color: var(--color-status-cancelled-bg);
     border-color: var(--color-status-cancelled-border);
@@ -116,6 +134,7 @@
 /* STATUS RADIO BUTTONS - Interactive status selection */
 .status-btn-completed:hover,
 .status-btn-absent:hover,
+.status-btn-student-cancelled:hover,
 .status-btn-cancelled:hover {
     background-color: var(--color-bg-tertiary);
 }
@@ -130,6 +149,12 @@
     background-color: var(--color-status-absent-bg);
     border-color: var(--color-status-absent-border);
     color: var(--color-status-absent);
+}
+
+.status-btn-student-cancelled:has(input:checked) {
+    background-color: var(--color-status-student-cancelled-bg);
+    border-color: var(--color-status-student-cancelled-border);
+    color: var(--color-status-student-cancelled);
 }
 
 .status-btn-cancelled:has(input:checked) {

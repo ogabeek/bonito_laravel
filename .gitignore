@@ -1,4 +1,6 @@
 *.log
+*.backup
+*.bak
 .DS_Store
 .env
 .env.backup
@@ -26,3 +28,7 @@ Thumbs.db
 project_description_for_AI_assistant.md
 CREDENTIALS.md
 hidden
+Presentation
+.claude
+CLAUDE.md
+
