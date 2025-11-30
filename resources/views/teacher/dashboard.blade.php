@@ -24,7 +24,7 @@
             </div>
         </div>
         @if($students->count() > 0)
-            <x-student-stats-list :students="$students" :stats="$studentStats" :totalStats="$stats" />
+            <x-student-stats-list :students="$students" :stats="$studentStats" :totalStats="$stats" :showBalance="false" />
         @else
             <x-empty-state message="No students assigned" />
         @endif

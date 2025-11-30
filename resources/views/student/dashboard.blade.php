@@ -10,9 +10,16 @@
         :subtitle="$student->goal ? 'Goal: ' . $student->goal : null" 
     />
 
-    <div class="flex justify-end mb-4">
-        <x-stats-inline :stats="$stats" class="w-24 text-gray-500" />
-    </div>
+    <x-lesson-stats-summary 
+        :stats="$stats" 
+        :date="now()" 
+        :prevMonth="now()->copy()->subMonth()" 
+        :nextMonth="now()->copy()->addMonth()" 
+        routeName="student.dashboard" 
+        :routeParams="['student' => $student]" 
+        :showNav="false" 
+        title="All Lessons"
+    />
 
     @if($upcomingLessons->count() > 0)
         <x-card title="📅 Upcoming Lessons" class="mb-6">

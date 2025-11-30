@@ -1,4 +1,4 @@
-@props(['students', 'stats', 'totalStats' => null])
+@props(['students', 'stats', 'totalStats' => null, 'showBalance' => false])
 
 <div class="space-y-1">
     <div class="flex justify-between items-center px-3">
@@ -26,6 +26,9 @@
                 <div class="flex items-center gap-2 min-w-0">
                     <x-student-status-dot :status="$student->status" />
                     <div class="font-medium text-sm text-gray-900 truncate">{{ $student->name }}</div>
+                    @if($showBalance && $student->class_balance !== null)
+                        <x-balance-badge :value="$student->class_balance" class="ml-1" />
+                    @endif
                 </div>
                 <x-student-stats-compact :stats="$s" class="w-40" />
             </div>

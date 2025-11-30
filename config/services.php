@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'sheets' => [
+        'balance_sheet_id' => env('GOOGLE_SHEETS_BALANCE_SHEET_ID'),
+        'balance_sheet_tab' => env('GOOGLE_SHEETS_BALANCE_TAB', 'balances'),
+    ],
+
 ];

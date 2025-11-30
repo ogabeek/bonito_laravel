@@ -68,7 +68,7 @@ class AdminController extends Controller
     }
 
     // Dashboard
-    public function dashboard(Request $request, CalendarService $calendar, LessonStatisticsService $statsService)
+    public function dashboard(Request $request, CalendarService $calendar, LessonStatisticsService $statsService, \App\Services\BalanceService $balanceService)
     {
         $billing = $request->boolean('billing');
 
@@ -111,8 +111,10 @@ class AdminController extends Controller
         ];
 
         $teachers = Teacher::withFullDetails()->get();
-        $students = Student::withFullDetails()->get()->map(function($student) {
+        $balances = $balanceService->getBalances();
+        $students = Student::withFullDetails()->get()->map(function($student) use ($balances) {
             $student->teacher_ids = $student->teachers->pluck('id')->toArray();
+            $student->class_balance = $balances[$student->uuid] ?? null;
             return $student;
         });
 
