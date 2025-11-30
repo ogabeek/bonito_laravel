@@ -83,6 +83,11 @@ class AdminController extends Controller
             return $lesson->student_id . '_' . $lesson->class_date->format('Y-m-d');
         });
 
+        // Stats for current month
+        $monthStats = $statsService->calculateStats($monthLessons);
+        $studentStats = $statsService->calculateStatsByStudent($monthLessons);
+        $teacherStats = $statsService->calculateStatsByTeacher($monthLessons);
+
         $stats = [
             'teachers' => Teacher::count(),
             'students' => Student::count(),
@@ -98,7 +103,7 @@ class AdminController extends Controller
         // Get archived (soft-deleted) teachers for restore functionality
         $archivedTeachers = Teacher::onlyTrashed()->get();
 
-        return view('admin.dashboard', compact('stats', 'teachers', 'students', 'currentMonth', 'daysInMonth', 'monthStart', 'lessonsThisMonth', 'prevMonth', 'nextMonth', 'archivedTeachers'));
+        return view('admin.dashboard', compact('stats', 'teachers', 'students', 'currentMonth', 'daysInMonth', 'monthStart', 'lessonsThisMonth', 'prevMonth', 'nextMonth', 'archivedTeachers', 'monthStats', 'studentStats', 'teacherStats'));
     }
 
     // Teachers Management

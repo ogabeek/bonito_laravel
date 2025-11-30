@@ -7,21 +7,6 @@
     
     <x-page-header title="Admin Dashboard" :logoutRoute="route('admin.logout')" />
 
-    <!-- Stats -->
-    <div class="grid grid-cols-3 gap-4 mb-6">
-        <x-card class="p-4">
-            <p class="text-sm text-gray-600">Teachers</p>
-            <p class="text-2xl font-bold">{{ $stats['teachers'] }}</p>
-        </x-card>
-        <x-card class="p-4">
-            <p class="text-sm text-gray-600">Students</p>
-            <p class="text-2xl font-bold">{{ $stats['students'] }}</p>
-        </x-card>
-        <x-card class="p-4">
-            <p class="text-sm text-gray-600">Lessons - {{ $currentMonth->format('M Y') }}</p>
-            <p class="text-2xl font-bold">{{ $stats['lessons_this_month'] }}</p>
-        </x-card>
-    </div>
 
     <x-card>
         <div class="border-b flex gap-4 px-4">
@@ -36,14 +21,38 @@
         <div class="p-6">
             <!-- Calendar Tab -->
             <div x-show="activeTab === 'calendar'" x-cloak>
-                <div class="flex justify-between items-center mb-4">
+                <div class="flex justify-between items-start gap-4 mb-4">
                     <div class="flex items-center gap-4">
                         <h2 class="text-xl font-semibold">{{ $currentMonth->format('F Y') }}</h2>
                         <x-month-nav :currentMonth="$currentMonth" :prevMonth="$prevMonth" :nextMonth="$nextMonth" routeName="admin.dashboard" />
                     </div>
-                    <button @click="showAddStudent = !showAddStudent" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                        <span x-text="showAddStudent ? 'Cancel' : '+ Add Student'"></span>
-                    </button>
+                    <div class="flex items-center gap-3">
+                        <div class="grid grid-cols-5 gap-3 text-xs text-gray-600 bg-gray-50 rounded px-3 py-2">
+                            <div class="text-center">
+                                <div class="font-semibold" style="color: var(--color-status-completed);">{{ $monthStats['completed'] }}</div>
+                                <div>Done</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="font-semibold" style="color: var(--color-status-student-cancelled);">{{ $monthStats['student_cancelled'] }}</div>
+                                <div>C</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="font-semibold" style="color: var(--color-status-cancelled);">{{ $monthStats['teacher_cancelled'] }}</div>
+                                <div>CT</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="font-semibold" style="color: var(--color-status-absent);">{{ $monthStats['student_absent'] }}</div>
+                                <div>A</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="font-semibold text-gray-900">{{ $monthStats['total'] }}</div>
+                                <div>Total</div>
+                            </div>
+                        </div>
+                        <button @click="showAddStudent = !showAddStudent" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            <span x-text="showAddStudent ? 'Cancel' : '+ Add Student'"></span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Add Student Form -->
@@ -71,61 +80,63 @@
                     </select>
                 </div>
 
-                <!-- Calendar Grid -->
-                <div class="overflow-x-auto border rounded">
-                    <table class="w-full text-sm">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-3 py-2 text-left border-r sticky left-0 bg-gray-50 min-w-[150px]">Student</th>
-                                @for($day = 1; $day <= $daysInMonth; $day++)
-                                    @php
-                                        $date = $monthStart->copy()->addDays($day - 1);
-                                        $isWeekend = $date->isWeekend();
-                                        $isToday = $date->isToday();
-                                    @endphp
-                                    <th class="px-2 py-2 text-center min-w-[50px] border-l {{ $isWeekend ? 'bg-gray-100' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
-                                        <div class="font-bold">{{ $day }}</div>
-                                        <div class="text-xs text-gray-500">{{ $date->format('D') }}</div>
-                                    </th>
-                                @endfor
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($students as $student)
-                                <tr x-show="(selectedTeacher === '' || {{ json_encode($student->teacher_ids) }}.includes(parseInt(selectedTeacher))) && (selectedStatus === '' || selectedStatus === '{{ $student->status->value }}')" class="border-t hover:bg-gray-50">
-                                    <td class="px-3 py-2 border-r sticky left-0 bg-white">
-                                        <div class="flex items-center gap-1.5">
-                                            <x-student-status-dot :status="$student->status" />
-                                            <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-gray-900 hover:text-blue-600">
-                                                {{ $student->name }}
-                                            </a>
-                                        </div>
-                                        @if($student->teachers->count() > 0)
-                                            <div class="text-xs text-gray-500 ml-3.5">{{ $student->teachers->pluck('name')->join(', ') }}</div>
-                                        @endif
-                                    </td>
+                <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                    <div class="xl:col-span-4 overflow-x-auto border rounded">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-3 py-2 text-left border-r sticky left-0 bg-gray-50 min-w-[200px]">Student</th>
                                     @for($day = 1; $day <= $daysInMonth; $day++)
                                         @php
                                             $date = $monthStart->copy()->addDays($day - 1);
-                                            $dateKey = $student->id . '_' . $date->format('Y-m-d');
-                                            $lessons = $lessonsThisMonth->get($dateKey, collect());
                                             $isWeekend = $date->isWeekend();
                                             $isToday = $date->isToday();
                                         @endphp
-                                        <td class="px-1 py-2 text-center border-l {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
-                                            @foreach($lessons as $lesson)
-                                                <div class="inline-block px-1.5 py-0.5 text-xs font-medium rounded"
-                                                     style="background: var(--color-status-{{ $lesson->status->cssClass() }}-bg); color: var(--color-status-{{ $lesson->status->cssClass() }});"
-                                                     title="{{ $lesson->teacher->name }} - {{ $lesson->status->label() }}">
-                                                    {{ substr($lesson->teacher->name, 0, 1) }}
-                                                </div>
-                                            @endforeach
-                                        </td>
+                                        <th class="px-2 py-2 text-center min-w-[50px] border-l {{ $isWeekend ? 'bg-gray-100' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
+                                            <div class="font-bold">{{ $day }}</div>
+                                            <div class="text-xs text-gray-500">{{ $date->format('D') }}</div>
+                                        </th>
                                     @endfor
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach($students as $student)
+                                    <tr x-show="(selectedTeacher === '' || {{ json_encode($student->teacher_ids) }}.includes(parseInt(selectedTeacher))) && (selectedStatus === '' || selectedStatus === '{{ $student->status->value }}')" class="border-t hover:bg-gray-50">
+                                        <td class="px-3 py-2 border-r sticky left-0 bg-white">
+                                            <div class="flex items-center gap-2 min-w-0">
+                                                <x-student-status-dot :status="$student->status" />
+                                                <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-sm text-gray-900 hover:text-blue-600 truncate">
+                                                    {{ $student->name }}
+                                                </a>
+                                                <x-student-stats-compact :stats="($studentStats[$student->id] ?? null)" class="w-20 ml-auto text-gray-500" />
+                                            </div>
+                                            @if($student->teachers->count() > 0)
+                                                <div class="text-xs text-gray-500 ml-3.5">{{ $student->teachers->pluck('name')->join(', ') }}</div>
+                                            @endif
+                                        </td>
+                                        @for($day = 1; $day <= $daysInMonth; $day++)
+                                            @php
+                                                $date = $monthStart->copy()->addDays($day - 1);
+                                                $dateKey = $student->id . '_' . $date->format('Y-m-d');
+                                                $lessons = $lessonsThisMonth->get($dateKey, collect());
+                                                $isWeekend = $date->isWeekend();
+                                                $isToday = $date->isToday();
+                                            @endphp
+                                            <td class="px-1 py-2 text-center border-l {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
+                                                @foreach($lessons as $lesson)
+                                                    <div class="inline-block px-1.5 py-0.5 text-xs font-medium rounded"
+                                                         style="background: var(--color-status-{{ $lesson->status->cssClass() }}-bg); color: var(--color-status-{{ $lesson->status->cssClass() }});"
+                                                         title="{{ $lesson->teacher->name }} - {{ $lesson->status->label() }}">
+                                                        {{ substr($lesson->teacher->name, 0, 1) }}
+                                                    </div>
+                                                @endforeach
+                                            </td>
+                                        @endfor
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="mt-4">
@@ -159,6 +170,7 @@
                             <th class="px-4 py-2 text-left">Teacher</th>
                             <th class="px-4 py-2 text-left">Students</th>
                             <th class="px-4 py-2 text-left">Lessons</th>
+                            <th class="px-4 py-2 text-right">Month</th>
                             <th class="px-4 py-2 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -168,6 +180,12 @@
                                 <td class="px-4 py-2">{{ $teacher->name }}</td>
                                 <td class="px-4 py-2">{{ $teacher->students_count }}</td>
                                 <td class="px-4 py-2">{{ $teacher->lessons_count }}</td>
+                                @php
+                                    $ts = $teacherStats[$teacher->id] ?? ['total' => 0, 'completed' => 0, 'student_cancelled' => 0, 'teacher_cancelled' => 0, 'student_absent' => 0];
+                                @endphp
+                                <td class="px-4 py-2 text-right">
+                                    <x-student-stats-compact :stats="$ts" class="w-20 ml-auto text-gray-500" />
+                                </td>
                                 <td class="px-4 py-2 text-right">
                                     <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}" onsubmit="return confirm('Archive {{ $teacher->name }}? (Can be restored later)')">
                                         @csrf

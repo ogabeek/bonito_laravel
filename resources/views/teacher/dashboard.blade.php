@@ -11,15 +11,17 @@
     />
 
     <x-card class="mb-6">
-        <div class="flex justify-between items-center mb-3">
-            <h2 class="text-xl font-semibold">{{ $date->format('F Y') }}</h2>
-            <x-month-nav 
-                :currentMonth="$date" 
-                :prevMonth="$prevMonth" 
-                :nextMonth="$nextMonth" 
-                routeName="teacher.dashboard" 
-                :routeParams="['teacher' => $teacher->id]" 
-            />
+        <div class="flex justify-between items-start gap-4 mb-3">
+            <div class="flex items-center gap-3">
+                <h2 class="text-xl font-semibold">{{ $date->format('F Y') }}</h2>
+                <x-month-nav 
+                    :currentMonth="$date" 
+                    :prevMonth="$prevMonth" 
+                    :nextMonth="$nextMonth" 
+                    routeName="teacher.dashboard" 
+                    :routeParams="['teacher' => $teacher->id]" 
+                />
+            </div>
         </div>
         @if($students->count() > 0)
             <x-student-stats-list :students="$students" :stats="$studentStats" :totalStats="$stats" />

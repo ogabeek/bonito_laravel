@@ -25,6 +25,25 @@ class LessonStatisticsService
     }
 
     /**
+     * Calculate statistics grouped by teacher
+     *
+     * @param Collection $lessons
+     * @return Collection
+     */
+    public function calculateStatsByTeacher(Collection $lessons): Collection
+    {
+        return $lessons->groupBy('teacher_id')->map(function($teacherLessons) {
+            return [
+                'total' => $teacherLessons->count(),
+                'completed' => $teacherLessons->filter(fn($lesson) => $lesson->status === LessonStatus::COMPLETED)->count(),
+                'student_absent' => $teacherLessons->filter(fn($lesson) => $lesson->status === LessonStatus::STUDENT_ABSENT)->count(),
+                'student_cancelled' => $teacherLessons->filter(fn($lesson) => $lesson->status === LessonStatus::STUDENT_CANCELLED)->count(),
+                'teacher_cancelled' => $teacherLessons->filter(fn($lesson) => $lesson->status === LessonStatus::TEACHER_CANCELLED)->count(),
+            ];
+        });
+    }
+
+    /**
      * Calculate statistics grouped by student
      *
      * @param Collection $lessons
