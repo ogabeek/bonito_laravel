@@ -9,6 +9,7 @@ use App\Models\Lesson;
 use App\Concerns\LogsActivityActions;
 use App\Services\CalendarService;
 use App\Services\LessonStatisticsService;
+use App\Services\BalanceService;
 use App\Http\Requests\CreateStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
 use Illuminate\Http\Request;
@@ -68,7 +69,7 @@ class AdminController extends Controller
     }
 
     // Dashboard
-    public function dashboard(Request $request, CalendarService $calendar, LessonStatisticsService $statsService, \App\Services\BalanceService $balanceService)
+    public function dashboard(Request $request, CalendarService $calendar, LessonStatisticsService $statsService, BalanceService $balanceService)
     {
         $billing = $request->boolean('billing');
 
@@ -103,6 +104,47 @@ class AdminController extends Controller
         $periodStats = $statsService->calculateStats($periodLessons);
         $studentStats = $statsService->calculateStatsByStudent($periodLessons);
         $teacherStats = $statsService->calculateStatsByTeacher($periodLessons);
+        $yearLessons = Lesson::with(['teacher', 'student'])
+            ->whereYear('class_date', $currentMonth->year)
+            ->get();
+        $yearStatsByMonth = $statsService->calculateStatsByMonth($yearLessons);
+        $studentMonthStats = $yearLessons->groupBy('student_id')->map(function($lessonsForStudent) use ($statsService) {
+            return $lessonsForStudent
+                ->groupBy(fn($lesson) => (int) $lesson->class_date->format('n'))
+                ->map(fn($monthLessons) => $statsService->calculateStats($monthLessons));
+        });
+        $teacherMonthStats = $yearLessons->groupBy('teacher_id')->map(function($lessonsForTeacher) use ($statsService) {
+            return $lessonsForTeacher
+                ->groupBy(fn($lesson) => (int) $lesson->class_date->format('n'))
+                ->map(fn($monthLessons) => $statsService->calculateStats($monthLessons));
+        });
+        $months = range(1, 12);
+        $studentMonthStats = $yearLessons->groupBy('student_id')->map(function($lessonsForStudent) use ($statsService) {
+            return $lessonsForStudent
+                ->groupBy(fn($lesson) => (int) $lesson->class_date->format('n'))
+                ->map(fn($monthLessons) => $statsService->calculateStats($monthLessons));
+        });
+        $months = range(1, 12);
+        $studentMonthStats = $yearLessons->groupBy('student_id')->map(function($lessonsForStudent) use ($statsService) {
+            return $lessonsForStudent
+                ->groupBy(fn($lesson) => (int) $lesson->class_date->format('n'))
+                ->map(fn($monthLessons) => $statsService->calculateStats($monthLessons));
+        });
+        $months = range(1, 12);
+        $studentMonthStats = $yearLessons->groupBy('student_id')->map(function($lessonsForStudent) use ($statsService) {
+            return $lessonsForStudent
+                ->groupBy(fn($lesson) => (int) $lesson->class_date->format('n'))
+                ->map(fn($monthLessons) => $statsService->calculateStats($monthLessons));
+        });
+        $months = range(1, 12);
+        $yearLessons = Lesson::with(['teacher', 'student'])
+            ->whereYear('class_date', $currentMonth->year)
+            ->get();
+        $yearStatsByMonth = $statsService->calculateStatsByMonth($yearLessons);
+        $yearLessons = Lesson::with(['teacher', 'student'])
+            ->whereYear('class_date', $currentMonth->year)
+            ->get();
+        $yearStatsByMonth = $statsService->calculateStatsByMonth($yearLessons);
 
         $stats = [
             'teachers' => Teacher::count(),
@@ -149,7 +191,86 @@ class AdminController extends Controller
             'periodStats',
             'studentStats',
             'teacherStats',
-            'billing'
+            'billing',
+            'yearStatsByMonth'
+        ));
+    }
+
+    public function billing(Request $request, CalendarService $calendar, LessonStatisticsService $statsService, BalanceService $balanceService)
+    {
+        $billing = $request->boolean('billing');
+
+        $calendarData = $calendar->getMonthData($request);
+        $currentMonth = $calendarData['currentMonth'];
+        $prevMonth = $calendarData['prevMonth'];
+        $nextMonth = $calendarData['nextMonth'];
+
+        // Lessons for period (calendar or billing 26-25)
+        if ($billing) {
+            $periodStart = $currentMonth->copy()->subMonthNoOverflow()->day(26);
+            $periodEnd = $currentMonth->copy()->day(25)->endOfDay();
+            $periodLessons = Lesson::with(['teacher', 'student'])
+                ->whereBetween('class_date', [$periodStart, $periodEnd])
+                ->get();
+        } else {
+            $periodLessons = Lesson::with(['teacher', 'student'])->forMonth($currentMonth)->get();
+        }
+
+        $periodStats = $statsService->calculateStats($periodLessons);
+        $studentStats = $statsService->calculateStatsByStudent($periodLessons);
+        $teacherStats = $statsService->calculateStatsByTeacher($periodLessons);
+        $yearLessons = Lesson::with(['teacher', 'student'])
+            ->whereYear('class_date', $currentMonth->year)
+            ->get();
+        $yearStatsByMonth = $statsService->calculateStatsByMonth($yearLessons);
+        $studentMonthStats = $yearLessons->groupBy('student_id')->map(function($lessonsForStudent) use ($statsService) {
+            return $lessonsForStudent
+                ->groupBy(fn($lesson) => (int) $lesson->class_date->format('n'))
+                ->map(fn($monthLessons) => $statsService->calculateStats($monthLessons));
+        });
+        $teacherMonthStats = $yearLessons->groupBy('teacher_id')->map(function($lessonsForTeacher) use ($statsService) {
+            return $lessonsForTeacher
+                ->groupBy(fn($lesson) => (int) $lesson->class_date->format('n'))
+                ->map(fn($monthLessons) => $statsService->calculateStats($monthLessons));
+        });
+        $months = range(1, 12);
+
+        $teachers = Teacher::withFullDetails()->get();
+        $balances = $balanceService->getBalances();
+
+        // Usage counts up to today for chargeable lessons (completed + student_absent)
+        $chargeableStatuses = [
+            LessonStatus::COMPLETED,
+            LessonStatus::STUDENT_ABSENT,
+        ];
+        $usedCounts = Lesson::whereDate('class_date', '<=', now()->toDateString())
+            ->whereIn('status', $chargeableStatuses)
+            ->selectRaw('student_id, count(*) as used')
+            ->groupBy('student_id')
+            ->pluck('used', 'student_id');
+
+        $students = Student::withFullDetails()->get()->map(function($student) use ($balances, $usedCounts) {
+            $student->teacher_ids = $student->teachers->pluck('id')->toArray();
+            $paid = $balances[$student->uuid] ?? null;
+            $used = $usedCounts[$student->id] ?? 0;
+            $student->class_balance = $paid !== null ? ($paid - $used) : null;
+            return $student;
+        });
+
+        return view('admin.billing', compact(
+            'teachers',
+            'students',
+            'currentMonth',
+            'prevMonth',
+            'nextMonth',
+            'periodStats',
+            'studentStats',
+            'teacherStats',
+            'billing',
+            'yearStatsByMonth',
+            'studentMonthStats',
+            'teacherMonthStats',
+            'months'
         ));
     }
 
