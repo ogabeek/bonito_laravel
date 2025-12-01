@@ -14,13 +14,12 @@ class TeacherStatsService
     /**
      * Build teacher-student stats breakdown for a period
      *
+     * @param Collection $teachers Collection of teachers
      * @param Collection $periodLessons Lessons for the period
      * @return Collection Teacher ID => array of student stats
      */
-    public function buildTeacherStudentStats(Collection $periodLessons): Collection
+    public function buildTeacherStudentStats(Collection $teachers, Collection $periodLessons): Collection
     {
-        $teachers = Teacher::withFullDetails()->get();
-
         return $teachers->mapWithKeys(function($teacher) use ($periodLessons) {
             $lessonsForTeacher = $periodLessons->where('teacher_id', $teacher->id);
             $byStudent = $lessonsForTeacher

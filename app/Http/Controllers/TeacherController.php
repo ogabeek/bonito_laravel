@@ -11,6 +11,7 @@ use App\Services\LessonStatisticsService;
 use App\Repositories\LessonRepository;
 use App\Http\Requests\CreateLessonRequest;
 use App\Http\Requests\UpdateLessonRequest;
+use App\Http\Requests\TeacherLoginRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
@@ -27,12 +28,8 @@ class TeacherController extends Controller
     }
 
     // Handle login
-    public function login(Request $request, Teacher $teacher)
+    public function login(TeacherLoginRequest $request, Teacher $teacher)
     {
-        $request->validate([
-            'password' => 'required|string|min:4',
-        ]);
-
         $storedPassword = $teacher->password;
         $isHashed = Hash::info($storedPassword)['algo'] !== null;
         $valid = $isHashed

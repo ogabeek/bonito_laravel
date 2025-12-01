@@ -13,10 +13,12 @@ use App\Services\BalanceService;
 use App\Services\StudentBalanceService;
 use App\Services\TeacherStatsService;
 use App\Repositories\LessonRepository;
+use App\Http\Requests\AdminLoginRequest;
 use App\Http\Requests\CreateStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Spatie\Activitylog\Models\Activity;
 use Carbon\Carbon;
 
@@ -36,12 +38,8 @@ class AdminController extends Controller
     }
 
     // Handle login
-    public function login(Request $request)
+    public function login(AdminLoginRequest $request)
     {
-        $request->validate([
-            'password' => 'required|string|min:4',
-        ]);
-
         $configuredPassword = config('app.admin_password');
 
         if (empty($configuredPassword)) {
@@ -95,22 +93,23 @@ class AdminController extends Controller
         // Stats period: calendar month or billing (26 -> 25)
         $periodLessons = $lessonRepo->getForPeriod($currentMonth, $billing, ['teacher', 'student']);
 
+        // Load teachers and students once for all operations
+        $teachers = Teacher::withFullDetails()->get();
+        $students = $studentBalanceService->enrichStudentsWithBalance();
+
         $periodStats = $statsService->calculateStats($periodLessons);
         $studentStats = $statsService->calculateStatsByStudent($periodLessons);
         $teacherStats = $statsService->calculateStatsByTeacher($periodLessons);
-        $teacherStudentCounts = $teacherStatsService->buildTeacherStudentStats($periodLessons);
+        $teacherStudentCounts = $teacherStatsService->buildTeacherStudentStats($teachers, $periodLessons);
 
         $yearLessons = $lessonRepo->getForYear($currentMonth->year, ['teacher', 'student']);
         $yearStatsByMonth = $statsService->calculateStatsByMonth($yearLessons);
 
         $stats = [
-            'teachers' => Teacher::count(),
-            'students' => Student::count(),
+            'teachers' => $teachers->count(),
+            'students' => $students->count(),
             'lessons_this_month' => $monthLessons->count(),
         ];
-
-        $teachers = Teacher::withFullDetails()->get();
-        $students = $studentBalanceService->enrichStudentsWithBalance();
 
         // Get archived (soft-deleted) teachers for restore functionality
         $archivedTeachers = Teacher::onlyTrashed()->get();
@@ -167,6 +166,10 @@ class AdminController extends Controller
         // Lessons for period (calendar or billing 26-25)
         $periodLessons = $lessonRepo->getForPeriod($currentMonth, $billing, ['teacher', 'student']);
 
+        // Load teachers and students once for all operations
+        $teachers = Teacher::withFullDetails()->get();
+        $students = $studentBalanceService->enrichStudentsWithBalance();
+
         $periodStats = $statsService->calculateStats($periodLessons);
         $studentStats = $statsService->calculateStatsByStudent($periodLessons);
         $teacherStats = $statsService->calculateStatsByTeacher($periodLessons);
@@ -185,9 +188,7 @@ class AdminController extends Controller
         });
         $months = range(1, 12);
 
-        $teachers = Teacher::withFullDetails()->get();
-        $teacherStudentCounts = $teacherStatsService->buildTeacherStudentStats($periodLessons);
-        $students = $studentBalanceService->enrichStudentsWithBalance();
+        $teacherStudentCounts = $teacherStatsService->buildTeacherStudentStats($teachers, $periodLessons);
 
         return compact(
             'teachers',
@@ -275,7 +276,7 @@ class AdminController extends Controller
     public function updateStudentStatus(Request $request, Student $student)
     {
         $request->validate([
-            'status' => 'required|in:' . implode(',', \App\Enums\StudentStatus::values()),
+            'status' => ['required', Rule::in(\App\Enums\StudentStatus::values())],
         ]);
 
         $original = $student->status;
