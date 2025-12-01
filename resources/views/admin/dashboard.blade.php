@@ -9,6 +9,16 @@
         <a href="{{ route('admin.logs') }}" class="text-sm text-blue-600 hover:underline">Activity Logs</a>
     </x-page-header>
 
+    @if ($errors->any())
+        <div class="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded">
+            <div class="font-semibold mb-1">Please fix the following:</div>
+            <ul class="list-disc ml-4 space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     <x-card>
         <div class="border-b flex gap-4 px-4">
@@ -98,7 +108,6 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="cal-cell cal-sticky border-r bg-gray-50 min-w-[170px] text-sm">Student</th>
-                                    <th class="cal-cell cal-balance border-l bg-gray-50 text-[10px]"></th>
                                     @for($day = 1; $day <= $daysInMonth; $day++)
                                         @php
                                             $date = $monthStart->copy()->addDays($day - 1);
@@ -106,8 +115,8 @@
                                             $isToday = $date->isToday();
                                         @endphp
                                         <th class="cal-cell cal-day border-l {{ $isWeekend ? 'bg-gray-100' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
-                                            <div class="font-semibold text-[10px]">{{ $day }}</div>
-                                            <div class="cal-sub text-[8px]">{{ substr($date->format('D'), 0, 2) }}</div>
+                                            <div class="cal-daynum">{{ $day }}</div>
+                                            <div class="cal-weekday">{{ substr($date->format('D'), 0, 2) }}</div>
                                         </th>
                                     @endfor
                                 </tr>
@@ -127,9 +136,6 @@
                                                 <div class="text-xs text-gray-500 ml-3.5">{{ $student->teachers->pluck('name')->join(', ') }}</div>
                                             @endif
                                         </td>
-                                        <td class="cal-cell cal-balance border-l align-middle">
-                                            <x-balance-badge :value="$student->class_balance" class="mx-auto" />
-                                        </td>
                                         @for($day = 1; $day <= $daysInMonth; $day++)
                                             @php
                                                 $date = $monthStart->copy()->addDays($day - 1);
@@ -138,13 +144,13 @@
                                                 $isWeekend = $date->isWeekend();
                                                 $isToday = $date->isToday();
                                         @endphp
-                                        <td class="cal-cell cal-day text-[10px] text-center border-l {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
+                                        <td class="cal-cell cal-day cal-daycell text-[10px] text-center border-l {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
                                             @foreach($lessons as $lesson)
-                                                <div class="inline-block px-0.5 py-0.25 text-[9px] font-medium rounded"
+                                                <span class="cal-lesson-chip"
                                                      style="background: var(--color-status-{{ $lesson->status->cssClass() }}-bg); color: var(--color-status-{{ $lesson->status->cssClass() }});"
                                                      title="{{ $lesson->teacher->name }} - {{ $lesson->status->label() }}">
                                                     {{ substr($lesson->teacher->name, 0, 1) }}
-                                                    </div>
+                                                </span>
                                                 @endforeach
                                             </td>
                                         @endfor

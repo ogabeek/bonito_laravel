@@ -64,5 +64,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Activity log
         Route::get('/logs', [\App\Http\Controllers\AdminController::class, 'logs'])->name('logs');
+
+        // Billing & stats
+        Route::get('/billing', [\App\Http\Controllers\AdminController::class, 'billing'])->name('billing');
+        Route::post('/billing/export', [\App\Http\Controllers\AdminController::class, 'exportBilling'])->name('billing.export');
     });
 });

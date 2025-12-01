@@ -61,4 +61,11 @@ class LessonStatisticsService
             ];
         });
     }
+
+    public function calculateStatsByMonth(Collection $lessons): Collection
+    {
+        return $lessons->groupBy(fn($lesson) => $lesson->class_date->format('Y-m'))->map(function($monthLessons) {
+            return $this->calculateStats($monthLessons);
+        });
+    }
 }
