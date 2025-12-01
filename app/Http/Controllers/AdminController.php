@@ -104,6 +104,23 @@ class AdminController extends Controller
         $periodStats = $statsService->calculateStats($periodLessons);
         $studentStats = $statsService->calculateStatsByStudent($periodLessons);
         $teacherStats = $statsService->calculateStatsByTeacher($periodLessons);
+        $teacherStudentCounts = $teachers->mapWithKeys(function($teacher) use ($periodLessons, $statsService) {
+            $lessonsForTeacher = $periodLessons->where('teacher_id', $teacher->id);
+            $byStudent = $lessonsForTeacher
+                ->groupBy('student_id')
+                ->map(function($studentLessons) use ($statsService) {
+                    $student = $studentLessons->first()->student;
+                    $stats = $statsService->calculateStats($studentLessons);
+                    return [
+                        'name' => $student?->name ?? 'Unknown',
+                        'stats' => $stats,
+                    ];
+                })
+                ->sortBy('name')
+                ->values();
+
+            return [$teacher->id => $byStudent];
+        });
         $yearLessons = Lesson::with(['teacher', 'student'])
             ->whereYear('class_date', $currentMonth->year)
             ->get();
@@ -236,6 +253,22 @@ class AdminController extends Controller
         $months = range(1, 12);
 
         $teachers = Teacher::withFullDetails()->get();
+        $teacherStudentCounts = $teachers->mapWithKeys(function($teacher) use ($periodLessons, $statsService) {
+            $byStudent = $periodLessons
+                ->where('teacher_id', $teacher->id)
+                ->groupBy('student_id')
+                ->map(function($studentLessons) use ($statsService) {
+                    $student = $studentLessons->first()->student;
+                    return [
+                        'name' => $student?->name ?? 'Unknown',
+                        'stats' => $statsService->calculateStats($studentLessons),
+                    ];
+                })
+                ->sortBy('name')
+                ->values();
+
+            return [$teacher->id => $byStudent];
+        });
         $balances = $balanceService->getBalances();
 
         // Usage counts up to today for chargeable lessons (completed + student_absent)
@@ -270,7 +303,8 @@ class AdminController extends Controller
             'yearStatsByMonth',
             'studentMonthStats',
             'teacherMonthStats',
-            'months'
+            'months',
+            'teacherStudentCounts'
         ));
     }
 
