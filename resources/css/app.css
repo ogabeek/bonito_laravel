@@ -89,11 +89,15 @@
 }
 .cal-day {
     min-width: var(--cal-day-width);
+    width: var(--cal-day-width);
+    max-width: var(--cal-day-width);
     text-align: center;
 }
 .cal-daycell {
     min-height: var(--cal-day-height);
+    height: auto;
     vertical-align: top;
+    padding: 4px 2px;
 }
 .cal-daynum {
     font-size: var(--cal-daynum);
@@ -109,6 +113,7 @@
     position: sticky;
     left: 0;
     background: #fff;
+    z-index: 10;
 }
 .cal-balance {
     min-width: 38px;
@@ -116,14 +121,15 @@
 }
 
 .cal-lesson-chip {
-    display: block;
-    padding: 1px 3px;
-    margin-bottom: 2px;
+    display: inline-block;
+    padding: 2px 4px;
+    margin: 1px;
     font-size: 9px;
     font-weight: 600;
-    border-radius: 4px;
+    border-radius: 3px;
     line-height: 1.2;
+    white-space: nowrap;
 }
 .cal-lesson-chip:last-child {
-    margin-bottom: 0;
+    margin-bottom: 1px;
 }

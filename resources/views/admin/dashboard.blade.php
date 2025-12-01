@@ -147,15 +147,17 @@
                                                 $isWeekend = $date->isWeekend();
                                                 $isToday = $date->isToday();
                                         @endphp
-                                        <td class="cal-cell cal-day cal-daycell text-[10px] text-center border-l {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
-                                            @foreach($lessons as $lesson)
-                                                <span class="cal-lesson-chip"
-                                                     style="background: var(--color-status-{{ $lesson->status->cssClass() }}-bg); color: var(--color-status-{{ $lesson->status->cssClass() }});"
-                                                     title="{{ $lesson->teacher->name }} - {{ $lesson->status->label() }}">
-                                                    {{ substr($lesson->teacher->name, 0, 1) }}
-                                                </span>
+                                        <td class="cal-cell cal-day cal-daycell border-l {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
+                                            <div class="flex flex-wrap justify-center gap-0.5">
+                                                @foreach($lessons as $lesson)
+                                                    <span class="cal-lesson-chip"
+                                                         style="background: var(--color-status-{{ $lesson->status->cssClass() }}-bg); color: var(--color-status-{{ $lesson->status->cssClass() }});"
+                                                         title="{{ $lesson->teacher->name }} - {{ $lesson->status->label() }}">
+                                                        {{ substr($lesson->teacher->name, 0, 1) }}
+                                                    </span>
                                                 @endforeach
-                                            </td>
+                                            </div>
+                                        </td>
                                         @endfor
                                     </tr>
                                 @endforeach
