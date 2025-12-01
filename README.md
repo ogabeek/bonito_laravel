@@ -44,9 +44,9 @@ This is a pragmatic MVP built in 2 weeks focusing on core functionality over arc
 - Read-only access
 
 **3. Google Sheets Sync**
-- Hourly automatic export via cron
-- Manual "Sync Now" button for immediate updates
-- One-way sync (Laravel → Sheets only)
+- Balance import: `BalanceService` pulls `uuid/balance` from Google Sheets via service account (env: `GOOGLE_APPLICATION_CREDENTIALS`, `GOOGLE_SHEETS_BALANCE_SHEET_ID`, `GOOGLE_SHEETS_BALANCE_TAB`).
+- Stats export: billing page has “Export to Sheet” to overwrite a tab (env: `GOOGLE_SHEETS_STATS_TAB`, same sheet ID). Uses native Google API client.
+- One-way sync (Sheets → app for balances; app → Sheets for stats).
 
 
 **Rationale for MVP because:**
@@ -72,4 +72,17 @@ This is a pragmatic MVP built in 2 weeks focusing on core functionality over arc
 - `resources/views/components/` - Reusable UI (lesson-card, lesson-form, calendar-picker, login-card)
 - `public/css/app.css` - Design system (CSS variables)
 
+
+
+### Recent Changes (summary)
+- Added billing export button (admin billing page) writing stats to a single Google Sheet tab (configurable tab name).
+- Simplified admin calendar (balance column removed), consistent sizing; lesson chips stack vertically.
+- Shared monthly stats table component reused for student/teacher grids.
+- Activity logs now include student names for easier matching.
+
+
+
 <img src="image-1.png" alt="Alt Text" width="200" >
+
+
+
