@@ -6,7 +6,10 @@
 <div class="p-6 w-full mx-auto" x-data="{ activeTab: 'calendar', showAddTeacher: false, showAddStudent: false, selectedTeacher: '', selectedStatus: '' }">
     
     <x-page-header title="Admin Dashboard" :logoutRoute="route('admin.logout')">
-        <a href="{{ route('admin.logs') }}" class="text-sm text-blue-600 hover:underline">Activity Logs</a>
+        <div class="flex items-center gap-4">
+            <a href="{{ route('admin.billing') }}" class="text-sm text-blue-600 hover:underline">Billing / Stats</a>
+            <a href="{{ route('admin.logs') }}" class="text-sm text-blue-600 hover:underline">Activity Logs</a>
+        </div>
     </x-page-header>
 
     @if ($errors->any())
