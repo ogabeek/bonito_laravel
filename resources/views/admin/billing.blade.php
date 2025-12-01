@@ -41,6 +41,15 @@
                     <span class="inline-block w-2.5 h-2.5 rounded-full" style="background: var(--color-status-absent);"></span>
                     A
                 </span>
+                <form method="POST" action="{{ route('admin.billing.export') }}" class="ml-auto">
+                    @csrf
+                    <input type="hidden" name="billing" value="{{ $billing ? 1 : 0 }}">
+                    <input type="hidden" name="year" value="{{ $currentMonth->year }}">
+                    <input type="hidden" name="month" value="{{ $currentMonth->month }}">
+                    <button type="submit" class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
+                        Export to Sheet
+                    </button>
+                </form>
             </div>
         </div>
     </x-card>
@@ -99,70 +108,21 @@
         </x-card>
     </div>
 
-    <x-card title="Students by Month ({{ $currentMonth->year }})" class="mt-6 overflow-x-auto">
-        @php
-            $emptyStats = ['completed' => 0, 'student_cancelled' => 0, 'teacher_cancelled' => 0, 'student_absent' => 0];
-        @endphp
-        <table class="min-w-full text-[11px]">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-2 py-2 text-left whitespace-nowrap">Student</th>
-                    @foreach($months as $month)
-                        @php
-                            $label = \Carbon\Carbon::createFromDate($currentMonth->year, $month, 1)->format('M');
-                        @endphp
-                        <th class="px-2 py-2 text-center whitespace-nowrap">{{ $label }}</th>
-                    @endforeach
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($students as $student)
-                    <tr class="border-t">
-                        <td class="px-2 py-2 whitespace-nowrap">{{ $student->name }}</td>
-                        @foreach($months as $month)
-                            @php
-                                $stats = $studentMonthStats[$student->id][$month] ?? $emptyStats;
-                            @endphp
-                            <td class="px-1 py-1 text-right align-top">
-                                <x-stats-inline :stats="$stats" class="w-14 ml-auto text-gray-500" />
-                            </td>
-                        @endforeach
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </x-card>
+    <x-stats-by-month-table 
+        :title="'Students by Month (' . $currentMonth->year . ')'"
+        :entities="$students"
+        :statsByEntity="$studentMonthStats"
+        :months="$months"
+        :year="$currentMonth->year"
+    />
 
-    <x-card title="Teachers by Month ({{ $currentMonth->year }})" class="mt-6 overflow-x-auto">
-        <table class="min-w-full text-[11px]">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-2 py-2 text-left whitespace-nowrap">Teacher</th>
-                    @foreach($months as $month)
-                        @php
-                            $label = \Carbon\Carbon::createFromDate($currentMonth->year, $month, 1)->format('M');
-                        @endphp
-                        <th class="px-2 py-2 text-center whitespace-nowrap">{{ $label }}</th>
-                    @endforeach
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($teachers as $teacher)
-                    <tr class="border-t">
-                        <td class="px-2 py-2 whitespace-nowrap">{{ $teacher->name }}</td>
-                        @foreach($months as $month)
-                            @php
-                                $stats = $teacherMonthStats[$teacher->id][$month] ?? $emptyStats;
-                            @endphp
-                            <td class="px-1 py-1 text-right align-top">
-                                <x-stats-inline :stats="$stats" class="w-14 ml-auto text-gray-500" />
-                            </td>
-                        @endforeach
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </x-card>
+    <x-stats-by-month-table 
+        :title="'Teachers by Month (' . $currentMonth->year . ')'"
+        :entities="$teachers"
+        :statsByEntity="$teacherMonthStats"
+        :months="$months"
+        :year="$currentMonth->year"
+    />
 
 </div>
 @endsection

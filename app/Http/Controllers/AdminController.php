@@ -104,16 +104,17 @@ class AdminController extends Controller
         $periodStats = $statsService->calculateStats($periodLessons);
         $studentStats = $statsService->calculateStatsByStudent($periodLessons);
         $teacherStats = $statsService->calculateStatsByTeacher($periodLessons);
+
+        $teachers = Teacher::withFullDetails()->get();
         $teacherStudentCounts = $teachers->mapWithKeys(function($teacher) use ($periodLessons, $statsService) {
             $lessonsForTeacher = $periodLessons->where('teacher_id', $teacher->id);
             $byStudent = $lessonsForTeacher
                 ->groupBy('student_id')
                 ->map(function($studentLessons) use ($statsService) {
                     $student = $studentLessons->first()->student;
-                    $stats = $statsService->calculateStats($studentLessons);
                     return [
                         'name' => $student?->name ?? 'Unknown',
-                        'stats' => $stats,
+                        'stats' => $statsService->calculateStats($studentLessons),
                     ];
                 })
                 ->sortBy('name')
@@ -121,43 +122,7 @@ class AdminController extends Controller
 
             return [$teacher->id => $byStudent];
         });
-        $yearLessons = Lesson::with(['teacher', 'student'])
-            ->whereYear('class_date', $currentMonth->year)
-            ->get();
-        $yearStatsByMonth = $statsService->calculateStatsByMonth($yearLessons);
-        $studentMonthStats = $yearLessons->groupBy('student_id')->map(function($lessonsForStudent) use ($statsService) {
-            return $lessonsForStudent
-                ->groupBy(fn($lesson) => (int) $lesson->class_date->format('n'))
-                ->map(fn($monthLessons) => $statsService->calculateStats($monthLessons));
-        });
-        $teacherMonthStats = $yearLessons->groupBy('teacher_id')->map(function($lessonsForTeacher) use ($statsService) {
-            return $lessonsForTeacher
-                ->groupBy(fn($lesson) => (int) $lesson->class_date->format('n'))
-                ->map(fn($monthLessons) => $statsService->calculateStats($monthLessons));
-        });
-        $months = range(1, 12);
-        $studentMonthStats = $yearLessons->groupBy('student_id')->map(function($lessonsForStudent) use ($statsService) {
-            return $lessonsForStudent
-                ->groupBy(fn($lesson) => (int) $lesson->class_date->format('n'))
-                ->map(fn($monthLessons) => $statsService->calculateStats($monthLessons));
-        });
-        $months = range(1, 12);
-        $studentMonthStats = $yearLessons->groupBy('student_id')->map(function($lessonsForStudent) use ($statsService) {
-            return $lessonsForStudent
-                ->groupBy(fn($lesson) => (int) $lesson->class_date->format('n'))
-                ->map(fn($monthLessons) => $statsService->calculateStats($monthLessons));
-        });
-        $months = range(1, 12);
-        $studentMonthStats = $yearLessons->groupBy('student_id')->map(function($lessonsForStudent) use ($statsService) {
-            return $lessonsForStudent
-                ->groupBy(fn($lesson) => (int) $lesson->class_date->format('n'))
-                ->map(fn($monthLessons) => $statsService->calculateStats($monthLessons));
-        });
-        $months = range(1, 12);
-        $yearLessons = Lesson::with(['teacher', 'student'])
-            ->whereYear('class_date', $currentMonth->year)
-            ->get();
-        $yearStatsByMonth = $statsService->calculateStatsByMonth($yearLessons);
+
         $yearLessons = Lesson::with(['teacher', 'student'])
             ->whereYear('class_date', $currentMonth->year)
             ->get();
@@ -215,6 +180,26 @@ class AdminController extends Controller
 
     public function billing(Request $request, CalendarService $calendar, LessonStatisticsService $statsService, BalanceService $balanceService)
     {
+        $data = $this->buildBillingData($request, $calendar, $statsService, $balanceService);
+        return view('admin.billing', $data);
+    }
+
+    public function exportBilling(Request $request, CalendarService $calendar, LessonStatisticsService $statsService, BalanceService $balanceService, \App\Services\StatsExportService $exporter)
+    {
+        $data = $this->buildBillingData($request, $calendar, $statsService, $balanceService);
+        $exported = $exporter->export($data);
+
+        return redirect()
+            ->route('admin.billing', [
+                'billing' => $data['billing'] ? 1 : null,
+                'year' => $data['currentMonth']->year,
+                'month' => $data['currentMonth']->month,
+            ])
+            ->with($exported ? 'success' : 'error', $exported ? 'Stats exported to sheet' : 'Failed to export stats');
+    }
+
+    protected function buildBillingData(Request $request, CalendarService $calendar, LessonStatisticsService $statsService, BalanceService $balanceService): array
+    {
         $billing = $request->boolean('billing');
 
         $calendarData = $calendar->getMonthData($request);
@@ -236,6 +221,7 @@ class AdminController extends Controller
         $periodStats = $statsService->calculateStats($periodLessons);
         $studentStats = $statsService->calculateStatsByStudent($periodLessons);
         $teacherStats = $statsService->calculateStatsByTeacher($periodLessons);
+
         $yearLessons = Lesson::with(['teacher', 'student'])
             ->whereYear('class_date', $currentMonth->year)
             ->get();
@@ -269,6 +255,7 @@ class AdminController extends Controller
 
             return [$teacher->id => $byStudent];
         });
+
         $balances = $balanceService->getBalances();
 
         // Usage counts up to today for chargeable lessons (completed + student_absent)
@@ -290,7 +277,7 @@ class AdminController extends Controller
             return $student;
         });
 
-        return view('admin.billing', compact(
+        return compact(
             'teachers',
             'students',
             'currentMonth',
@@ -305,7 +292,7 @@ class AdminController extends Controller
             'teacherMonthStats',
             'months',
             'teacherStudentCounts'
-        ));
+        );
     }
 
     // Teachers Management

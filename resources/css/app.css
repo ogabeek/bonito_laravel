@@ -15,6 +15,10 @@
     --cal-pad-y: 10px;
     --cal-text: 11px;
     --cal-subtext: 9px;
+    --cal-daynum: 10px;
+    --cal-weekday: 9px;
+    --cal-day-width: 38px;
+    --cal-day-height: 46px;
 
     /* Student Status Colors - Light color schema for status dots */
     --color-student-active: #86efac;        /* green-300 - light green */
@@ -84,8 +88,22 @@
     line-height: 1.1;
 }
 .cal-day {
-    min-width: 32px;
+    min-width: var(--cal-day-width);
     text-align: center;
+}
+.cal-daycell {
+    min-height: var(--cal-day-height);
+    vertical-align: top;
+}
+.cal-daynum {
+    font-size: var(--cal-daynum);
+    font-weight: 600;
+    line-height: 1.1;
+}
+.cal-weekday {
+    font-size: var(--cal-weekday);
+    color: var(--color-text-secondary, #6b7280);
+    line-height: 1;
 }
 .cal-sticky {
     position: sticky;
@@ -95,4 +113,17 @@
 .cal-balance {
     min-width: 38px;
     text-align: right;
+}
+
+.cal-lesson-chip {
+    display: block;
+    padding: 1px 3px;
+    margin-bottom: 2px;
+    font-size: 9px;
+    font-weight: 600;
+    border-radius: 4px;
+    line-height: 1.2;
+}
+.cal-lesson-chip:last-child {
+    margin-bottom: 0;
 }

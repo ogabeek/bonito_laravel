@@ -10,6 +10,17 @@
         :logoutRoute="route('teacher.logout')" 
     />
 
+    @if ($errors->any())
+        <div class="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded">
+            <div class="font-semibold mb-1">Please fix the following:</div>
+            <ul class="list-disc ml-4 space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <x-card class="mb-6">
         <div class="flex justify-between items-start gap-4 mb-3">
             <div class="flex items-center gap-3">
