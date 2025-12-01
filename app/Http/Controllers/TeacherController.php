@@ -81,10 +81,13 @@ class TeacherController extends Controller
         return redirect('/');
     }
 
-     // Update lesson
+    // Update lesson
     public function updateLesson(UpdateLessonRequest $request, Lesson $lesson)
     {
         $teacherActor = Teacher::find(session('teacher_id'));
+        if (!$teacherActor || $lesson->teacher_id !== $teacherActor->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
         $original = $lesson->getOriginal();
 
         $lesson->update([
@@ -108,9 +111,16 @@ class TeacherController extends Controller
     public function createLesson(CreateLessonRequest $request)
     {
         $teacherActor = Teacher::find(session('teacher_id'));
+        if (!$teacherActor) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        $assigned = $teacherActor->students()->where('students.id', $request->student_id)->exists();
+        if (!$assigned) {
+            return response()->json(['error' => 'Student not assigned to teacher'], 403);
+        }
 
         $lesson = Lesson::create([
-            'teacher_id' => session('teacher_id'),
+            'teacher_id' => $teacherActor->id,
             'student_id' => $request->student_id,
             'class_date' => $request->class_date,
             'status' => $request->status,
@@ -139,8 +149,7 @@ class TeacherController extends Controller
         $teacherActor = Teacher::find(session('teacher_id'));
         $snapshot = $lesson->toArray();
 
-        // Check teacher owns this lesson
-        if ($lesson->teacher_id !== session('teacher_id')) {
+        if (!$teacherActor || $lesson->teacher_id !== $teacherActor->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         
