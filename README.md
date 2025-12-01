@@ -74,7 +74,8 @@ Simplified management system for online school with ~10 teachers, ~100 students,
 - Small user base (110 total users)
 - Financial calculations remain in tested spreadsheet formulas
 
-
+**Current pain points:**
+Make a platform for Teachers to mark attendance, topic, HW  -> student see it -> admin have calculation of all classes
 
 <img src="image-1.png" alt="Alt Text" width="200" >
 

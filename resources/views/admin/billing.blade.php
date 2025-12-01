@@ -24,23 +24,8 @@
                     <a href="{{ route('admin.billing', ['year' => $currentMonth->year, 'month' => $currentMonth->month, 'billing' => 1]) }}" class="px-3 py-1 text-xs rounded {{ $billing ? 'bg-blue-100 text-blue-700' : 'text-gray-600 bg-gray-100' }}">26-25</a>
                 </div>
             </div>
-            <div class="flex flex-wrap items-center gap-2 text-[10px] text-gray-600">
-                <span class="flex items-center gap-1">
-                    <span class="inline-block w-2.5 h-2.5 rounded-full" style="background: var(--color-status-completed);"></span>
-                    Done
-                </span>
-                <span class="flex items-center gap-1">
-                    <span class="inline-block w-2.5 h-2.5 rounded-full" style="background: var(--color-status-student-cancelled);"></span>
-                    C
-                </span>
-                <span class="flex items-center gap-1">
-                    <span class="inline-block w-2.5 h-2.5 rounded-full" style="background: var(--color-status-cancelled);"></span>
-                    CT
-                </span>
-                <span class="flex items-center gap-1">
-                    <span class="inline-block w-2.5 h-2.5 rounded-full" style="background: var(--color-status-absent);"></span>
-                    A
-                </span>
+            <div class="flex flex-wrap items-center gap-2">
+                <x-status-legend compact />
                 <form method="POST" action="{{ route('admin.billing.export') }}" class="ml-auto">
                     @csrf
                     <input type="hidden" name="billing" value="{{ $billing ? 1 : 0 }}">

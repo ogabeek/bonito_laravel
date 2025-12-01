@@ -17,10 +17,10 @@ class LessonStatisticsService
     {
         return [
             'total' => $lessons->count(),
-            'completed' => $lessons->filter(fn($lesson) => $lesson->status === LessonStatus::COMPLETED)->count(),
-            'student_absent' => $lessons->filter(fn($lesson) => $lesson->status === LessonStatus::STUDENT_ABSENT)->count(),
-            'student_cancelled' => $lessons->filter(fn($lesson) => $lesson->status === LessonStatus::STUDENT_CANCELLED)->count(),
-            'teacher_cancelled' => $lessons->filter(fn($lesson) => $lesson->status === LessonStatus::TEACHER_CANCELLED)->count(),
+            'completed' => $this->countByStatus($lessons, LessonStatus::COMPLETED),
+            'student_absent' => $this->countByStatus($lessons, LessonStatus::STUDENT_ABSENT),
+            'student_cancelled' => $this->countByStatus($lessons, LessonStatus::STUDENT_CANCELLED),
+            'teacher_cancelled' => $this->countByStatus($lessons, LessonStatus::TEACHER_CANCELLED),
         ];
     }
 
@@ -32,15 +32,7 @@ class LessonStatisticsService
      */
     public function calculateStatsByTeacher(Collection $lessons): Collection
     {
-        return $lessons->groupBy('teacher_id')->map(function($teacherLessons) {
-            return [
-                'total' => $teacherLessons->count(),
-                'completed' => $teacherLessons->filter(fn($lesson) => $lesson->status === LessonStatus::COMPLETED)->count(),
-                'student_absent' => $teacherLessons->filter(fn($lesson) => $lesson->status === LessonStatus::STUDENT_ABSENT)->count(),
-                'student_cancelled' => $teacherLessons->filter(fn($lesson) => $lesson->status === LessonStatus::STUDENT_CANCELLED)->count(),
-                'teacher_cancelled' => $teacherLessons->filter(fn($lesson) => $lesson->status === LessonStatus::TEACHER_CANCELLED)->count(),
-            ];
-        });
+        return $lessons->groupBy('teacher_id')->map(fn($teacherLessons) => $this->calculateStats($teacherLessons));
     }
 
     /**
@@ -51,15 +43,19 @@ class LessonStatisticsService
      */
     public function calculateStatsByStudent(Collection $lessons): Collection
     {
-        return $lessons->groupBy('student_id')->map(function($studentLessons) {
-            return [
-                'total' => $studentLessons->count(),
-                'completed' => $studentLessons->filter(fn($lesson) => $lesson->status === LessonStatus::COMPLETED)->count(),
-                'student_absent' => $studentLessons->filter(fn($lesson) => $lesson->status === LessonStatus::STUDENT_ABSENT)->count(),
-                'student_cancelled' => $studentLessons->filter(fn($lesson) => $lesson->status === LessonStatus::STUDENT_CANCELLED)->count(),
-                'teacher_cancelled' => $studentLessons->filter(fn($lesson) => $lesson->status === LessonStatus::TEACHER_CANCELLED)->count(),
-            ];
-        });
+        return $lessons->groupBy('student_id')->map(fn($studentLessons) => $this->calculateStats($studentLessons));
+    }
+
+    /**
+     * Count lessons by status
+     *
+     * @param Collection $lessons
+     * @param LessonStatus $status
+     * @return int
+     */
+    private function countByStatus(Collection $lessons, LessonStatus $status): int
+    {
+        return $lessons->filter(fn($lesson) => $lesson->status === $status)->count();
     }
 
     public function calculateStatsByMonth(Collection $lessons): Collection
