@@ -266,11 +266,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 scales: {
                     y: {
-                        display: false,
-                        beginAtZero: true
+                        display: true,
+                        beginAtZero: true,
+                        ticks: { 
+                            font: { size: 6 },
+                            stepSize: 50,
+                            padding: 2
+                        },
+                        grid: {
+                            display: false
+                        }
                     },
                     x: {
-                        ticks: { font: { size: 6 }, padding: 0 }
+                        ticks: { font: { size: 6 }, padding: 0 },
+                        grid: {
+                            display: false
+                        }
                     }
                 }
             }
