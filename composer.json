@@ -13,6 +13,7 @@
         "google/apiclient": "*",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "sentry/sentry-laravel": "^4.20",
         "spatie/laravel-activitylog": "^4.10"
     },
     "require-dev": {

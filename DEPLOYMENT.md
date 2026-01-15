@@ -6,6 +6,7 @@
 - **Region:** Amsterdam 3
 - **Domain:** t.leaguesofcode.space
 - **DNS:** Cloudflare
+- **Monitoring:** Sentry (Student plan, expires Jan 15, 2027)
 - **Repository:** ogabeek/bonito_laravel (master branch)
 
 ---
@@ -36,11 +37,17 @@ SESSION_DRIVER=database
 CACHE_STORE=database
 QUEUE_CONNECTION=database
 
-# Google Sheets Integration (if needed)
+# Google Sheets Integration
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
 GOOGLE_SHEETS_BALANCE_SHEET_ID=your_sheet_id
 GOOGLE_SHEETS_BALANCE_TAB=Balance
 GOOGLE_SHEETS_STATS_TAB=Stats
+
+# Sentry Error Monitoring
+SENTRY_LARAVEL_DSN=your_sentry_dsn_here
+SENTRY_ENVIRONMENT=production
+SENTRY_SAMPLE_RATE=0.25
+SENTRY_TRACES_SAMPLE_RATE=0.1
 ```
 
 ### 2. Deploy Application
