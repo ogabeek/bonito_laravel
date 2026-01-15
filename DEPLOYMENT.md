@@ -1,32 +1,35 @@
-# Laravel Cloud Deployment Guide
+# Production Deployment Guide
 
-## Prerequisites
-✅ Laravel Cloud account created
-✅ GitHub repository connected to Laravel Cloud
-✅ Repository: `ogabeek/bonito_laravel`
+## Current Production Setup
+- **Hosting:** Laravel Forge + DigitalOcean
+- **Server:** 2 GB RAM (Premium AMD) · 1 vCPU · 50 GB SSD ($14/mo)
+- **Region:** Amsterdam 3
+- **Domain:** t.leaguesofcode.space
+- **DNS:** Cloudflare
+- **Repository:** ogabeek/bonito_laravel (master branch)
 
 ---
 
 ## Deployment Steps
 
-### 1. Configure Environment in Laravel Cloud Dashboard
+### 1. Environment Configuration (Laravel Forge)
 
-In your Laravel Cloud dashboard, set these environment variables:
+In your Laravel Forge dashboard, set these environment variables:
 
 ```bash
 APP_NAME="Boniato School"
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://your-app.laravel.cloud
+APP_URL=https://t.leaguesofcode.space
 ADMIN_PASSWORD=your_secure_password_here
 
-# Database (Laravel Cloud provides MySQL automatically)
+# Database (Forge provisions MySQL automatically)
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=boniato_school
+DB_DATABASE=forge
 DB_USERNAME=forge
-DB_PASSWORD=your_db_password_here
+DB_PASSWORD=auto_generated_by_forge
 
 # Session & Cache
 SESSION_DRIVER=database
@@ -42,41 +45,41 @@ GOOGLE_SHEETS_STATS_TAB=Stats
 
 ### 2. Deploy Application
 
-Laravel Cloud will automatically:
-- Pull code from your GitHub repository
-- Run `composer install`
-- Run `npm install && npm run build`
-- Set up the database
+Forge automatically:
+- Pulls code from GitHub repository (master branch)
+- Runs `composer install --no-dev --optimize-autoloader`
+- Runs `npm install && npm run build`
+- Configures Nginx with SSL (Let's Encrypt)
 
-### 3. Run Database Migrations & Seeding
+### 3. Database Migration & Seeding
 
-After initial deployment, SSH into your Laravel Cloud instance or use the Cloud CLI:
+SSH into server via Forge or run commands in Forge dashboard:
 
 ```bash
 # Run migrations
 php artisan migrate --force
 
-# Seed the database with test data
+# Seed the database
 php artisan db:seed --force
 
-# Or fresh migrate + seed
+# Or fresh install
 php artisan migrate:fresh --seed --force
 ```
 
-### 4. Configure Database Settings
+### 4. DNS Configuration (Cloudflare)
 
-Laravel Cloud automatically provisions a MySQL database. Make sure to:
-1. Go to Database section in Laravel Cloud dashboard
-2. Note the database credentials
-3. Update environment variables with correct DB credentials
+1. Add A record: `t.leaguesofcode.space` → Server IP
+2. Enable Cloudflare proxy (orange cloud)
+3. SSL/TLS mode: Full (strict)
+4. Force HTTPS redirect
 
-### 5. Set Up Storage (if needed)
+### 5. Storage & Permissions
 
 ```bash
 php artisan storage:link
 ```
 
-### 6. Clear & Optimize Caches
+### 6. Optimize Caches
 
 ```bash
 php artisan optimize
@@ -89,12 +92,16 @@ php artisan view:cache
 
 ## Post-Deployment Checklist
 
-- [ ] App is accessible at your Laravel Cloud URL
-- [ ] Admin login works at `/admin` with your ADMIN_PASSWORD
-- [ ] Database has teachers and students
-- [ ] Teachers can log in at `/teacher/{id}` with seeded passwords
-- [ ] Students can access their portals via UUID links
-- [ ] Billing page displays charts correctly
+- [x] Server created on DigitalOcean via Forge
+- [x] Domain configured: t.leaguesofcode.space
+- [x] DNS managed via Cloudflare
+- [x] SSL certificate active (Let's Encrypt)
+- [ ] Database migrated and seeded
+- [ ] Admin login tested at `/admin`
+- [ ] Teacher login tested at `/teacher/{id}`
+- [ ] Student UUID links working
+- [ ] Google Sheets integration configured
+- [ ] Billing page functional
 
 ---
 
@@ -113,25 +120,27 @@ Current seed data (from `DatabaseSeeder.php`):
 
 ## Continuous Deployment
 
-Laravel Cloud will automatically redeploy when you push to the `master` branch:
+Forge auto-deploys on push to master branch:
 
 ```bash
-# Make changes locally
 git add .
 git commit -m "Your changes"
 git push origin master
-
-# Laravel Cloud will auto-deploy
+# Forge deploys automatically
 ```
+
+Deploy script runs:
+- `composer install --no-dev --optimize-autoloader`
+- `npm run build`
+- `php artisan migrate --force`
+- `php artisan optimize`
 
 ---
 
 ## Troubleshooting
 
 ### Database Issues
-If database doesn't seed properly:
 ```bash
-# SSH into Laravel Cloud instance
 php artisan migrate:fresh --seed --force
 ```
 
@@ -148,8 +157,13 @@ chmod -R 775 storage bootstrap/cache
 
 ### Check Logs
 ```bash
-# In Laravel Cloud dashboard
 tail -f storage/logs/laravel.log
+```
+
+### Forge Server Access
+SSH via Forge dashboard or:
+```bash
+ssh forge@server-ip
 ```
 
 ---
@@ -157,30 +171,41 @@ tail -f storage/logs/laravel.log
 ## Important Notes
 
 ⚠️ **Security:**
-- Keep `APP_DEBUG=false` in production
-- Use strong `ADMIN_PASSWORD`
-- Never commit `.env` file to repository
+- `APP_DEBUG=false` in production
+- Strong `ADMIN_PASSWORD` required
+- Never commit `.env` to repository
+- Cloudflare proxy enabled for DDoS protection
 
 ⚠️ **Database:**
-- SQLite (local dev) → MySQL (production)
-- Database migrations handle this automatically
-- Seed data creates November-December 2025 lessons only
+- SQLite (local) → MySQL (production via Forge)
+- Migrations handle schema automatically
+- Seed data: 9 teachers, 30 students, ~300 lessons (Nov-Dec 2025)
 
 ⚠️ **Google Sheets:**
-- Upload service account JSON to Laravel Cloud
-- Set correct path in `GOOGLE_APPLICATION_CREDENTIALS`
-- Configure sheet IDs in environment variables
+- Upload service account JSON to server
+- Set `GOOGLE_APPLICATION_CREDENTIALS` path
+- Configure sheet IDs in environment
+
+⚠️ **DNS & SSL:**
+- Domain: t.leaguesofcode.space
+- DNS: Cloudflare (proxy enabled)
+- SSL: Let's Encrypt (auto-renewed by Forge)
 
 ---
 
 ## Support
 
-For Laravel Cloud specific issues:
-- Check Laravel Cloud documentation
-- Use dashboard logs and monitoring
-- Contact Laravel Cloud support
+**Laravel Forge:**
+- Dashboard: forge.laravel.com
+- Server logs and monitoring available
+- One-click SSL, deployments, backups
 
-For application issues:
+**DigitalOcean:**
+- $200 student credit (14 months at $14/mo)
+- Server: Amsterdam 3
+- 2GB RAM (Premium AMD), 1 vCPU, 50GB SSD
+
+**Application Issues:**
 - Check `storage/logs/laravel.log`
-- Review database connections
-- Verify environment variables
+- Verify environment variables in Forge
+- Test database connection
