@@ -223,7 +223,7 @@ class AdminController extends Controller
 
         $this->logActivity($teacher, 'teacher_created');
 
-        return redirect()->route('admin.dashboard')->with('success', 'Teacher created successfully!');
+        return redirect()->route('admin.dashboard')->with('success', "Teacher created! URL: {$request->getSchemeAndHttpHost()}/teacher/{$teacher->id}");
     }
 
     public function deleteTeacher(Teacher $teacher)
