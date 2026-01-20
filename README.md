@@ -6,10 +6,12 @@ Simplified management system for online school with ~10 teachers, ~100 students,
 ### Technical Stack
 
 - **Local Development:** Laravel Herd
-- **Database:** SQLite (dev) -> Connected to TablePlus for gui 
-- **Auth:** UUID-based direct links (no password system currently)
+- **Database:** SQLite (dev) → MySQL (production)
+- **Auth:** UUID-based direct links (students), password-based (teachers/admin)
 - **Sheets Integration:** Native Google API client in `BalanceService` (service account + sheet with `uuid`/`balance`)
-- **CSS:** Tailwind and app.css file as a design references
+- **Monitoring:** Sentry error tracking
+- **Backups:** Automated daily backups (spatie/laravel-backup)
+- **CSS:** Tailwind and app.css file as design references
 
 ### How to Setup
 
@@ -41,9 +43,15 @@ Simplified management system for online school with ~10 teachers, ~100 students,
  - managing students and teachers
 
 **4. Google Sheets Sync**
-- Balance import: `BalanceService` pulls `uuid/balance` from Google Sheets via service account (env: `GOOGLE_APPLICATION_CREDENTIALS`, `GOOGLE_SHEETS_BALANCE_SHEET_ID`, `GOOGLE_SHEETS_BALANCE_TAB`).
-- Stats export: billing page has “Export to Sheet” to overwrite a tab (env: `GOOGLE_SHEETS_STATS_TAB`, same sheet ID). Uses native Google API client.
-- One-way sync (Sheets → app for balances; app → Sheets for stats).
+- Balance import: `BalanceService` pulls `uuid/balance` from Google Sheets via service account
+- Stats export: billing page "Export to Sheet" button writes to configured tab
+- One-way sync (Sheets → app for balances; app → Sheets for stats)
+
+**5. Automated Backups**
+- Twice daily: 4:30 AM and 4:30 PM
+- Retention: 360 days (all), 720 days (daily), 3 years (monthly)
+- Storage: `storage/app/private/Laravel/` (local), future: remote backup server
+- Package: spatie/laravel-backup
 
 
 **Database:**

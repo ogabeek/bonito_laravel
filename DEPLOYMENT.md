@@ -85,9 +85,23 @@ php artisan migrate:fresh --seed --force
 
 ```bash
 php artisan storage:link
+chmod -R 775 storage bootstrap/cache
 ```
 
-### 6. Optimize Caches
+### 6. Verify Backups
+
+```bash
+# Test backup manually
+php artisan backup:run
+
+# Check backup files
+ls -lh storage/app/private/Laravel/
+
+# Verify scheduler is running (Forge handles this automatically)
+php artisan schedule:list
+```
+
+### 7. Optimize Caches
 
 ```bash
 php artisan optimize
@@ -104,12 +118,14 @@ php artisan view:cache
 - [x] Domain configured: t.leaguesofcode.space
 - [x] DNS managed via Cloudflare
 - [x] SSL certificate active (Let's Encrypt)
-- [ ] Database migrated and seeded
+- [x] Database migrated
 - [ ] Admin login tested at `/admin`
-- [ ] Teacher login tested at `/teacher/{id}`
+- [ ] Teacher creation tested (URL shown in success message)
 - [ ] Student UUID links working
 - [ ] Google Sheets integration configured
-- [ ] Billing page functional
+- [ ] Billing export functional
+- [ ] Automated backups running (check after 24h)
+- [ ] Sentry error tracking active
 
 ---
 
