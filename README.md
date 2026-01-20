@@ -48,10 +48,11 @@ Simplified management system for online school with ~10 teachers, ~100 students,
 - One-way sync (Sheets → app for balances; app → Sheets for stats)
 
 **5. Automated Backups**
-- Twice daily: 4:30 AM and 4:30 PM
+- Twice daily: 4:30 AM and 4:30 PM CET (Europe/Madrid timezone)
 - Retention: 360 days (all), 720 days (daily), 3 years (monthly)
 - Storage: `storage/app/private/Laravel/` (local), future: remote backup server
 - Package: spatie/laravel-backup
+- Scheduler: Laravel cron (Forge handles automatically)
 
 
 **Database:**

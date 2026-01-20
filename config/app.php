@@ -76,7 +76,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => env('APP_TIMEZONE', 'Europe/Madrid'), // CET/CEST timezone
 
     /*
     |--------------------------------------------------------------------------

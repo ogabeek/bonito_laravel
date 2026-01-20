@@ -21,6 +21,7 @@ In your Laravel Forge dashboard, set these environment variables:
 APP_NAME="Boniato School"
 APP_ENV=production
 APP_DEBUG=false
+APP_TIMEZONE=Europe/Amsterdam
 APP_URL=https://t.leaguesofcode.space
 ADMIN_PASSWORD=your_secure_password_here
 
@@ -88,9 +89,15 @@ php artisan storage:link
 chmod -R 775 storage bootstrap/cache
 ```
 
-### 6. Verify Backups
+### 6. Verify Backups & Timezone
 
 ```bash
+# Verify server timezone (should be CET/Europe/Amsterdam)
+timedatectl
+
+# If server timezone is UTC, Laravel will still use CET from APP_TIMEZONE
+# Backups scheduled for 4:30 AM/PM CET will run correctly
+
 # Test backup manually
 php artisan backup:run
 
