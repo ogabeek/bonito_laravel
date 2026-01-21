@@ -3,7 +3,7 @@
 @section('title', $teacher->name . "'s Dashboard")
 
 @section('content')
-<div class="p-6 max-w-5xl mx-auto">
+<div class="p-3 sm:p-6 max-w-5xl mx-auto">
     
     <x-page-header 
         :title="$teacher->name . \"'s Dashboard\"" 
@@ -11,7 +11,7 @@
     />
 
     @if ($errors->any())
-        <div class="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded">
+        <div class="mb-4 bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-3 rounded">
             <div class="font-semibold mb-1">Please fix the following:</div>
             <ul class="list-disc ml-4 space-y-1">
                 @foreach ($errors->all() as $error)
@@ -22,9 +22,9 @@
     @endif
 
     <x-card class="mb-6">
-        <div class="flex justify-between items-start gap-4 mb-3">
-            <div class="flex items-center gap-3">
-                <h2 class="text-xl font-semibold">{{ $date->format('F Y') }}</h2>
+        <div class="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4 mb-3">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <h2 class="text-lg sm:text-xl font-semibold">{{ $date->format('F Y') }}</h2>
                 <x-month-nav 
                     :currentMonth="$date" 
                     :prevMonth="$prevMonth" 
@@ -42,11 +42,11 @@
     </x-card>
 
     <x-card class="mb-6">
-        <div id="lessonFormErrors" class="mb-4 hidden bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded"></div>
+        <div id="lessonFormErrors" class="mb-4 hidden bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm px-3 py-2 rounded"></div>
         <form id="newLessonForm">
             <x-lesson-form :students="$students" />
-            <div class="mt-6">
-                <button type="submit" class="btn-primary">+ Add Class</button>
+            <div class="mt-4 sm:mt-6">
+                <button type="submit" class="btn-primary w-full sm:w-auto">+ Add Class</button>
             </div>
         </form>
     </x-card>

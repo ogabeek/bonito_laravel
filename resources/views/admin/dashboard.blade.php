@@ -185,38 +185,38 @@
 
                 <!-- Teachers Table -->
                 <table class="w-full border rounded">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left">Teacher</th>
-                            <th class="px-4 py-2 text-left">Students</th>
-                            <th class="px-4 py-2 text-left">Lessons</th>
-                            <th class="px-4 py-2 text-right">Month</th>
-                            <th class="px-4 py-2 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($teachers as $teacher)
-                            <tr class="border-t hover:bg-gray-50">
-                                <td class="px-4 py-2">{{ $teacher->name }}</td>
-                                <td class="px-4 py-2">{{ $teacher->students_count }}</td>
-                                <td class="px-4 py-2">{{ $teacher->lessons_count }}</td>
-                                @php
-                                    $ts = $teacherStats[$teacher->id] ?? ['total' => 0, 'completed' => 0, 'student_cancelled' => 0, 'teacher_cancelled' => 0, 'student_absent' => 0];
-                                @endphp
-                                <td class="px-4 py-2 text-right">
-                                    <x-stats-inline :stats="$ts" class="w-20 ml-auto text-gray-500" />
-                                </td>
-                                <td class="px-4 py-2 text-right">
-                                    <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}" onsubmit="return confirm('Archive {{ $teacher->name }}? (Can be restored later)')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="text-orange-600 hover:text-orange-800">Archive</button>
-                                    </form>
-                                </td>
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-2 text-left">Teacher</th>
+                                <th class="px-4 py-2 text-left">Students</th>
+                                <th class="px-4 py-2 text-left">Lessons</th>
+                                <th class="px-4 py-2 text-right">Month</th>
+                                <th class="px-4 py-2 text-right">Actions</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach($teachers as $teacher)
+                                <tr class="border-t hover:bg-gray-50">
+                                    <td class="px-4 py-2">{{ $teacher->name }}</td>
+                                    <td class="px-4 py-2">{{ $teacher->students_count }}</td>
+                                    <td class="px-4 py-2">{{ $teacher->lessons_count }}</td>
+                                    @php
+                                        $ts = $teacherStats[$teacher->id] ?? ['total' => 0, 'completed' => 0, 'student_cancelled' => 0, 'teacher_cancelled' => 0, 'student_absent' => 0];
+                                    @endphp
+                                    <td class="px-4 py-2 text-right">
+                                        <x-stats-inline :stats="$ts" class="w-20 ml-auto text-gray-500" />
+                                    </td>
+                                    <td class="px-4 py-2 text-right">
+                                        <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}" onsubmit="return confirm('Archive {{ $teacher->name }}? (Can be restored later)')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="text-orange-600 hover:text-orange-800">Archive</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
 
                 <div class="flex justify-end items-center mt-4">
                     <button @click="showAddTeacher = !showAddTeacher" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
