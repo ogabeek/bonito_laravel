@@ -6,42 +6,40 @@
 
     <!-- Right Side: Student, Status, and Details -->
     <div class="flex-1 flex flex-col gap-3 lg:gap-4 lg:min-h-[210px]" x-data>
+        <!-- Student Select -->
         <div>
-            <!-- Student Select -->
-            <div class="mb-3">
-                <label class="form-label">Student</label>
-                <select name="student_id" required class="form-input w-full">
-                    <option value="">Select...</option>
-                    @foreach($students as $student)
-                        <option value="{{ $student->id }}">{{ $student->name }}</option>
-                    @endforeach
-                </select>
-            </div>
+            <label class="form-label">Student</label>
+            <select name="student_id" required class="form-input w-full">
+                <option value="">Select...</option>
+                @foreach($students as $student)
+                    <option value="{{ $student->id }}">{{ $student->name }}</option>
+                @endforeach
+            </select>
+        </div>
 
-            <!-- Status Buttons - Mobile Optimized -->
-            <div>
-                <label class="form-label mb-2 block">Status</label>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <label class="status-btn-completed flex items-center justify-center border rounded cursor-pointer transition p-3 text-sm font-medium" title="Lesson completed successfully">
-                        <input type="radio" name="status" value="completed" class="status-radio hidden" checked>
-                        <span>✓ Done</span>
-                    </label>
+        <!-- Status Buttons - Mobile Optimized -->
+        <div>
+            <label class="form-label">Status</label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+                <label class="status-btn-completed flex items-center justify-center border rounded cursor-pointer transition p-3 text-sm font-medium" title="Lesson completed successfully">
+                    <input type="radio" name="status" value="completed" class="status-radio hidden" checked>
+                    <span>✓ Done</span>
+                </label>
 
-                    <label class="status-btn-student-cancelled flex items-center justify-center border rounded cursor-pointer transition p-3 text-sm font-medium" title="Cancelled by student/parent (agreed)">
-                        <input type="radio" name="status" value="student_cancelled" class="status-radio hidden">
-                        <span>C</span>
-                    </label>
-                    
-                    <label class="status-btn-cancelled flex items-center justify-center border rounded cursor-pointer transition p-3 text-sm font-medium" title="Cancelled by teacher">
-                        <input type="radio" name="status" value="teacher_cancelled" class="status-radio hidden">
-                        <span>CT</span>
-                    </label>
+                <label class="status-btn-student-cancelled flex items-center justify-center border rounded cursor-pointer transition p-3 text-sm font-medium" title="Cancelled by student/parent (agreed)">
+                    <input type="radio" name="status" value="student_cancelled" class="status-radio hidden">
+                    <span>C</span>
+                </label>
+                
+                <label class="status-btn-cancelled flex items-center justify-center border rounded cursor-pointer transition p-3 text-sm font-medium" title="Cancelled by teacher">
+                    <input type="radio" name="status" value="teacher_cancelled" class="status-radio hidden">
+                    <span>CT</span>
+                </label>
 
-                    <label class="status-btn-absent flex items-center justify-center border rounded cursor-pointer transition p-3 text-sm font-medium" title="Student was absent">
-                        <input type="radio" name="status" value="student_absent" class="status-radio hidden">
-                        <span>A</span>
-                    </label>
-                </div>
+                <label class="status-btn-absent flex items-center justify-center border rounded cursor-pointer transition p-3 text-sm font-medium" title="Student was absent">
+                    <input type="radio" name="status" value="student_absent" class="status-radio hidden">
+                    <span>A</span>
+                </label>
             </div>
         </div>
 
