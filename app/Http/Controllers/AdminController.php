@@ -213,7 +213,7 @@ class AdminController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'password' => 'required|string|min:4',w
+            'password' => 'required|string|min:4',
         ]);
 
         $teacher = Teacher::create([
