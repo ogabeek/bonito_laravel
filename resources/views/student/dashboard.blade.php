@@ -3,7 +3,7 @@
 @section('title', $student->name . "'s Lessons")
 
 @section('content')
-<div class="p-6 max-w-4xl mx-auto">
+<div class="p-3 sm:p-6 max-w-4xl mx-auto">
     
     <x-page-header 
         :title="$student->name" 
@@ -25,17 +25,17 @@
         <x-card title="📅 Upcoming Lessons" class="mb-6">
             <div class="space-y-3">
                     @foreach($upcomingLessons as $lesson)
-                        <div class="border-l-4 border-blue-500 pl-4 py-2 bg-blue-50">
-                            <div class="flex justify-between items-start">
+                        <div class="border-l-4 border-blue-500 pl-3 sm:pl-4 py-2 bg-blue-50 rounded-r">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-0">
                                 <div>
-                                    <div class="font-semibold text-gray-900">
-                                        {{ $lesson->class_date->format('l, F d, Y') }}
+                                    <div class="font-semibold text-sm sm:text-base text-gray-900">
+                                        {{ $lesson->class_date->format('D, M d, Y') }}
                                     </div>
-                                    <div class="text-sm text-gray-600 mt-1">
+                                    <div class="text-xs sm:text-sm text-gray-600 mt-1">
                                         Teacher: {{ $lesson->teacher->name }}
                                     </div>
                                 </div>
-                                <div class="text-sm text-gray-500">
+                                <div class="text-xs sm:text-sm text-gray-500">
                                     {{ $lesson->class_date->format('g:i A') }}
                                 </div>
                             </div>
