@@ -15,3 +15,8 @@ Schedule::command('backup:run')->daily()->at('16:30');
 
 // Monitor backup health once daily
 Schedule::command('backup:monitor')->daily()->at('05:00');
+
+// Ping Forge heartbeat to monitor scheduler is running
+if (app()->environment('production')) {
+    Schedule::call(fn() => @file_get_contents(env('FORGE_HEARTBEAT_URL')))->everyFiveMinutes();
+}
