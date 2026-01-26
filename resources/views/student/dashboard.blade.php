@@ -10,6 +10,16 @@
         :subtitle="$student->goal ? 'Goal: ' . $student->goal : null" 
     />
 
+    @if($stats['total'] === 0)
+        <x-info-banner type="success" dismissible class="mb-6">
+            <div class="font-medium mb-1">Welcome! 🎉</div>
+            <div class="text-xs opacity-90">
+                This is your personal learning dashboard. After each lesson, your teacher will log what you covered, 
+                homework assignments, and track your progress. Check back after your first class!
+            </div>
+        </x-info-banner>
+    @endif
+
     <x-lesson-stats-summary 
         :stats="$stats" 
         :date="now()" 

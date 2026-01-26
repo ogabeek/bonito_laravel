@@ -69,9 +69,19 @@ Simplified management system for online school with ~10 teachers, ~100 students,
 - `app/Http/Requests/` - Form validation (CreateLessonRequest, UpdateLessonRequest)
 - `app/Models/` - Teacher, Student, Lesson (with relationships)
 - `resources/views/layouts/app.blade.php` - Base layout for all pages
-- `resources/views/components/` - Reusable UI (lesson-card, lesson-form, calendar-picker, login-card)
+- `resources/views/components/` - Reusable UI (lesson-card, lesson-form, calendar-picker, info-banner)
 - `public/css/app.css` - Design system (CSS variables)
 
+**UI Components:**
+```blade
+<!-- Info Banner - for help text, tips, and welcome messages -->
+<x-info-banner type="tip" dismissible>
+    Welcome message or helpful tip here
+</x-info-banner>
+
+<!-- Types: info (blue), success (green), warning (orange), tip (purple) -->
+<!-- Add dismissible to allow users to close it -->
+```
 
 ### Recent Changes (summary)
 - Added billing export button (admin billing page) writing stats to a single Google Sheet tab (configurable tab name).
@@ -87,6 +97,18 @@ Simplified management system for online school with ~10 teachers, ~100 students,
 Make a platform for Teachers to mark attendance, topic, HW  -> student see it -> admin have calculation of all classes
 
 <img src="image-1.png" alt="Alt Text" width="200" >
+
+
+
+TODO: 
+- delete student (e.g. accidentally created Rafael G, how to delete it now) 
+- welcome message add note section about how to start
+- Decide about "Notes " at teachers pannel 
+- setUp Sentry dashboard and tracked errors 
+
+
+
+
 
 
 
