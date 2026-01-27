@@ -27,7 +27,12 @@ class StudentBalanceService
             $student->teacher_ids = $student->teachers->pluck('id')->toArray();
             $paid = $balances[$student->uuid] ?? null;
             $used = $usedCounts[$student->id] ?? 0;
+            
+            // Add detailed balance info
+            $student->paid_classes = $paid;
+            $student->used_classes = $used;
             $student->class_balance = $paid !== null ? ($paid - $used) : null;
+            
             return $student;
         });
     }

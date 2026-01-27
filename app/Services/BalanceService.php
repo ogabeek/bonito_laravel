@@ -45,7 +45,7 @@ class BalanceService
             $headers = array_map('strtolower', $rows->pull(0));
 
             $uuidIndex = array_search('uuid', $headers);
-            $balanceIndex = array_search('balance', $headers);
+            $balanceIndex = array_search('paid classes', $headers);
 
             if ($uuidIndex === false || $balanceIndex === false) {
                 return [];
