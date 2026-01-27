@@ -28,10 +28,10 @@ class StudentBalanceService
             $paid = $balances[$student->uuid] ?? null;
             $used = $usedCounts[$student->id] ?? 0;
             
-            // Add detailed balance info
-            $student->paid_classes = $paid;
-            $student->used_classes = $used;
-            $student->class_balance = $paid !== null ? ($paid - $used) : null;
+            // Add detailed balance info - ensure paid is integer
+            $student->paid_classes = $paid !== null ? (int) $paid : null;
+            $student->used_classes = (int) $used;
+            $student->class_balance = $paid !== null ? ((int) $paid - (int) $used) : null;
             
             return $student;
         });
