@@ -16,8 +16,10 @@ class BalanceService
             return [];
         }
 
-        return Cache::remember('balances.sheet', 300, function () use ($sheetId, $tab) {
-            $credentialsPath = env('GOOGLE_APPLICATION_CREDENTIALS');
+        $cacheTtl = config('services.sheets.cache_ttl', 300);
+
+        return Cache::remember('balances.sheet', $cacheTtl, function () use ($sheetId, $tab) {
+            $credentialsPath = config('services.google.credentials_path');
 
             if (!$credentialsPath || !file_exists($credentialsPath)) {
                 Log::warning('BalanceService: credentials missing or not found', ['path' => $credentialsPath]);

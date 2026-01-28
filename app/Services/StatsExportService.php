@@ -17,7 +17,7 @@ class StatsExportService
     {
         $sheetId = config('services.sheets.balance_sheet_id');
         $tab = config('services.sheets.stats_tab', 'Stats');
-        $credentialsPath = env('GOOGLE_APPLICATION_CREDENTIALS');
+        $credentialsPath = config('services.google.credentials_path');
 
         if (!$sheetId || !$credentialsPath || !file_exists($credentialsPath)) {
             Log::warning('StatsExportService: missing sheet configuration or credentials');
