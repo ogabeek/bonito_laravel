@@ -3,14 +3,17 @@
 namespace App\Models;
 
 use App\Enums\StudentStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Student extends Model
 {
-    protected $fillable = [ //fields that can be mass-assigned
+    use HasFactory;
+
+    protected $fillable = [ // fields that can be mass-assigned
         'uuid',
         'name',
         'parent_name',
@@ -28,8 +31,7 @@ class Student extends Model
         'status' => 'active', // Default status for new students (uses StudentStatus::ACTIVE)
     ];
 
-
-    //Automatically generate UUI when creating a student
+    // Automatically generate UUI when creating a student
     protected static function boot()
     {
         parent::boot();

@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Enums\LessonStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Lesson extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'teacher_id',
@@ -22,11 +23,11 @@ class Lesson extends Model
     ];
 
     protected $casts = [
-        'class_date' => 'date', //convert automatically to Carbon(date)
+        'class_date' => 'date', // convert automatically to Carbon(date)
         'status' => LessonStatus::class,
     ];
 
-    //Relationship: A lesson belongs to a teacher (includes soft-deleted teachers)
+    // Relationship: A lesson belongs to a teacher (includes soft-deleted teachers)
     public function teacher(): BelongsTo
     {
         return $this->belongsTo(Teacher::class)->withTrashed();
@@ -42,7 +43,7 @@ class Lesson extends Model
     public function scopeForMonth($query, $date)
     {
         return $query->whereYear('class_date', $date->year)
-                     ->whereMonth('class_date', $date->month);
+            ->whereMonth('class_date', $date->month);
     }
 
     // Scope: Filter upcoming lessons

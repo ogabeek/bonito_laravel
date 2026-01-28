@@ -1,7 +1,6 @@
 <?php
 
-test('the application returns a successful response', function () {
-    $response = $this->get('/');
-
-    $response->assertStatus(200);
+test('the root redirects to admin login', function () {
+    $this->get('/')
+        ->assertRedirect(route('admin.login'));
 });
