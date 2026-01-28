@@ -15,8 +15,17 @@ class CalendarService
      */
     public function getMonthData(?Request $request = null): array
     {
-        $year = $request?->get('year') ?? now()->year;
-        $month = $request?->get('month') ?? now()->month;
+        $now = now();
+
+        // Validate and sanitize year (reasonable range: 2000-2100)
+        $year = $request?->query('year');
+        $year = is_numeric($year) ? (int) $year : $now->year;
+        $year = max(2000, min(2100, $year));
+
+        // Validate and sanitize month (1-12)
+        $month = $request?->query('month');
+        $month = is_numeric($month) ? (int) $month : $now->month;
+        $month = max(1, min(12, $month));
 
         $currentMonth = Carbon::createFromDate($year, $month, 1);
 
