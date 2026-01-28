@@ -94,8 +94,8 @@ window.deleteLesson = function(lessonId) {
 
     clearLessonErrors();
     
-    fetch('/lesson/' + lessonId + '/delete', {
-        method: 'POST',
+    fetch('/lesson/' + lessonId, {
+        method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',

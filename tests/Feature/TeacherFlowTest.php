@@ -121,7 +121,7 @@ it('updates own lesson', function () {
     ]);
 
     $this->withSession(['teacher_id' => $teacher->id])
-        ->postJson(route('lesson.update', $lesson), [
+        ->putJson(route('lesson.update', $lesson), [
             'status' => LessonStatus::STUDENT_ABSENT->value,
             'topic' => 'Updated Topic',
             'homework' => 'Updated Homework',
@@ -148,7 +148,7 @@ it('prevents updating another teacher lesson', function () {
     ]);
 
     $this->withSession(['teacher_id' => $teacher1->id])
-        ->postJson(route('lesson.update', $lesson), [
+        ->putJson(route('lesson.update', $lesson), [
             'status' => LessonStatus::COMPLETED->value,
         ])
         ->assertForbidden();
@@ -165,7 +165,7 @@ it('deletes own lesson', function () {
     ]);
 
     $this->withSession(['teacher_id' => $teacher->id])
-        ->postJson(route('lesson.delete', $lesson))
+        ->deleteJson(route('lesson.delete', $lesson))
         ->assertSuccessful()
         ->assertJson(['success' => true]);
 
@@ -183,7 +183,7 @@ it('prevents deleting another teacher lesson', function () {
     ]);
 
     $this->withSession(['teacher_id' => $teacher1->id])
-        ->postJson(route('lesson.delete', $lesson))
+        ->deleteJson(route('lesson.delete', $lesson))
         ->assertForbidden();
 });
 

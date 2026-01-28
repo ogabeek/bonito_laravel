@@ -27,8 +27,8 @@ Route::middleware('teacher.auth')
     ->prefix('lesson')
     ->name('lesson.')
     ->group(function () {
-        Route::post('/{lesson}/update', [TeacherController::class, 'updateLesson'])->name('update');
-        Route::post('/{lesson}/delete', [TeacherController::class, 'deleteLesson'])->name('delete');
+        Route::put('/{lesson}', [TeacherController::class, 'updateLesson'])->name('update');
+        Route::delete('/{lesson}', [TeacherController::class, 'deleteLesson'])->name('delete');
     });
 
 // Student routes (UUID-based access)

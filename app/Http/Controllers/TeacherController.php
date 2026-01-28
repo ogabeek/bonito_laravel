@@ -84,10 +84,8 @@ class TeacherController extends Controller
     // Update lesson
     public function updateLesson(UpdateLessonRequest $request, Lesson $lesson)
     {
+        // Authorization already handled by UpdateLessonRequest::authorize()
         $teacherActor = Teacher::find(session('teacher_id'));
-        if (!$teacherActor || $lesson->teacher_id !== $teacherActor->id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
         $original = $lesson->getOriginal();
 
         $lesson->update([
