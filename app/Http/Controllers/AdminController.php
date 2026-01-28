@@ -69,68 +69,33 @@ class AdminController extends Controller
     }
 
     // Dashboard
-    public function dashboard(Request $request, CalendarService $calendar, LessonStatisticsService $statsService, StudentBalanceService $studentBalanceService, TeacherStatsService $teacherStatsService, LessonRepository $lessonRepo)
+    public function dashboard(Request $request, BillingDataService $billingService, CalendarService $calendar, LessonRepository $lessonRepo)
     {
-        $billing = $request->boolean('billing');
+        // Get common billing/stats data
+        $data = $billingService->build($request);
 
-        // Get calendar data
+        // Add calendar-specific data for dashboard display
         $calendarData = $calendar->getMonthData($request);
-        $currentMonth = $calendarData['currentMonth'];
-        $prevMonth = $calendarData['prevMonth'];
-        $nextMonth = $calendarData['nextMonth'];
-        $daysInMonth = $calendarData['daysInMonth'];
-        $monthStart = $calendarData['monthStart'];
+        $data['daysInMonth'] = $calendarData['daysInMonth'];
+        $data['monthStart'] = $calendarData['monthStart'];
 
-        // Get all lessons for selected month with relationships
-        $monthLessons = $lessonRepo->getForMonth($currentMonth, ['teacher', 'student']);
-
-        // Group lessons by student and date for calendar display
-        $lessonsThisMonth = $monthLessons->groupBy(function ($lesson) {
+        // Get lessons grouped by student+date for calendar display
+        $monthLessons = $lessonRepo->getForMonth($data['currentMonth'], ['teacher', 'student']);
+        $data['lessonsThisMonth'] = $monthLessons->groupBy(function ($lesson) {
             return $lesson->student_id.'_'.$lesson->class_date->format('Y-m-d');
         });
 
-        // Stats period: calendar month or billing (26 -> 25)
-        $periodLessons = $lessonRepo->getForPeriod($currentMonth, $billing, ['teacher', 'student']);
-
-        // Load teachers and students once for all operations
-        $teachers = Teacher::withFullDetails()->get();
-        $students = $studentBalanceService->enrichStudentsWithBalance();
-
-        $periodStats = $statsService->calculateStats($periodLessons);
-        $studentStats = $statsService->calculateStatsByStudent($periodLessons);
-        $teacherStats = $statsService->calculateStatsByTeacher($periodLessons);
-        $teacherStudentCounts = $teacherStatsService->buildTeacherStudentStats($teachers, $periodLessons);
-
-        $yearLessons = $lessonRepo->getForYear($currentMonth->year, ['teacher', 'student']);
-        $yearStatsByMonth = $statsService->calculateStatsByMonth($yearLessons);
-
-        $stats = [
-            'teachers' => $teachers->count(),
-            'students' => $students->count(),
+        // Summary stats for header
+        $data['stats'] = [
+            'teachers' => $data['teachers']->count(),
+            'students' => $data['students']->count(),
             'lessons_this_month' => $monthLessons->count(),
         ];
 
-        // Get archived (soft-deleted) teachers for restore functionality
-        $archivedTeachers = Teacher::onlyTrashed()->get();
+        // Archived teachers for restore functionality
+        $data['archivedTeachers'] = Teacher::onlyTrashed()->get();
 
-        return view('admin.dashboard', compact(
-            'stats',
-            'teachers',
-            'students',
-            'currentMonth',
-            'daysInMonth',
-            'monthStart',
-            'lessonsThisMonth',
-            'prevMonth',
-            'nextMonth',
-            'archivedTeachers',
-            'periodStats',
-            'studentStats',
-            'teacherStats',
-            'billing',
-            'yearStatsByMonth',
-            'teacherStudentCounts'
-        ));
+        return view('admin.dashboard', $data);
     }
 
     public function billing(Request $request, BillingDataService $billingService)

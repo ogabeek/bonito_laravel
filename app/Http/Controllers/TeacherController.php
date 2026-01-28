@@ -102,7 +102,7 @@ class TeacherController extends Controller
             $teacherActor
         );
         
-        return response()->json(['success' => true, 'lesson' => $lesson->fresh()]);
+        return response()->json(['success' => true, 'lesson' => $lesson]);
     }
     
     // Create new lesson
