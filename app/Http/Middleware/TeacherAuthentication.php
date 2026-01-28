@@ -20,7 +20,7 @@ class TeacherAuthentication
 
         // If route has a {teacher} parameter, verify it matches the logged-in teacher
         $teacher = $request->route('teacher');
-        if ($teacher && session('teacher_id') != $teacher->id) {
+        if ($teacher && (int) session('teacher_id') !== $teacher->id) {
             return redirect()->route('teacher.login', $teacher->id);
         }
 

@@ -18,14 +18,10 @@ trait LogsActivityActions
         if (isset($subject->name)) {
             $properties['name'] = $subject->name;
         }
-        if (isset($subject->student) && isset($subject->student->name)) {
+
+        // Use already-loaded student relationship to avoid N+1 query
+        if (method_exists($subject, 'student') && $subject->relationLoaded('student') && $subject->student) {
             $properties['student_name'] = $subject->student->name;
-        }
-        if (isset($properties['student_id']) && empty($properties['student_name'] ?? null) && method_exists($subject, 'student')) {
-            $student = $subject->student()->first();
-            if ($student && isset($student->name)) {
-                $properties['student_name'] = $student->name;
-            }
         }
 
         $logger = activity($logName);
