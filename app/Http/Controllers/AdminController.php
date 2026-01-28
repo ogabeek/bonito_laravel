@@ -2,25 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\LessonStatus;
-use App\Models\Teacher;
-use App\Models\Student;
-use App\Models\Lesson;
 use App\Concerns\LogsActivityActions;
-use App\Services\CalendarService;
-use App\Services\LessonStatisticsService;
-use App\Services\BalanceService;
-use App\Services\StudentBalanceService;
-use App\Services\TeacherStatsService;
-use App\Repositories\LessonRepository;
 use App\Http\Requests\AdminLoginRequest;
 use App\Http\Requests\CreateStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
+use App\Models\Student;
+use App\Models\Teacher;
+use App\Repositories\LessonRepository;
+use App\Services\BillingDataService;
+use App\Services\CalendarService;
+use App\Services\LessonStatisticsService;
+use App\Services\StudentBalanceService;
+use App\Services\TeacherStatsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Spatie\Activitylog\Models\Activity;
-use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -33,7 +30,7 @@ class AdminController extends Controller
         if (session('admin_authenticated')) {
             return redirect()->route('admin.dashboard');
         }
-        
+
         return view('admin.login');
     }
 
@@ -54,6 +51,7 @@ class AdminController extends Controller
         if ($valid) {
             $request->session()->regenerate();
             session(['admin_authenticated' => true]);
+
             return redirect()->route('admin.dashboard');
         }
 
@@ -66,6 +64,7 @@ class AdminController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         session()->forget('admin_authenticated');
+
         return redirect()->route('admin.login')->with('success', 'Logged out successfully');
     }
 
@@ -86,8 +85,8 @@ class AdminController extends Controller
         $monthLessons = $lessonRepo->getForMonth($currentMonth, ['teacher', 'student']);
 
         // Group lessons by student and date for calendar display
-        $lessonsThisMonth = $monthLessons->groupBy(function($lesson) {
-            return $lesson->student_id . '_' . $lesson->class_date->format('Y-m-d');
+        $lessonsThisMonth = $monthLessons->groupBy(function ($lesson) {
+            return $lesson->student_id.'_'.$lesson->class_date->format('Y-m-d');
         });
 
         // Stats period: calendar month or billing (26 -> 25)
@@ -134,15 +133,14 @@ class AdminController extends Controller
         ));
     }
 
-    public function billing(Request $request, CalendarService $calendar, LessonStatisticsService $statsService, StudentBalanceService $studentBalanceService, TeacherStatsService $teacherStatsService, LessonRepository $lessonRepo)
+    public function billing(Request $request, BillingDataService $billingService)
     {
-        $data = $this->buildBillingData($request, $calendar, $statsService, $studentBalanceService, $teacherStatsService, $lessonRepo);
-        return view('admin.billing', $data);
+        return view('admin.billing', $billingService->build($request));
     }
 
-    public function exportBilling(Request $request, CalendarService $calendar, LessonStatisticsService $statsService, StudentBalanceService $studentBalanceService, TeacherStatsService $teacherStatsService, LessonRepository $lessonRepo, \App\Services\StatsExportService $exporter)
+    public function exportBilling(Request $request, BillingDataService $billingService, \App\Services\StatsExportService $exporter)
     {
-        $data = $this->buildBillingData($request, $calendar, $statsService, $studentBalanceService, $teacherStatsService, $lessonRepo);
+        $data = $billingService->build($request);
         $exported = $exporter->export($data);
 
         return redirect()
@@ -152,60 +150,6 @@ class AdminController extends Controller
                 'month' => $data['currentMonth']->month,
             ])
             ->with($exported ? 'success' : 'error', $exported ? 'Stats exported to sheet' : 'Failed to export stats');
-    }
-
-    protected function buildBillingData(Request $request, CalendarService $calendar, LessonStatisticsService $statsService, StudentBalanceService $studentBalanceService, TeacherStatsService $teacherStatsService, LessonRepository $lessonRepo): array
-    {
-        $billing = $request->boolean('billing');
-
-        $calendarData = $calendar->getMonthData($request);
-        $currentMonth = $calendarData['currentMonth'];
-        $prevMonth = $calendarData['prevMonth'];
-        $nextMonth = $calendarData['nextMonth'];
-
-        // Lessons for period (calendar or billing 26-25)
-        $periodLessons = $lessonRepo->getForPeriod($currentMonth, $billing, ['teacher', 'student']);
-
-        // Load teachers and students once for all operations
-        $teachers = Teacher::withFullDetails()->get();
-        $students = $studentBalanceService->enrichStudentsWithBalance();
-
-        $periodStats = $statsService->calculateStats($periodLessons);
-        $studentStats = $statsService->calculateStatsByStudent($periodLessons);
-        $teacherStats = $statsService->calculateStatsByTeacher($periodLessons);
-
-        $yearLessons = $lessonRepo->getForYear($currentMonth->year, ['teacher', 'student']);
-        $yearStatsByMonth = $statsService->calculateStatsByMonth($yearLessons);
-        $studentMonthStats = $yearLessons->groupBy('student_id')->map(function($lessonsForStudent) use ($statsService) {
-            return $lessonsForStudent
-                ->groupBy(fn($lesson) => (int) $lesson->class_date->format('n'))
-                ->map(fn($monthLessons) => $statsService->calculateStats($monthLessons));
-        });
-        $teacherMonthStats = $yearLessons->groupBy('teacher_id')->map(function($lessonsForTeacher) use ($statsService) {
-            return $lessonsForTeacher
-                ->groupBy(fn($lesson) => (int) $lesson->class_date->format('n'))
-                ->map(fn($monthLessons) => $statsService->calculateStats($monthLessons));
-        });
-        $months = range(1, 12);
-
-        $teacherStudentCounts = $teacherStatsService->buildTeacherStudentStats($teachers, $periodLessons);
-
-        return compact(
-            'teachers',
-            'students',
-            'currentMonth',
-            'prevMonth',
-            'nextMonth',
-            'periodStats',
-            'studentStats',
-            'teacherStats',
-            'billing',
-            'yearStatsByMonth',
-            'studentMonthStats',
-            'teacherMonthStats',
-            'months',
-            'teacherStudentCounts'
-        );
     }
 
     // Teachers Management
@@ -230,6 +174,7 @@ class AdminController extends Controller
     {
         $teacher->delete();
         $this->logActivity($teacher, 'teacher_archived');
+
         return redirect()->route('admin.dashboard')->with('success', 'Teacher archived successfully!');
     }
 
@@ -238,6 +183,7 @@ class AdminController extends Controller
         $teacherModel = Teacher::withTrashed()->findOrFail($teacher);
         $teacherModel->restore();
         $this->logActivity($teacherModel, 'teacher_restored');
+
         return redirect()->route('admin.dashboard')->with('success', 'Teacher restored successfully!');
     }
 
@@ -323,6 +269,7 @@ class AdminController extends Controller
     public function logs()
     {
         $logs = Activity::latest()->with('subject')->limit(200)->get();
+
         return view('admin.logs', compact('logs'));
     }
 }
