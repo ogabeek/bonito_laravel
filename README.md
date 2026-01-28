@@ -42,12 +42,16 @@ Simplified management system for online school with ~10 teachers, ~100 students,
  - statistics page 
  - managing students and teachers
 
-**4. Google Sheets Sync**
-- Balance import: `BalanceService` pulls `uuid/balance` from Google Sheets via service account
-- Stats export: billing page "Export to Sheet" button writes to configured tab
-- One-way sync (Sheets → app for balances; app → Sheets for stats)
+**4. Balance Tracking**
+- Syncs "Paid classes" from Google Sheets with completed lessons from database
+- Auto-calculates balance (paid - used) in real-time
+- View at `/admin/billing`
 
-**5. Automated Backups**
+**5. Google Sheets Integration**
+- Balance import & stats export via service account
+- Config: See `DEPLOYMENT.md` for setup
+
+**6. Automated Backups**
 - Twice daily: 4:30 AM and 4:30 PM CET (Europe/Madrid timezone)
 - Retention: 360 days (all), 720 days (daily), 3 years (monthly)
 - Storage: `storage/app/private/Laravel/` (local), future: remote backup server

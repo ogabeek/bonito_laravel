@@ -4,7 +4,7 @@
 - **Hosting:** Laravel Forge + DigitalOcean
 - **Server:** 2 GB RAM (Premium AMD) · 1 vCPU · 50 GB SSD ($14/mo)
 - **Region:** Amsterdam 3
-- **Domain:** t.leaguesofcode.space
+- **Domain:** your-domain.com (example)
 - **DNS:** Cloudflare
 - **Monitoring:** Sentry (Student plan, expires Jan 15, 2027)
 - **Repository:** ogabeek/bonito_laravel (master branch)
@@ -22,7 +22,7 @@ APP_NAME="Boniato School"
 APP_ENV=production
 APP_DEBUG=false
 APP_TIMEZONE=Europe/Amsterdam
-APP_URL=https://t.leaguesofcode.space
+APP_URL=https://your-domain.com
 ADMIN_PASSWORD=your_secure_password_here
 
 # Database (Forge provisions MySQL automatically)
@@ -38,14 +38,14 @@ SESSION_DRIVER=database
 CACHE_STORE=database
 QUEUE_CONNECTION=database
 
-# Google Sheets Integration
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
-GOOGLE_SHEETS_BALANCE_SHEET_ID=your_sheet_id
-GOOGLE_SHEETS_BALANCE_TAB=Balance
+# Google Sheets Integration (Balance Tracking)
+GOOGLE_APPLICATION_CREDENTIALS=/home/forge/your-domain.com/storage/app/google-credentials.json
+GOOGLE_SHEETS_BALANCE_SHEET_ID=your_spreadsheet_id_here
+GOOGLE_SHEETS_BALANCE_TAB="Clients balance"
 GOOGLE_SHEETS_STATS_TAB=Stats
 
-# Sentry Error Monitoring (see Monitoring.md for details)
-SENTRY_LARAVEL_DSN=https://b7c6b641909f10e37319f6f112e82a78@o4510713480544256.ingest.de.sentry.io/4510713949061200
+# Sentry Error Monitoring (optional - see sentry.io for free tier)
+SENTRY_LARAVEL_DSN=your_sentry_dsn_here
 SENTRY_ENVIRONMENT=production
 SENTRY_SEND_DEFAULT_PII=false
 SENTRY_SAMPLE_RATE=0.25
@@ -77,7 +77,7 @@ php artisan migrate:fresh --seed --force
 
 ### 4. DNS Configuration (Cloudflare)
 
-1. Add A record: `t.leaguesofcode.space` → Server IP
+1. Add A record: `your-domain.com` → Server IP
 2. Enable Cloudflare proxy (orange cloud)
 3. SSL/TLS mode: Full (strict)
 4. Force HTTPS redirect
@@ -129,7 +129,8 @@ php artisan view:cache
 - [ ] Admin login tested at `/admin`
 - [ ] Teacher creation tested (URL shown in success message)
 - [ ] Student UUID links working
-- [ ] Google Sheets integration configured
+- [ ] Balance tracking active (admin billing page shows balances)
+- [ ] Google Sheets integration configured (upload google-credentials.json)
 - [ ] Billing export functional
 - [ ] Automated backups running (check after 24h)
 - [ ] Sentry error tracking active
@@ -212,10 +213,13 @@ ssh forge@server-ip
 - Migrations handle schema automatically
 - Seed data: 9 teachers, 30 students, ~300 lessons (Nov-Dec 2025)
 
-⚠️ **Google Sheets:**
-- Upload service account JSON to server
-- Set `GOOGLE_APPLICATION_CREDENTIALS` path
-- Configure sheet IDs in environment
+⚠️ **Google Sheets (Balance System):**
+- Upload `google-credentials.json` to `storage/app/` on server
+- Set `GOOGLE_APPLICATION_CREDENTIALS` path in environment
+- Configure your spreadsheet ID in `GOOGLE_SHEETS_BALANCE_SHEET_ID`
+- Tab: "Clients balance" with columns: UUID (S), Paid classes (Q)
+- Platform auto-calculates: Balance = Paid - Used completed lessons
+- View balances at `/admin/billing`
 
 ⚠️ **DNS & SSL:**
 - Domain: t.leaguesofcode.space
