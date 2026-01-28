@@ -155,9 +155,11 @@ class AdminController extends Controller
     // Teachers Management
     public function createTeacher(Request $request)
     {
+        $minLength = config('validation.password_min_length', 4);
+
         $request->validate([
             'name' => 'required|string|max:255',
-            'password' => 'required|string|min:4',
+            'password' => "required|string|min:{$minLength}",
         ]);
 
         $teacher = Teacher::create([

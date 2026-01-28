@@ -12,14 +12,12 @@ class LessonRepository
     /**
      * Get lessons for a specific month
      *
-     * @param Carbon $month
-     * @param array $with Relationships to eager load
-     * @return Collection
+     * @param  array  $with  Relationships to eager load
      */
     public function getForMonth(Carbon $month, array $with = []): Collection
     {
         return Lesson::query()
-            ->when(!empty($with), fn($q) => $q->with($with))
+            ->when(! empty($with), fn ($q) => $q->with($with))
             ->forMonth($month)
             ->get();
     }
@@ -27,10 +25,7 @@ class LessonRepository
     /**
      * Get lessons for a specific teacher in a given month
      *
-     * @param int $teacherId
-     * @param Carbon $month
-     * @param array $with Relationships to eager load
-     * @return Collection
+     * @param  array  $with  Relationships to eager load
      */
     public function getForTeacher(int $teacherId, Carbon $month, array $with = ['student']): Collection
     {
@@ -44,9 +39,7 @@ class LessonRepository
     /**
      * Get lessons for a specific student
      *
-     * @param int $studentId
-     * @param array $with Relationships to eager load
-     * @return Collection
+     * @param  array  $with  Relationships to eager load
      */
     public function getForStudent(int $studentId, array $with = ['teacher']): Collection
     {
@@ -59,9 +52,7 @@ class LessonRepository
     /**
      * Get upcoming lessons for a student
      *
-     * @param int $studentId
-     * @param array $with Relationships to eager load
-     * @return Collection
+     * @param  array  $with  Relationships to eager load
      */
     public function getUpcomingForStudent(int $studentId, array $with = ['teacher']): Collection
     {
@@ -75,9 +66,7 @@ class LessonRepository
     /**
      * Get past lessons for a student
      *
-     * @param int $studentId
-     * @param array $with Relationships to eager load
-     * @return Collection
+     * @param  array  $with  Relationships to eager load
      */
     public function getPastForStudent(int $studentId, array $with = ['teacher']): Collection
     {
@@ -91,20 +80,20 @@ class LessonRepository
     /**
      * Get lessons for a specific month or billing period
      *
-     * @param Carbon $month
-     * @param bool $isBilling Whether to use billing period (26th to 25th) or calendar month
-     * @param array $with Relationships to eager load
-     * @return Collection
+     * @param  bool  $isBilling  Whether to use billing period (26th to 25th) or calendar month
+     * @param  array  $with  Relationships to eager load
      */
     public function getForPeriod(Carbon $month, bool $isBilling = false, array $with = []): Collection
     {
         if ($isBilling) {
-            // Billing period: 26th of previous month to 25th of current month
-            $periodStart = $month->copy()->subMonthNoOverflow()->day(26);
-            $periodEnd = $month->copy()->day(25)->endOfDay();
+            // Billing period: configurable start/end days
+            $startDay = config('billing.period_start_day', 26);
+            $endDay = config('billing.period_end_day', 25);
+            $periodStart = $month->copy()->subMonthNoOverflow()->day($startDay);
+            $periodEnd = $month->copy()->day($endDay)->endOfDay();
 
             return Lesson::query()
-                ->when(!empty($with), fn($q) => $q->with($with))
+                ->when(! empty($with), fn ($q) => $q->with($with))
                 ->whereBetween('class_date', [$periodStart, $periodEnd])
                 ->get();
         }
@@ -116,14 +105,12 @@ class LessonRepository
     /**
      * Get lessons for a specific year
      *
-     * @param int $year
-     * @param array $with Relationships to eager load
-     * @return Collection
+     * @param  array  $with  Relationships to eager load
      */
     public function getForYear(int $year, array $with = []): Collection
     {
         return Lesson::query()
-            ->when(!empty($with), fn($q) => $q->with($with))
+            ->when(! empty($with), fn ($q) => $q->with($with))
             ->whereYear('class_date', $year)
             ->get();
     }
@@ -131,7 +118,7 @@ class LessonRepository
     /**
      * Get count of used classes by student (chargeable statuses)
      *
-     * @param string|null $upToDate Date to count up to (defaults to today)
+     * @param  string|null  $upToDate  Date to count up to (defaults to today)
      * @return \Illuminate\Support\Collection Key-value pairs of student_id => count
      */
     public function getUsedCountsByStudent(?string $upToDate = null): \Illuminate\Support\Collection

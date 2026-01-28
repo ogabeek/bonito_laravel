@@ -22,8 +22,10 @@ class AdminLoginRequest extends FormRequest
      */
     public function rules(): array
     {
+        $minLength = config('validation.password_min_length', 4);
+
         return [
-            'password' => ['required', 'string', 'min:4'],
+            'password' => ['required', 'string', "min:{$minLength}"],
         ];
     }
 
@@ -34,9 +36,11 @@ class AdminLoginRequest extends FormRequest
      */
     public function messages(): array
     {
+        $minLength = config('validation.password_min_length', 4);
+
         return [
             'password.required' => 'Password is required',
-            'password.min' => 'Password must be at least 4 characters',
+            'password.min' => "Password must be at least {$minLength} characters",
         ];
     }
 }
