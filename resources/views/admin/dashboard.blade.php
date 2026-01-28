@@ -12,16 +12,7 @@
         </div>
     </x-page-header>
 
-    @if ($errors->any())
-        <div class="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded">
-            <div class="font-semibold mb-1">Please fix the following:</div>
-            <ul class="list-disc ml-4 space-y-1">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    <x-error-list />
 
     <x-card>
         <div class="border-b flex gap-4 px-4">
