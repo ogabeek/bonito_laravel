@@ -52,7 +52,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Teachers
         Route::post('/teachers', [\App\Http\Controllers\AdminController::class, 'createTeacher'])->name('teachers.create');
         Route::delete('/teachers/{teacher}', [\App\Http\Controllers\AdminController::class, 'deleteTeacher'])->name('teachers.delete');
-        Route::post('/teachers/{id}/restore', [\App\Http\Controllers\AdminController::class, 'restoreTeacher'])->name('teachers.restore');
+        Route::post('/teachers/{teacher}/restore', [\App\Http\Controllers\AdminController::class, 'restoreTeacher'])->name('teachers.restore');
 
         // Students
         Route::post('/students', [\App\Http\Controllers\AdminController::class, 'createStudent'])->name('students.store');

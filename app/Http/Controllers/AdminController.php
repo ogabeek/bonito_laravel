@@ -233,11 +233,11 @@ class AdminController extends Controller
         return redirect()->route('admin.dashboard')->with('success', 'Teacher archived successfully!');
     }
 
-    public function restoreTeacher($id)
+    public function restoreTeacher(int $teacher)
     {
-        $teacher = Teacher::withTrashed()->findOrFail($id);
-        $teacher->restore();
-        $this->logActivity($teacher, 'teacher_restored');
+        $teacherModel = Teacher::withTrashed()->findOrFail($teacher);
+        $teacherModel->restore();
+        $this->logActivity($teacherModel, 'teacher_restored');
         return redirect()->route('admin.dashboard')->with('success', 'Teacher restored successfully!');
     }
 

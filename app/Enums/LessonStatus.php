@@ -2,8 +2,11 @@
 
 namespace App\Enums;
 
+use App\Enums\Traits\HasValues;
+
 enum LessonStatus: string
 {
+    use HasValues;
     case COMPLETED = 'completed';
     case STUDENT_ABSENT = 'student_absent';
     case STUDENT_CANCELLED = 'student_cancelled';
@@ -20,14 +23,6 @@ enum LessonStatus: string
             self::STUDENT_CANCELLED => 'Student Cancelled',
             self::TEACHER_CANCELLED => 'Teacher Cancelled',
         };
-    }
-
-    /**
-     * Get all status values as array (for validation)
-     */
-    public static function values(): array
-    {
-        return array_column(self::cases(), 'value');
     }
 
     /**

@@ -2,8 +2,11 @@
 
 namespace App\Enums;
 
+use App\Enums\Traits\HasValues;
+
 enum StudentStatus: string
 {
+    use HasValues;
     case ACTIVE = 'active';
     case INACTIVE = 'inactive';
     case HOLIDAY = 'holiday';
@@ -22,14 +25,6 @@ enum StudentStatus: string
             self::FINISHED => 'Finished',
             self::DROPPED => 'Dropped',
         };
-    }
-
-    /**
-     * Get all status values as array (for validation)
-     */
-    public static function values(): array
-    {
-        return array_column(self::cases(), 'value');
     }
 
     /**
