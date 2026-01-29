@@ -6,6 +6,10 @@ use App\Models\Teacher;
 use App\Repositories\LessonRepository;
 use Illuminate\Http\Request;
 
+/**
+ * * SERVICE: Aggregates all data for billing/statistics views
+ * * Orchestrator pattern - coordinates multiple services to build view data
+ */
 class BillingDataService
 {
     public function __construct(
@@ -17,9 +21,8 @@ class BillingDataService
     ) {}
 
     /**
-     * Build all data needed for billing/stats views.
-     *
-     * @return array<string, mixed>
+     * * Main entry point - builds all data for admin billing view
+     * ? $billing mode: true = 26th-25th period, false = calendar month
      */
     public function build(Request $request): array
     {
@@ -30,10 +33,8 @@ class BillingDataService
         $prevMonth = $calendarData['prevMonth'];
         $nextMonth = $calendarData['nextMonth'];
 
-        // Lessons for period (calendar or billing 26-25)
         $periodLessons = $this->lessonRepo->getForPeriod($currentMonth, $billing, ['teacher', 'student']);
 
-        // Load teachers and students once for all operations
         $teachers = Teacher::withFullDetails()->get();
         $students = $this->studentBalanceService->enrichStudentsWithBalance();
 
@@ -50,6 +51,7 @@ class BillingDataService
 
         $teacherStudentCounts = $this->teacherStatsService->buildTeacherStudentStats($teachers, $periodLessons);
 
+        // * compact() creates array from variable names - Laravel convention
         return compact(
             'teachers',
             'students',
@@ -69,7 +71,7 @@ class BillingDataService
     }
 
     /**
-     * Build monthly stats grouped by a foreign key (student_id or teacher_id).
+     * * Groups lessons by student/teacher, then by month, calculates stats for each
      */
     protected function buildMonthlyStatsByGroup($lessons, string $groupKey)
     {

@@ -5,7 +5,8 @@ namespace App\Services;
 use Carbon\Carbon;
 
 /**
- * Exports billing/stats data to a Google Sheets tab.
+ * * SERVICE: Exports billing stats to Google Sheets
+ * * Used for sharing reports with admin via spreadsheet
  */
 class StatsExportService
 {
@@ -14,9 +15,7 @@ class StatsExportService
     ) {}
 
     /**
-     * Export stats to a Google Sheet tab (overwrites the tab content).
-     *
-     * @param  array<string, mixed>  $payload  The billing data payload
+     * * Export stats to Google Sheet (replaces tab content)
      */
     public function export(array $payload): bool
     {
@@ -32,10 +31,7 @@ class StatsExportService
     }
 
     /**
-     * Build export rows from billing payload.
-     *
-     * @param  array<string, mixed>  $payload
-     * @return array<int, array<int, mixed>>
+     * * Transforms billing payload into 2D array for spreadsheet
      */
     protected function buildRows(array $payload): array
     {
@@ -50,16 +46,17 @@ class StatsExportService
 
         $rows = [];
 
+        // * Header section
         $rows[] = ['Period', $currentMonthLabel, $modeLabel];
         $rows[] = ['Generated at', now()->toDateTimeString()];
         $rows[] = [];
 
-        // Summary
+        // * Summary section
         $rows[] = ['Summary', 'Done', 'C', 'CT', 'A', 'Total'];
         $rows[] = $this->buildStatsRow('', $periodStats);
         $rows[] = [];
 
-        // Students
+        // * Students section with balance
         $rows[] = ['Students', 'Done', 'C', 'CT', 'A', 'Total', 'Balance'];
         foreach ($students as $student) {
             $stats = $studentStats[$student->id] ?? $this->emptyStats();
@@ -69,7 +66,7 @@ class StatsExportService
         }
         $rows[] = [];
 
-        // Teachers
+        // * Teachers section
         $rows[] = ['Teachers', 'Done', 'C', 'CT', 'A', 'Total'];
         foreach ($teachers as $teacher) {
             $stats = $teacherStats[$teacher->id] ?? $this->emptyStats();
@@ -77,7 +74,7 @@ class StatsExportService
         }
         $rows[] = [];
 
-        // Year-to-date by month
+        // * Year-to-date by month
         $rows[] = ['Year to Date', 'Done', 'C', 'CT', 'A', 'Total'];
         foreach ($yearStatsByMonth as $ym => $stats) {
             [$year, $month] = explode('-', $ym);
@@ -89,10 +86,7 @@ class StatsExportService
     }
 
     /**
-     * Build a single stats row with consistent column ordering.
-     *
-     * @param  array<string, int>  $stats
-     * @return array<int, mixed>
+     * * Column order: Label, Done, Cancelled, Teacher Cancelled, Absent, Total
      */
     protected function buildStatsRow(string $label, array $stats): array
     {
@@ -106,11 +100,6 @@ class StatsExportService
         ];
     }
 
-    /**
-     * Get an empty stats array with default values.
-     *
-     * @return array<string, int>
-     */
     protected function emptyStats(): array
     {
         return [

@@ -10,10 +10,9 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Handles all Google Sheets API interactions.
- *
- * Centralizes authentication, reading, and writing operations
- * to Google Sheets for the application.
+ * * SERVICE: Google Sheets API wrapper
+ * * Handles auth, read, and write operations to Google Sheets
+ * ! Requires: config/services.php sheets config + credentials JSON file
  */
 class GoogleSheetsClient
 {
@@ -22,10 +21,8 @@ class GoogleSheetsClient
     protected ?string $sheetId = null;
 
     /**
-     * Initialize the Google Sheets client.
-     *
-     * @param  bool  $readonly  Whether to use readonly scope
-     * @return bool True if initialization was successful
+     * * Must call before read/write. Sets up Google API client.
+     * ? readonly: true = Sheets::SPREADSHEETS_READONLY scope (safer)
      */
     public function initialize(bool $readonly = true): bool
     {
@@ -47,6 +44,7 @@ class GoogleSheetsClient
             $client->setScopes([
                 $readonly ? Sheets::SPREADSHEETS_READONLY : Sheets::SPREADSHEETS,
             ]);
+            // * Timeout prevents hanging on slow connections
             $client->setHttpClient(new \GuzzleHttp\Client([
                 'timeout' => 10,
                 'connect_timeout' => 5,
@@ -62,10 +60,9 @@ class GoogleSheetsClient
     }
 
     /**
-     * Read values from a specific tab.
+     * * Read all values from a tab/sheet
      *
-     * @param  string  $tab  The tab/sheet name to read from
-     * @return Collection<int, array<int, mixed>> Collection of rows
+     * @param  string  $tab  Sheet tab name (e.g., 'balances', 'Stats')
      */
     public function read(string $tab): Collection
     {
@@ -88,11 +85,8 @@ class GoogleSheetsClient
     }
 
     /**
-     * Write values to a specific tab (clears and replaces content).
-     *
-     * @param  string  $tab  The tab/sheet name to write to
-     * @param  array<int, array<int, mixed>>  $rows  The rows to write
-     * @return bool True if write was successful
+     * * Write rows to a tab (clears existing content first)
+     * ! Destructive - completely replaces tab content
      */
     public function write(string $tab, array $rows): bool
     {
@@ -101,14 +95,12 @@ class GoogleSheetsClient
         }
 
         try {
-            // Clear existing content
             $this->service->spreadsheets_values->clear(
                 $this->sheetId,
                 $tab,
                 new ClearValuesRequest
             );
 
-            // Write new data
             $body = new ValueRange(['values' => $rows]);
             $this->service->spreadsheets_values->update(
                 $this->sheetId,
@@ -128,9 +120,6 @@ class GoogleSheetsClient
         }
     }
 
-    /**
-     * Check if the client has been initialized successfully.
-     */
     public function isInitialized(): bool
     {
         return $this->service !== null;

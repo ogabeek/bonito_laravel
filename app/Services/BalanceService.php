@@ -5,10 +5,9 @@ namespace App\Services;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Fetches "Paid Classes" data from Google Sheets.
- *
- * Payment tracking happens in Google Sheets (admin manual entry).
- * Returns array of [uuid => paid_classes_count].
+ * * SERVICE: Fetches "Paid Classes" from Google Sheets
+ * ! Payment data lives in Google Sheets (manual admin entry), not in database
+ * ? Why Google Sheets? Admin prefers spreadsheet for payment tracking
  */
 class BalanceService
 {
@@ -17,9 +16,8 @@ class BalanceService
     ) {}
 
     /**
-     * Get all student balances from Google Sheets.
-     *
-     * @return array<string, int|string> Map of UUID to paid classes count
+     * * Returns [uuid => paid_classes_count] from Google Sheets
+     * ! Cached for 5 minutes to avoid API rate limits
      */
     public function getBalances(): array
     {
@@ -37,10 +35,9 @@ class BalanceService
                 return [];
             }
 
-            // First row = headers, convert to lowercase for matching
+            // * pull(0) removes and returns first row (headers)
             $headers = array_map('strtolower', $rows->pull(0));
 
-            // Find column indexes for UUID (student ID) and Paid Classes
             $uuidIndex = array_search('uuid', $headers);
             $balanceIndex = array_search('paid classes', $headers);
 
@@ -48,7 +45,6 @@ class BalanceService
                 return [];
             }
 
-            // Build array mapping UUID → Paid Classes count
             $balances = [];
             foreach ($rows as $row) {
                 $uuid = $row[$uuidIndex] ?? null;
@@ -64,10 +60,7 @@ class BalanceService
     }
 
     /**
-     * Get paid classes count for a specific student.
-     *
-     * @param  string|null  $uuid  Student's UUID
-     * @return int|null Number of paid classes, or null if not found
+     * Get paid classes for single student by UUID
      */
     public function getBalanceForUuid(?string $uuid): ?int
     {

@@ -5,12 +5,13 @@ namespace App\Services;
 use Illuminate\Support\Facades\Hash;
 
 /**
- * Handles password hashing and verification for authentication.
+ * * SERVICE: Password hashing wrapper
+ * ? Why wrapper? Allows easy testing via mocking and centralizes auth logic
  */
 class AuthenticationService
 {
     /**
-     * Verify a password against a hashed password.
+     * * Hash::check() compares plaintext against bcrypt hash
      */
     public function verifyPassword(string $inputPassword, string $hashedPassword): bool
     {
@@ -18,7 +19,7 @@ class AuthenticationService
     }
 
     /**
-     * Hash a password using bcrypt.
+     * * Hash::make() uses bcrypt by default (configurable in config/hashing.php)
      */
     public function hash(string $password): string
     {

@@ -33,6 +33,7 @@ storage/app/*.json
 # Testing
 .phpunit.result.cache
 /.phpunit.cache
+test-ray.php
 
 # Legacy tools
 Homestead.json

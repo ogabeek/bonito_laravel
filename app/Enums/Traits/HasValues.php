@@ -2,13 +2,12 @@
 
 namespace App\Enums\Traits;
 
+/**
+ * * TRAIT: Adds values() helper to enums
+ * ? Used for validation: Rule::in(LessonStatus::values())
+ */
 trait HasValues
 {
-    /**
-     * Get all enum values as array (for validation).
-     *
-     * @return array<string>
-     */
     public static function values(): array
     {
         return array_column(self::cases(), 'value');

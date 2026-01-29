@@ -6,14 +6,13 @@ use App\Enums\LessonStatus;
 use Illuminate\Support\Collection;
 
 /**
- * Calculates lesson statistics from collections of lessons.
+ * * SERVICE: Calculates lesson statistics from collections
+ * * Pure functions - no side effects, just transforms data
  */
 class LessonStatisticsService
 {
     /**
-     * Calculate lesson statistics from a collection.
-     *
-     * @return array{total: int, completed: int, student_absent: int, student_cancelled: int, teacher_cancelled: int}
+     * * Core stats calculation - counts lessons by status
      */
     public function calculateStats(Collection $lessons): array
     {
@@ -27,9 +26,7 @@ class LessonStatisticsService
     }
 
     /**
-     * Calculate statistics grouped by teacher.
-     *
-     * @return Collection<int, array{total: int, completed: int, student_absent: int, student_cancelled: int, teacher_cancelled: int}>
+     * * Returns [teacher_id => stats_array]
      */
     public function calculateStatsByTeacher(Collection $lessons): Collection
     {
@@ -37,9 +34,7 @@ class LessonStatisticsService
     }
 
     /**
-     * Calculate statistics grouped by student.
-     *
-     * @return Collection<int, array{total: int, completed: int, student_absent: int, student_cancelled: int, teacher_cancelled: int}>
+     * * Returns [student_id => stats_array]
      */
     public function calculateStatsByStudent(Collection $lessons): Collection
     {
@@ -47,9 +42,7 @@ class LessonStatisticsService
     }
 
     /**
-     * Calculate statistics grouped by month.
-     *
-     * @return Collection<string, array{total: int, completed: int, student_absent: int, student_cancelled: int, teacher_cancelled: int}>
+     * * Returns ['2024-01' => stats_array, '2024-02' => stats_array, ...]
      */
     public function calculateStatsByMonth(Collection $lessons): Collection
     {
@@ -58,9 +51,6 @@ class LessonStatisticsService
         });
     }
 
-    /**
-     * Count lessons by status.
-     */
     private function countByStatus(Collection $lessons, LessonStatus $status): int
     {
         return $lessons->filter(fn ($lesson) => $lesson->status === $status)->count();

@@ -1,28 +1,39 @@
 <?php
 
+/**
+ * * ROUTES: Web routes for the application
+ *
+ * Route Groups:
+ * - /           → Redirects to admin login
+ * - /teacher/*  → Teacher login & dashboard (session auth)
+ * - /lesson/*   → Lesson CRUD (teacher auth required)
+ * - /student/*  → Student dashboard (UUID-based, no login)
+ * - /admin/*    → Admin dashboard & management
+ */
+
 use App\Http\Controllers\TeacherController;
 
 Route::get('/', function () {
     return redirect()->route('admin.login');
 });
 
-// Teacher routes
+// * TEACHER ROUTES: /teacher/{slug}/...
 Route::prefix('teacher')->name('teacher.')->group(function () {
-    // Authentication
+    // Public: login page and form submit
     Route::get('/{teacher}', [TeacherController::class, 'showLogin'])->name('login');
     Route::post('/{teacher}/login', [TeacherController::class, 'login'])
-        ->middleware('throttle:5,1')
+        ->middleware('throttle:5,1')  // ! Rate limit: 5 attempts per minute
         ->name('login.submit');
     Route::post('/logout', [TeacherController::class, 'logout'])->name('logout');
 
-    // Protected routes (require teacher authentication)
+    // Protected: requires teacher.auth middleware
     Route::middleware('teacher.auth')->group(function () {
         Route::get('/{teacher}/dashboard', [TeacherController::class, 'dashboard'])->name('dashboard');
         Route::post('/lesson/create', [TeacherController::class, 'createLesson'])->name('lesson.create');
     });
 });
 
-// Lesson routes (shared, with model binding)
+// * LESSON ROUTES: /lesson/{id}
 Route::middleware('teacher.auth')
     ->prefix('lesson')
     ->name('lesson.')
@@ -31,30 +42,31 @@ Route::middleware('teacher.auth')
         Route::delete('/{lesson}', [TeacherController::class, 'deleteLesson'])->name('delete');
     });
 
-// Student routes (UUID-based access)
+// * STUDENT ROUTES: /student/{uuid}
+// ? No auth required - UUID acts as access token
 Route::prefix('student')->name('student.')->group(function () {
     Route::get('/{student}', [\App\Http\Controllers\StudentController::class, 'dashboard'])->name('dashboard');
 });
 
-// Admin routes
+// * ADMIN ROUTES: /admin/...
 Route::prefix('admin')->name('admin.')->group(function () {
-    // Auth routes (public)
+    // Public: login
     Route::get('/login', [\App\Http\Controllers\AdminController::class, 'showLogin'])->name('login');
     Route::post('/login', [\App\Http\Controllers\AdminController::class, 'login'])
         ->middleware('throttle:5,1')
         ->name('login.submit');
     Route::post('/logout', [\App\Http\Controllers\AdminController::class, 'logout'])->name('logout');
-    
-    // Protected routes (require session)
+
+    // Protected: requires admin.auth middleware
     Route::middleware('admin.auth')->group(function () {
         Route::get('/', [\App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
-        
-        // Teachers
+
+        // Teachers CRUD
         Route::post('/teachers', [\App\Http\Controllers\AdminController::class, 'createTeacher'])->name('teachers.create');
         Route::delete('/teachers/{teacher}', [\App\Http\Controllers\AdminController::class, 'deleteTeacher'])->name('teachers.delete');
         Route::post('/teachers/{teacher}/restore', [\App\Http\Controllers\AdminController::class, 'restoreTeacher'])->name('teachers.restore');
 
-        // Students
+        // Students CRUD
         Route::post('/students', [\App\Http\Controllers\AdminController::class, 'createStudent'])->name('students.store');
         Route::get('/students/{student}/edit', [\App\Http\Controllers\AdminController::class, 'editStudentForm'])->name('students.edit');
         Route::put('/students/{student}', [\App\Http\Controllers\AdminController::class, 'updateStudent'])->name('students.update');
