@@ -2,45 +2,15 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class TeacherLoginRequest extends FormRequest
+/**
+ * ! FORM REQUEST: Teacher Login Validation
+ * * Purpose: Validates teacher login form data
+ * * Why: Specific request class for teacher authentication
+ * * What: Inherits all password validation from BaseLoginRequest
+ * ? Kept separate for future teacher-specific rules (e.g., account verification)
+ */
+class TeacherLoginRequest extends BaseLoginRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        // Anyone can attempt to login
-        return true;
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
-    {
-        $minLength = config('validation.password_min_length', 4);
-
-        return [
-            'password' => ['required', 'string', "min:{$minLength}"],
-        ];
-    }
-
-    /**
-     * Get custom messages for validator errors.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        $minLength = config('validation.password_min_length', 4);
-
-        return [
-            'password.required' => 'Password is required',
-            'password.min' => "Password must be at least {$minLength} characters",
-        ];
-    }
+    // * All validation logic inherited from BaseLoginRequest
+    // ? If teachers need different rules later, override methods here
 }
