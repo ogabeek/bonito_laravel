@@ -1,19 +1,25 @@
+# System files
+.DS_Store
+Thumbs.db
 *.log
 *.backup
 *.bak
-.DS_Store
+
+# Environment
 .env
 .env.backup
 .env.production
-.phpactor.json
-.phpunit.result.cache
+
+# IDE & Editor
 /.fleet
 /.idea
 /.nova
-/.phpunit.cache
 /.vscode
 /.zed
-/auth.json
+.phpactor.json
+
+# Laravel
+/vendor
 /node_modules
 /public/build
 /public/hot
@@ -21,14 +27,32 @@
 /storage/*.key
 /storage/paili
 /storage/debugbar
-/vendor
+storage/app/*.json
+/auth.json
+
+# Testing
+.phpunit.result.cache
+/.phpunit.cache
+
+# Legacy tools
 Homestead.json
 Homestead.yaml
-Thumbs.db
+
+# AI tools & assistants
+.claude/
+CLAUDE.md
+AGENTS.md
+.mcp.json
+boost.json
+.github/copilot-instructions.md
+
+# Project documentation (not for deployment)
 CREDENTIALS.md
 DEPLOYMENT.md
-hidden
-Presentation
-.claude
-CLAUDE.md
-storage/app/*.json
+Monitoring.md
+TODO.md
+
+# Project extras (not for deployment)
+Presentation/
+*.png
+

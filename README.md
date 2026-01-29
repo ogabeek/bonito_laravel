@@ -102,17 +102,3 @@ Make a platform for Teachers to mark attendance, topic, HW  -> student see it ->
 
 <img src="image-1.png" alt="Alt Text" width="200" >
 
-
-
-TODO: 
-- delete student (e.g. accidentally created Rafael G, how to delete it now) 
-- welcome message add note section about how to start
-- Decide about "Notes " at teachers pannel 
-- setUp Sentry dashboard and tracked errors 
-
-
-
-
-
-
-
