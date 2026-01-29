@@ -5,14 +5,15 @@ namespace App\Http\Controllers;
 use App\Concerns\LogsActivityActions;
 use App\Http\Requests\AdminLoginRequest;
 use App\Http\Requests\CreateStudentRequest;
+use App\Http\Requests\CreateTeacherRequest;
 use App\Http\Requests\UpdateStudentRequest;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Repositories\LessonRepository;
+use App\Services\AuthenticationService;
 use App\Services\BillingDataService;
 use App\Services\CalendarService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Spatie\Activitylog\Models\Activity;
 
@@ -32,7 +33,7 @@ class AdminController extends Controller
     }
 
     // Handle login
-    public function login(AdminLoginRequest $request)
+    public function login(AdminLoginRequest $request, AuthenticationService $auth)
     {
         $configuredPassword = config('app.admin_password');
 
@@ -40,12 +41,7 @@ class AdminController extends Controller
             return back()->with('error', 'Admin password is not configured.');
         }
 
-        $isHashed = Hash::info((string) $configuredPassword)['algo'] !== null;
-        $valid = $isHashed
-            ? Hash::check($request->password, $configuredPassword)
-            : hash_equals((string) $configuredPassword, $request->password);
-
-        if ($valid) {
+        if ($auth->verifyPassword($request->password, (string) $configuredPassword)) {
             $request->session()->regenerate();
             session(['admin_authenticated' => true]);
 
@@ -115,18 +111,11 @@ class AdminController extends Controller
     }
 
     // Teachers Management
-    public function createTeacher(Request $request)
+    public function createTeacher(CreateTeacherRequest $request, AuthenticationService $auth)
     {
-        $minLength = config('validation.password_min_length', 4);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'password' => "required|string|min:{$minLength}",
-        ]);
-
         $teacher = Teacher::create([
             'name' => $request->name,
-            'password' => Hash::make($request->password),
+            'password' => $auth->hash($request->password),
         ]);
 
         $this->logActivity($teacher, 'teacher_created');

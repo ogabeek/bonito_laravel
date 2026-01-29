@@ -9,10 +9,10 @@ use App\Http\Requests\UpdateLessonRequest;
 use App\Models\Lesson;
 use App\Models\Teacher;
 use App\Repositories\LessonRepository;
+use App\Services\AuthenticationService;
 use App\Services\CalendarService;
 use App\Services\LessonStatisticsService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class TeacherController extends Controller
 {
@@ -25,20 +25,9 @@ class TeacherController extends Controller
     }
 
     // Handle login
-    public function login(TeacherLoginRequest $request, Teacher $teacher)
+    public function login(TeacherLoginRequest $request, Teacher $teacher, AuthenticationService $auth)
     {
-        $storedPassword = $teacher->password;
-        $isHashed = Hash::info($storedPassword)['algo'] !== null;
-        $valid = $isHashed
-            ? Hash::check($request->password, $storedPassword)
-            : hash_equals($storedPassword, $request->password);
-
-        if ($valid) {
-            // Upgrade legacy plain-text passwords transparently
-            if (! $isHashed) {
-                $teacher->update(['password' => Hash::make($request->password)]);
-            }
-
+        if ($auth->verifyPassword($request->password, $teacher->password)) {
             $request->session()->regenerate();
             session(['teacher_id' => $teacher->id]);
 

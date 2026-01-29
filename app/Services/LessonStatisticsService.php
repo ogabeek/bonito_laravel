@@ -5,13 +5,15 @@ namespace App\Services;
 use App\Enums\LessonStatus;
 use Illuminate\Support\Collection;
 
+/**
+ * Calculates lesson statistics from collections of lessons.
+ */
 class LessonStatisticsService
 {
     /**
-     * Calculate lesson statistics from a collection
+     * Calculate lesson statistics from a collection.
      *
-     * @param Collection $lessons
-     * @return array
+     * @return array{total: int, completed: int, student_absent: int, student_cancelled: int, teacher_cancelled: int}
      */
     public function calculateStats(Collection $lessons): array
     {
@@ -25,43 +27,42 @@ class LessonStatisticsService
     }
 
     /**
-     * Calculate statistics grouped by teacher
+     * Calculate statistics grouped by teacher.
      *
-     * @param Collection $lessons
-     * @return Collection
+     * @return Collection<int, array{total: int, completed: int, student_absent: int, student_cancelled: int, teacher_cancelled: int}>
      */
     public function calculateStatsByTeacher(Collection $lessons): Collection
     {
-        return $lessons->groupBy('teacher_id')->map(fn($teacherLessons) => $this->calculateStats($teacherLessons));
+        return $lessons->groupBy('teacher_id')->map(fn ($teacherLessons) => $this->calculateStats($teacherLessons));
     }
 
     /**
-     * Calculate statistics grouped by student
+     * Calculate statistics grouped by student.
      *
-     * @param Collection $lessons
-     * @return Collection
+     * @return Collection<int, array{total: int, completed: int, student_absent: int, student_cancelled: int, teacher_cancelled: int}>
      */
     public function calculateStatsByStudent(Collection $lessons): Collection
     {
-        return $lessons->groupBy('student_id')->map(fn($studentLessons) => $this->calculateStats($studentLessons));
+        return $lessons->groupBy('student_id')->map(fn ($studentLessons) => $this->calculateStats($studentLessons));
     }
 
     /**
-     * Count lessons by status
+     * Calculate statistics grouped by month.
      *
-     * @param Collection $lessons
-     * @param LessonStatus $status
-     * @return int
+     * @return Collection<string, array{total: int, completed: int, student_absent: int, student_cancelled: int, teacher_cancelled: int}>
+     */
+    public function calculateStatsByMonth(Collection $lessons): Collection
+    {
+        return $lessons->groupBy(fn ($lesson) => $lesson->class_date->format('Y-m'))->map(function ($monthLessons) {
+            return $this->calculateStats($monthLessons);
+        });
+    }
+
+    /**
+     * Count lessons by status.
      */
     private function countByStatus(Collection $lessons, LessonStatus $status): int
     {
-        return $lessons->filter(fn($lesson) => $lesson->status === $status)->count();
-    }
-
-    public function calculateStatsByMonth(Collection $lessons): Collection
-    {
-        return $lessons->groupBy(fn($lesson) => $lesson->class_date->format('Y-m'))->map(function($monthLessons) {
-            return $this->calculateStats($monthLessons);
-        });
+        return $lessons->filter(fn ($lesson) => $lesson->status === $status)->count();
     }
 }

@@ -22,10 +22,18 @@ class Lesson extends Model
         'comments',
     ];
 
-    protected $casts = [
-        'class_date' => 'date', // convert automatically to Carbon(date)
-        'status' => LessonStatus::class,
-    ];
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'class_date' => 'date',
+            'status' => LessonStatus::class,
+        ];
+    }
 
     // Relationship: A lesson belongs to a teacher (includes soft-deleted teachers)
     public function teacher(): BelongsTo

@@ -13,7 +13,7 @@ class Student extends Model
 {
     use HasFactory;
 
-    protected $fillable = [ // fields that can be mass-assigned
+    protected $fillable = [
         'uuid',
         'name',
         'parent_name',
@@ -23,20 +23,30 @@ class Student extends Model
         'status',
     ];
 
-    protected $casts = [
-        'status' => StudentStatus::class,
-    ];
-
     protected $attributes = [
-        'status' => 'active', // Default status for new students (uses StudentStatus::ACTIVE)
+        'status' => 'active',
     ];
 
-    // Automatically generate UUI when creating a student
-    protected static function boot()
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => StudentStatus::class,
+        ];
+    }
+
+    /**
+     * Boot method to auto-generate UUID on creation.
+     */
+    protected static function boot(): void
     {
         parent::boot();
 
-        static::creating(function ($student) {
+        static::creating(function ($student): void {
             if (empty($student->uuid)) {
                 $student->uuid = (string) Str::uuid();
             }

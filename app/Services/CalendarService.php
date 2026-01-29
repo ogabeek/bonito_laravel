@@ -5,13 +5,15 @@ namespace App\Services;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
+/**
+ * Handles calendar navigation and month data calculations.
+ */
 class CalendarService
 {
     /**
-     * Get calendar data for a given request (with year/month query params)
+     * Get calendar data for a given request (with year/month query params).
      *
-     * @param Request|null $request
-     * @return array
+     * @return array{currentMonth: Carbon, prevMonth: Carbon, nextMonth: Carbon, daysInMonth: int, monthStart: Carbon}
      */
     public function getMonthData(?Request $request = null): array
     {
