@@ -46,12 +46,6 @@ class Lesson extends Model
             ->whereMonth('class_date', $date->month);
     }
 
-    // Scope: Filter upcoming lessons
-    public function scopeUpcoming($query)
-    {
-        return $query->where('class_date', '>=', now()->startOfDay());
-    }
-
     // Scope: Filter past lessons
     public function scopePast($query)
     {

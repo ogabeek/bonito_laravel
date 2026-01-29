@@ -50,20 +50,6 @@ class LessonRepository
     }
 
     /**
-     * Get upcoming lessons for a student
-     *
-     * @param  array  $with  Relationships to eager load
-     */
-    public function getUpcomingForStudent(int $studentId, array $with = ['teacher']): Collection
-    {
-        return Lesson::where('student_id', $studentId)
-            ->upcoming()
-            ->with($with)
-            ->orderBy('class_date', 'asc')
-            ->get();
-    }
-
-    /**
      * Get past lessons for a student
      *
      * @param  array  $with  Relationships to eager load

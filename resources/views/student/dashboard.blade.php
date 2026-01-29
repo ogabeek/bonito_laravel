@@ -31,31 +31,7 @@
         title="All Lessons"
     />
 
-    @if($upcomingLessons->count() > 0)
-        <x-card title="📅 Upcoming Lessons" class="mb-6">
-            <div class="space-y-3">
-                    @foreach($upcomingLessons as $lesson)
-                        <div class="border-l-4 border-blue-500 pl-3 sm:pl-4 py-2 bg-blue-50 rounded-r">
-                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-0">
-                                <div>
-                                    <div class="font-semibold text-sm sm:text-base text-gray-900">
-                                        {{ $lesson->class_date->format('D, M d, Y') }}
-                                    </div>
-                                    <div class="text-xs sm:text-sm text-gray-600 mt-1">
-                                        Teacher: {{ $lesson->teacher->name }}
-                                    </div>
-                                </div>
-                                <div class="text-xs sm:text-sm text-gray-500">
-                                    {{ $lesson->class_date->format('g:i A') }}
-                                </div>
-                            </div>
-                    </div>
-                @endforeach
-            </div>
-        </x-card>
-    @endif
-
-    <x-card :title="'📚 Past Lessons (' . $pastLessons->flatten()->count() . ')'">
+    <x-card :title="'📚 Lessons (' . $pastLessons->flatten()->count() . ')'">
         @if($pastLessons->isNotEmpty())
             <div class="space-y-4">
                 @foreach($pastLessons as $month => $lessons)

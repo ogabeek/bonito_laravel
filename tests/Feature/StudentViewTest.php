@@ -17,23 +17,6 @@ it('shows 404 for invalid uuid', function () {
         ->assertNotFound();
 });
 
-it('displays upcoming lessons', function () {
-    $teacher = Teacher::factory()->create(['name' => 'Future Teacher']);
-    $student = Student::factory()->create();
-    $teacher->students()->attach($student);
-
-    $upcomingLesson = Lesson::factory()->create([
-        'teacher_id' => $teacher->id,
-        'student_id' => $student->id,
-        'class_date' => now()->addDays(5),
-    ]);
-
-    $this->get(route('student.dashboard', $student))
-        ->assertSuccessful()
-        ->assertSee('Upcoming Lessons')
-        ->assertSee('Future Teacher');
-});
-
 it('displays past lessons grouped by month', function () {
     $teacher = Teacher::factory()->create();
     $student = Student::factory()->create();
