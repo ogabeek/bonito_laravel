@@ -47,6 +47,10 @@ class GoogleSheetsClient
             $client->setScopes([
                 $readonly ? Sheets::SPREADSHEETS_READONLY : Sheets::SPREADSHEETS,
             ]);
+            $client->setHttpClient(new \GuzzleHttp\Client([
+                'timeout' => 10,
+                'connect_timeout' => 5,
+            ]));
             $this->service = new Sheets($client);
 
             return true;
