@@ -2,20 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\LessonStatus;
-use App\Models\Teacher;
-use App\Models\Lesson;
 use App\Concerns\LogsActivityActions;
+use App\Http\Requests\CreateLessonRequest;
+use App\Http\Requests\TeacherLoginRequest;
+use App\Http\Requests\UpdateLessonRequest;
+use App\Models\Lesson;
+use App\Models\Teacher;
+use App\Repositories\LessonRepository;
 use App\Services\CalendarService;
 use App\Services\LessonStatisticsService;
-use App\Repositories\LessonRepository;
-use App\Http\Requests\CreateLessonRequest;
-use App\Http\Requests\UpdateLessonRequest;
-use App\Http\Requests\TeacherLoginRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
-
 
 class TeacherController extends Controller
 {
@@ -38,12 +35,13 @@ class TeacherController extends Controller
 
         if ($valid) {
             // Upgrade legacy plain-text passwords transparently
-            if (!$isHashed) {
+            if (! $isHashed) {
                 $teacher->update(['password' => Hash::make($request->password)]);
             }
 
             $request->session()->regenerate();
             session(['teacher_id' => $teacher->id]);
+
             return redirect()->route('teacher.dashboard', $teacher->id);
         }
 
@@ -78,6 +76,7 @@ class TeacherController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         session()->forget('teacher_id');
+
         return redirect('/');
     }
 
@@ -101,19 +100,19 @@ class TeacherController extends Controller
             ['changes' => $lesson->getChanges(), 'original' => $original],
             $teacherActor
         );
-        
+
         return response()->json(['success' => true, 'lesson' => $lesson]);
     }
-    
+
     // Create new lesson
     public function createLesson(CreateLessonRequest $request)
     {
         $teacherActor = Teacher::find(session('teacher_id'));
-        if (!$teacherActor) {
+        if (! $teacherActor) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         $assigned = $teacherActor->students()->where('students.id', $request->student_id)->exists();
-        if (!$assigned) {
+        if (! $assigned) {
             return response()->json(['error' => 'Student not assigned to teacher'], 403);
         }
 
@@ -137,7 +136,7 @@ class TeacherController extends Controller
             ],
             $teacherActor
         );
-        
+
         return response()->json(['success' => true, 'lesson' => $lesson]);
     }
 
@@ -147,10 +146,10 @@ class TeacherController extends Controller
         $teacherActor = Teacher::find(session('teacher_id'));
         $snapshot = $lesson->toArray();
 
-        if (!$teacherActor || $lesson->teacher_id !== $teacherActor->id) {
+        if (! $teacherActor || $lesson->teacher_id !== $teacherActor->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-        
+
         $lesson->delete();
 
         $this->logActivity(
@@ -159,7 +158,7 @@ class TeacherController extends Controller
             ['snapshot' => $snapshot],
             $teacherActor
         );
-        
+
         return response()->json(['success' => true]);
     }
 }

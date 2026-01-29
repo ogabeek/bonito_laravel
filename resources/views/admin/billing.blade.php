@@ -2,13 +2,6 @@
 
 @section('title', 'Billing & Stats')
 
-@push('styles')
-<style>
-    canvas {
-        height: 140px !important;
-    }
-</style>
-@endpush
 
 @section('content')
 <div class="p-6 w-full mx-auto">
@@ -48,23 +41,14 @@
     </x-card>
 
     {{-- Quick Stats Charts --}}
-    <div class="mb-3">
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-1.5">
-            <div class="bg-white p-2 rounded border border-gray-200">
-                <canvas id="periodOverviewChart"></canvas>
-            </div>
-            <div class="bg-white p-2 rounded border border-gray-200">
-                <canvas id="cancellationChart"></canvas>
-            </div>
-            <div class="bg-white p-2 rounded border border-gray-200">
-                <canvas id="monthlyTrendChart"></canvas>
-            </div>
-            <div class="bg-white p-2 rounded border border-gray-200">
-                <canvas id="teacherWorkloadChart"></canvas>
-            </div>
-            <div class="bg-white p-2 rounded border border-gray-200">
-                <canvas id="studentActivityChart"></canvas>
-            </div>
+    <div class="grid grid-cols-2 gap-3 mb-6">
+        <div class="bg-white p-3 rounded border border-gray-200">
+            <div class="text-xs text-gray-500 mb-2">Teachers (completed lessons)</div>
+            <canvas id="teacherWorkloadChart" height="120"></canvas>
+        </div>
+        <div class="bg-white p-3 rounded border border-gray-200">
+            <div class="text-xs text-gray-500 mb-2">Top Students (completed lessons)</div>
+            <canvas id="studentActivityChart" height="120"></canvas>
         </div>
     </div>
 
@@ -144,242 +128,60 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const chartDefaults = {
+    const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
-        },
-        layout: {
-            padding: 0
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { display: false, beginAtZero: true },
+            x: { ticks: { font: { size: 10 } } }
         }
     };
 
-    // Period Overview Chart (Doughnut)
-    const periodCtx = document.getElementById('periodOverviewChart');
-    if (periodCtx) {
-        const total = {{ $periodStats['total'] ?? 0 }};
-        const completed = {{ $periodStats['completed'] ?? 0 }};
-        new Chart(periodCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Completed', 'Other'],
-                datasets: [{
-                    data: [completed, total - completed],
-                    backgroundColor: ['rgba(34, 197, 94, 0.8)', 'rgba(229, 231, 235, 0.5)'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                ...chartDefaults,
-                cutout: '65%',
-                plugins: {
-                    legend: { display: false },
-                    title: {
-                        display: true,
-                        text: completed + '/' + total,
-                        font: { size: 8 },
-                        padding: 0
-                    }
-                }
-            }
-        });
-    }
-
-    // Cancellation Breakdown
-    const cancelCtx = document.getElementById('cancellationChart');
-    if (cancelCtx) {
-        new Chart(cancelCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Std', 'Tch'],
-                datasets: [{
-                    label: 'Cancelled',
-                    data: [
-                        {{ $periodStats['student_cancelled'] ?? 0 }},
-                        {{ $periodStats['teacher_cancelled'] ?? 0 }}
-                    ],
-                    backgroundColor: ['rgba(251, 191, 36, 0.8)', 'rgba(239, 68, 68, 0.8)'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                ...chartDefaults,
-                plugins: {
-                    legend: { display: false },
-                    title: {
-                        display: true,
-                        text: 'Cancel',
-                        font: { size: 8 },
-                        padding: 0
-                    }
-                },
-                scales: {
-                    y: {
-                        display: false,
-                        beginAtZero: true
-                    },
-                    x: {
-                        ticks: { font: { size: 7 }, padding: 0 }
-                    }
-                }
-            }
-        });
-    }
-
-    // Monthly Trend Chart (Sparkline)
-    const monthlyCtx = document.getElementById('monthlyTrendChart');
-    if (monthlyCtx) {
-        const monthlyData = @json($yearStatsByMonth ?? []);
-        console.log('Monthly data:', monthlyData);
-        
-        const data = [];
-        for (let i = 1; i <= 12; i++) {
-            data.push(monthlyData[i]?.completed || 0);
-        }
-        console.log('Chart data:', data);
-        
-        new Chart(monthlyCtx, {
-            type: 'line',
-            data: {
-                labels: ['J','F','M','A','M','J','J','A','S','O','N','D'],
-                datasets: [{
-                    data: data,
-                    borderColor: 'rgb(59, 130, 246)',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    tension: 0.4,
-                    fill: true,
-                    pointRadius: 2,
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                ...chartDefaults,
-                plugins: {
-                    legend: { display: false },
-                    title: {
-                        display: true,
-                        text: 'Trend',
-                        font: { size: 8 },
-                        padding: 0
-                    }
-                },
-                scales: {
-                    y: {
-                        display: true,
-                        beginAtZero: true,
-                        ticks: { 
-                            font: { size: 6 },
-                            stepSize: 50,
-                            padding: 2
-                        },
-                        grid: {
-                            display: false
-                        }
-                    },
-                    x: {
-                        ticks: { font: { size: 6 }, padding: 0 },
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // Teacher Workload Chart
+    // Teachers Chart
     const teacherCtx = document.getElementById('teacherWorkloadChart');
     if (teacherCtx) {
         const teacherData = @json($teacherStats);
         const teachers = @json($teachers);
-        
-        const teacherArray = Object.entries(teacherData)
+
+        const data = Object.entries(teacherData)
             .map(([id, stats]) => ({
                 name: teachers.find(t => t.id === parseInt(id))?.name?.split(' ')[0] || '?',
-                completed: stats.completed || 0
+                value: stats.completed || 0
             }))
-            .sort((a, b) => b.completed - a.completed);
+            .sort((a, b) => b.value - a.value);
 
         new Chart(teacherCtx, {
             type: 'bar',
             data: {
-                labels: teacherArray.map(t => t.name),
-                datasets: [{
-                    data: teacherArray.map(t => t.completed),
-                    backgroundColor: 'rgba(168, 85, 247, 0.8)',
-                    borderWidth: 0
-                }]
+                labels: data.map(t => t.name),
+                datasets: [{ data: data.map(t => t.value), backgroundColor: 'rgba(99, 102, 241, 0.7)' }]
             },
-            options: {
-                ...chartDefaults,
-                plugins: {
-                    legend: { display: false },
-                    title: {
-                        display: true,
-                        text: 'Teachers',
-                        font: { size: 8 },
-                        padding: 0
-                    }
-                },
-                scales: {
-                    y: {
-                        display: false,
-                        beginAtZero: true
-                    },
-                    x: {
-                        ticks: { font: { size: 6 }, padding: 0 }
-                    }
-                }
-            }
+            options: chartOptions
         });
     }
 
-    // Student Activity Chart (Top Active)
+    // Students Chart (Top 8)
     const studentCtx = document.getElementById('studentActivityChart');
     if (studentCtx) {
         const studentData = @json($studentStats);
         const students = @json($students);
-        
-        const studentArray = Object.entries(studentData)
+
+        const data = Object.entries(studentData)
             .map(([id, stats]) => ({
                 name: students.find(s => s.id === parseInt(id))?.name?.split(' ')[0] || '?',
-                completed: stats.completed || 0
+                value: stats.completed || 0
             }))
-            .sort((a, b) => b.completed - a.completed)
-            .slice(0, 5);
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 8);
 
         new Chart(studentCtx, {
             type: 'bar',
             data: {
-                labels: studentArray.map(s => s.name),
-                datasets: [{
-                    data: studentArray.map(s => s.completed),
-                    backgroundColor: 'rgba(236, 72, 153, 0.8)',
-                    borderWidth: 0
-                }]
+                labels: data.map(s => s.name),
+                datasets: [{ data: data.map(s => s.value), backgroundColor: 'rgba(236, 72, 153, 0.7)' }]
             },
-            options: {
-                ...chartDefaults,
-                plugins: {
-                    legend: { display: false },
-                    title: {
-                        display: true,
-                        text: 'Students',
-                        font: { size: 8 },
-                        padding: 0
-                    }
-                },
-                scales: {
-                    y: {
-                        display: false,
-                        beginAtZero: true
-                    },
-                    x: {
-                        ticks: { font: { size: 6 }, padding: 0 }
-                    }
-                }
-            }
+            options: chartOptions
         });
     }
 });
