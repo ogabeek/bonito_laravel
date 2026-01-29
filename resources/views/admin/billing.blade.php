@@ -41,14 +41,18 @@
     </x-card>
 
     {{-- Quick Stats Charts --}}
-    <div class="grid grid-cols-2 gap-3 mb-6">
-        <div class="bg-white p-3 rounded border border-gray-200">
-            <div class="text-xs text-gray-500 mb-2">Teachers (completed lessons)</div>
-            <canvas id="teacherWorkloadChart" height="120"></canvas>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-white p-4 rounded border border-gray-200">
+            <div class="text-sm text-gray-600 font-medium mb-2">Teachers (completed)</div>
+            <div style="height: 150px;">
+                <canvas id="teacherWorkloadChart"></canvas>
+            </div>
         </div>
-        <div class="bg-white p-3 rounded border border-gray-200">
-            <div class="text-xs text-gray-500 mb-2">Top Students (completed lessons)</div>
-            <canvas id="studentActivityChart" height="120"></canvas>
+        <div class="bg-white p-4 rounded border border-gray-200">
+            <div class="text-sm text-gray-600 font-medium mb-2">Top Students (completed)</div>
+            <div style="height: 150px;">
+                <canvas id="studentActivityChart"></canvas>
+            </div>
         </div>
     </div>
 
@@ -133,8 +137,8 @@ document.addEventListener('DOMContentLoaded', function() {
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-            y: { display: false, beginAtZero: true },
-            x: { ticks: { font: { size: 10 } } }
+            y: { beginAtZero: true, ticks: { font: { size: 11 } } },
+            x: { ticks: { font: { size: 11 } } }
         }
     };
 
@@ -155,7 +159,10 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'bar',
             data: {
                 labels: data.map(t => t.name),
-                datasets: [{ data: data.map(t => t.value), backgroundColor: 'rgba(99, 102, 241, 0.7)' }]
+                datasets: [{
+                    data: data.map(t => t.value),
+                    backgroundColor: 'rgba(99, 102, 241, 0.8)'
+                }]
             },
             options: chartOptions
         });
@@ -179,7 +186,10 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'bar',
             data: {
                 labels: data.map(s => s.name),
-                datasets: [{ data: data.map(s => s.value), backgroundColor: 'rgba(236, 72, 153, 0.7)' }]
+                datasets: [{
+                    data: data.map(s => s.value),
+                    backgroundColor: 'rgba(236, 72, 153, 0.8)'
+                }]
             },
             options: chartOptions
         });
