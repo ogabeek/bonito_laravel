@@ -7,6 +7,7 @@ use App\Enums\Traits\HasValues;
 enum StudentStatus: string
 {
     use HasValues;
+
     case ACTIVE = 'active';
     case INACTIVE = 'inactive';
     case HOLIDAY = 'holiday';
@@ -18,7 +19,7 @@ enum StudentStatus: string
      */
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::ACTIVE => 'Active',
             self::INACTIVE => 'Inactive',
             self::HOLIDAY => 'On Holiday',
@@ -40,7 +41,7 @@ enum StudentStatus: string
      */
     public function badgeClass(): string
     {
-        return match($this) {
+        return match ($this) {
             self::ACTIVE => 'bg-green-100 text-green-800',
             self::INACTIVE => 'bg-gray-100 text-gray-800',
             self::HOLIDAY => 'bg-blue-100 text-blue-800',
@@ -54,7 +55,7 @@ enum StudentStatus: string
      */
     public function dotColor(): string
     {
-        return match($this) {
+        return match ($this) {
             self::ACTIVE => 'var(--color-student-active)',
             self::INACTIVE => 'var(--color-student-inactive)',
             self::HOLIDAY => 'var(--color-student-holiday)',

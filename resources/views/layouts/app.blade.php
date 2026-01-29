@@ -8,9 +8,7 @@
     <link rel="icon" href="{{ asset($favicon ?? 'favicon.svg') }}" type="image/svg+xml">
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     @stack('styles')
 </head>
 <body class="bg-gray-50 min-h-screen">
