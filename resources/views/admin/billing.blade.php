@@ -2,6 +2,13 @@
 
 @section('title', 'Billing & Stats')
 
+@push('styles')
+<style>
+    canvas {
+        height: 140px !important;
+    }
+</style>
+@endpush
 
 @section('content')
 <div class="p-6 w-full mx-auto">
@@ -41,16 +48,26 @@
     </x-card>
 
     {{-- Quick Stats Charts --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div class="bg-white p-4 rounded border border-gray-200">
-            <div class="text-sm text-gray-600 font-medium mb-2">Teachers (completed)</div>
-            <div style="height: 150px;">
+    <div class="mb-3">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-1.5">
+            {{-- Placeholder 1 --}}
+            <div class="bg-white p-2 rounded border border-gray-200 border-dashed">
+                <div class="h-[140px] flex items-center justify-center text-gray-300 text-xs">Chart 1</div>
+            </div>
+            {{-- Placeholder 2 --}}
+            <div class="bg-white p-2 rounded border border-gray-200 border-dashed">
+                <div class="h-[140px] flex items-center justify-center text-gray-300 text-xs">Chart 2</div>
+            </div>
+            {{-- Placeholder 3 --}}
+            <div class="bg-white p-2 rounded border border-gray-200 border-dashed">
+                <div class="h-[140px] flex items-center justify-center text-gray-300 text-xs">Chart 3</div>
+            </div>
+            {{-- Teachers Chart --}}
+            <div class="bg-white p-2 rounded border border-gray-200">
                 <canvas id="teacherWorkloadChart"></canvas>
             </div>
-        </div>
-        <div class="bg-white p-4 rounded border border-gray-200">
-            <div class="text-sm text-gray-600 font-medium mb-2">Top Students (completed)</div>
-            <div style="height: 150px;">
+            {{-- Students Chart --}}
+            <div class="bg-white p-2 rounded border border-gray-200">
                 <canvas id="studentActivityChart"></canvas>
             </div>
         </div>
@@ -137,8 +154,8 @@ document.addEventListener('DOMContentLoaded', function() {
         maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: {
-            y: { beginAtZero: true, ticks: { font: { size: 11 } } },
-            x: { ticks: { font: { size: 11 } } }
+            y: { beginAtZero: true, ticks: { font: { size: 11 } }, grid: { display: false } },
+            x: { ticks: { font: { size: 11 } }, grid: { display: false } }
         }
     };
 
