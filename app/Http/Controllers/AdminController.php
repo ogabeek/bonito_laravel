@@ -152,6 +152,7 @@ class AdminController extends Controller
 
     public function editStudentForm(Student $student)
     {
+        $student->load('teachers');
         $assignedTeacherIds = $student->teachers->pluck('id')->toArray();
         $availableTeachers = Teacher::whereNotIn('id', $assignedTeacherIds)->get();
 
