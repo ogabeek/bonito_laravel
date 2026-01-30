@@ -16,7 +16,7 @@
         <x-info-banner type="warning" icon="🎓">
             <strong>Demo/Presentation Mode</strong>
             <p class="mt-1 text-sm">
-                We're currently showcasing the platform. You can still log in and test all features!
+                We're currently showcasing the platform. 
                 Normal operations resume on <strong>February 1st, 2026</strong>.
             </p>
             <span class="text-xs opacity-75 mt-2 block">
