@@ -6,11 +6,16 @@ use App\Models\Student;
 use App\Repositories\LessonRepository;
 use App\Services\LessonStatisticsService;
 
+/**
+ * StudentController - Public student progress page
+ *
+ * No auth required - uses UUID for secure public sharing.
+ */
 class StudentController extends Controller
 {
-    // Show student dashboard
     public function dashboard(Student $student, LessonRepository $lessonRepo, LessonStatisticsService $statsService)
     {
+        // Past lessons grouped by month
         $pastLessons = $lessonRepo->getPastForStudent($student->id)
             ->groupBy(fn ($lesson) => $lesson->class_date->format('Y-m'));
 

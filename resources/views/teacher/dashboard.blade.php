@@ -1,3 +1,8 @@
+{{--
+    * VIEW: Teacher Dashboard
+    * Shows: month stats, lesson form, lesson list
+    * Variables: $teacher, $students, $lessons, $stats, $studentStats, $date
+--}}
 @extends('layouts.app', ['favicon' => 'favicon-teacher.svg'])
 
 @section('title', $teacher->name . "'s Dashboard")
@@ -5,11 +10,13 @@
 @section('content')
 <div class="p-3 sm:p-6 max-w-5xl mx-auto">
     
+    {{-- * Reusable component with title + logout button --}}
     <x-page-header 
         :title="$teacher->name . \"'s Dashboard\"" 
         :logoutRoute="route('teacher.logout')" 
     />
 
+    {{-- * Shows validation errors from session --}}
     <x-error-list />
 
     <x-info-banner type="tip" dismissible class="mb-6">
@@ -20,6 +27,7 @@
         </div>
     </x-info-banner>
 
+    {{-- * Student stats grid with month navigation --}}
     <x-card class="mb-6">
         <div class="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4 mb-3">
             <div class="flex items-center gap-2 sm:gap-3">
@@ -40,6 +48,7 @@
         @endif
     </x-card>
 
+    {{-- * New lesson form - submits via AJAX (see teacher-dashboard.js) --}}
     <x-card class="mb-6">
         <div id="lessonFormErrors" class="mb-4 hidden bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm px-3 py-2 rounded"></div>
         <form id="newLessonForm">
@@ -50,6 +59,7 @@
         </form>
     </x-card>
 
+    {{-- * Lesson list with edit/delete functionality --}}
     <x-card :title="'📚 Lessons (' . $stats['total'] . ')'">
         @if($lessons->count() > 0)
             <div class="space-y-2">

@@ -3,9 +3,10 @@
 use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Teacher;
+use Illuminate\Support\Facades\Hash;
 
 beforeEach(function () {
-    config(['app.admin_password' => 'test-password']);
+    config(['app.admin_password' => Hash::make('test-password')]);
 });
 
 it('redirects unauthenticated users to login', function () {

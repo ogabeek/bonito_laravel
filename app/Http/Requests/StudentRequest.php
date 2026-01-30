@@ -4,6 +4,10 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * * BASE REQUEST: Shared student validation (abstract)
+ * ? Extended by CreateStudentRequest & UpdateStudentRequest
+ */
 abstract class StudentRequest extends FormRequest
 {
     public function authorize(): bool
@@ -11,11 +15,6 @@ abstract class StudentRequest extends FormRequest
         return session()->has('admin_authenticated');
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [

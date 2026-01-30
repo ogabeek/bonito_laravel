@@ -2,7 +2,11 @@
 
 namespace App\Http\Requests;
 
+/**
+ * * REQUEST: Update Student validation
+ * ? Uses all parent StudentRequest rules
+ */
 class UpdateStudentRequest extends StudentRequest
 {
-    // Authorization inherited from StudentRequest
+    // Inherits from StudentRequest
 }

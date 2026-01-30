@@ -6,19 +6,19 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * * MIDDLEWARE: Protects teacher routes
+ * ! Also verifies route's {teacher} matches session teacher_id
+ */
 class TeacherAuthentication
 {
-    /**
-     * Handle an incoming request.
-     */
     public function handle(Request $request, Closure $next): Response
     {
-        // Check if teacher is logged in
-        if (!session('teacher_id')) {
+        if (! session('teacher_id')) {
             return redirect('/');
         }
 
-        // If route has a {teacher} parameter, verify it matches the logged-in teacher
+        // * Prevent Teacher A from accessing Teacher B's routes
         $teacher = $request->route('teacher');
         if ($teacher && (int) session('teacher_id') !== $teacher->id) {
             return redirect()->route('teacher.login', $teacher->id);

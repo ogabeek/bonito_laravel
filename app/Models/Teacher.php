@@ -8,28 +8,33 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * Teacher - Represents a tutor who conducts lessons
+ *
+ * Uses SoftDeletes to preserve lesson history when teachers leave.
+ * Password-only auth (no email) - access via /teacher/{id}.
+ */
 class Teacher extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name',
-        'password',
+        'password',  // Always hash before saving
     ];
 
-    // Relationship: A teacher has many lessons
     public function lessons(): HasMany
     {
         return $this->hasMany(Lesson::class);
     }
 
-    // Relationship: A teacher has many students (many-to-many)
+    // Many-to-many via student_teacher pivot
     public function students(): BelongsToMany
     {
         return $this->belongsToMany(Student::class);
     }
 
-    // Scope: Load teacher with full details (students and lessons count)
+    // Eager load with counts to prevent N+1
     public function scopeWithFullDetails($query)
     {
         return $query->withCount('students', 'lessons')->with('students');

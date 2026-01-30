@@ -6,26 +6,24 @@ use App\Enums\LessonStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/**
+ * * BASE REQUEST: Shared lesson validation (abstract)
+ * ? Extended by CreateLessonRequest & UpdateLessonRequest
+ */
 abstract class LessonRequest extends FormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
             'status' => ['required', Rule::in(LessonStatus::values())],
-            'topic' => 'required_if:status,' . LessonStatus::COMPLETED->value . '|nullable|string',
+            // * Topic required only for completed lessons
+            'topic' => 'required_if:status,'.LessonStatus::COMPLETED->value.'|nullable|string',
             'homework' => 'nullable|string',
-            'comments' => 'required_if:status,' . LessonStatus::TEACHER_CANCELLED->value . '|nullable|string',
+            // * Comments required only when teacher cancels
+            'comments' => 'required_if:status,'.LessonStatus::TEACHER_CANCELLED->value.'|nullable|string',
         ];
     }
 
-    /**
-     * Get custom messages for validator errors.
-     */
     public function messages(): array
     {
         return [

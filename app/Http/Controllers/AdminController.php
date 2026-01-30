@@ -5,25 +5,27 @@ namespace App\Http\Controllers;
 use App\Concerns\LogsActivityActions;
 use App\Http\Requests\AdminLoginRequest;
 use App\Http\Requests\CreateStudentRequest;
+use App\Http\Requests\CreateTeacherRequest;
 use App\Http\Requests\UpdateStudentRequest;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Repositories\LessonRepository;
+use App\Services\AuthenticationService;
 use App\Services\BillingDataService;
 use App\Services\CalendarService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Spatie\Activitylog\Models\Activity;
 
+/**
+ * AdminController - Admin portal for managing teachers, students, and viewing stats
+ */
 class AdminController extends Controller
 {
     use LogsActivityActions;
 
-    // Show login form
     public function showLogin()
     {
-        // If already logged in, redirect to dashboard
         if (session('admin_authenticated')) {
             return redirect()->route('admin.dashboard');
         }
@@ -31,8 +33,7 @@ class AdminController extends Controller
         return view('admin.login');
     }
 
-    // Handle login
-    public function login(AdminLoginRequest $request)
+    public function login(AdminLoginRequest $request, AuthenticationService $auth)
     {
         $configuredPassword = config('app.admin_password');
 
@@ -40,12 +41,7 @@ class AdminController extends Controller
             return back()->with('error', 'Admin password is not configured.');
         }
 
-        $isHashed = Hash::info((string) $configuredPassword)['algo'] !== null;
-        $valid = $isHashed
-            ? Hash::check($request->password, $configuredPassword)
-            : hash_equals((string) $configuredPassword, $request->password);
-
-        if ($valid) {
+        if ($auth->verifyPassword($request->password, (string) $configuredPassword)) {
             $request->session()->regenerate();
             session(['admin_authenticated' => true]);
 
@@ -55,7 +51,6 @@ class AdminController extends Controller
         return back()->with('error', 'Invalid password');
     }
 
-    // Handle logout
     public function logout(Request $request)
     {
         $request->session()->invalidate();
@@ -65,31 +60,27 @@ class AdminController extends Controller
         return redirect()->route('admin.login')->with('success', 'Logged out successfully');
     }
 
-    // Dashboard
     public function dashboard(Request $request, BillingDataService $billingService, CalendarService $calendar, LessonRepository $lessonRepo)
     {
-        // Get common billing/stats data
         $data = $billingService->build($request);
 
-        // Add calendar-specific data for dashboard display
         $calendarData = $calendar->getMonthData($request);
         $data['daysInMonth'] = $calendarData['daysInMonth'];
         $data['monthStart'] = $calendarData['monthStart'];
 
-        // Get lessons grouped by student+date for calendar display
         $monthLessons = $lessonRepo->getForMonth($data['currentMonth'], ['teacher', 'student']);
+
+        // Group by "studentId_date" for calendar cell lookup
         $data['lessonsThisMonth'] = $monthLessons->groupBy(function ($lesson) {
             return $lesson->student_id.'_'.$lesson->class_date->format('Y-m-d');
         });
 
-        // Summary stats for header
         $data['stats'] = [
             'teachers' => $data['teachers']->count(),
             'students' => $data['students']->count(),
             'lessons_this_month' => $monthLessons->count(),
         ];
 
-        // Archived teachers for restore functionality
         $data['archivedTeachers'] = Teacher::onlyTrashed()->get();
 
         return view('admin.dashboard', $data);
@@ -114,19 +105,15 @@ class AdminController extends Controller
             ->with($exported ? 'success' : 'error', $exported ? 'Stats exported to sheet' : 'Failed to export stats');
     }
 
-    // Teachers Management
-    public function createTeacher(Request $request)
+    // ═══════════════════════════════════════════════════════════════════
+    // TEACHER MANAGEMENT CRUD
+    // ═══════════════════════════════════════════════════════════════════
+
+    public function createTeacher(CreateTeacherRequest $request, AuthenticationService $auth)
     {
-        $minLength = config('validation.password_min_length', 4);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'password' => "required|string|min:{$minLength}",
-        ]);
-
         $teacher = Teacher::create([
             'name' => $request->name,
-            'password' => Hash::make($request->password),
+            'password' => $auth->hash($request->password),
         ]);
 
         $this->logActivity($teacher, 'teacher_created');
@@ -142,6 +129,7 @@ class AdminController extends Controller
         return redirect()->route('admin.dashboard')->with('success', 'Teacher archived successfully!');
     }
 
+    // Int param because soft-deleted models aren't found by default route model binding
     public function restoreTeacher(int $teacher)
     {
         $teacherModel = Teacher::withTrashed()->findOrFail($teacher);
@@ -151,11 +139,13 @@ class AdminController extends Controller
         return redirect()->route('admin.dashboard')->with('success', 'Teacher restored successfully!');
     }
 
-    // Students Management
+    // ═══════════════════════════════════════════════════════════════════
+    // STUDENT MANAGEMENT CRUD
+    // ═══════════════════════════════════════════════════════════════════
+
     public function createStudent(CreateStudentRequest $request)
     {
         $student = Student::create($request->validated());
-
         $this->logActivity($student, 'student_created');
 
         return redirect()->route('admin.dashboard')->with('success', 'Student created successfully!');
@@ -163,6 +153,7 @@ class AdminController extends Controller
 
     public function editStudentForm(Student $student)
     {
+        $student->load('teachers');
         $assignedTeacherIds = $student->teachers->pluck('id')->toArray();
         $availableTeachers = Teacher::whereNotIn('id', $assignedTeacherIds)->get();
 
@@ -201,11 +192,10 @@ class AdminController extends Controller
         return back()->with('success', 'Student status updated successfully!');
     }
 
+    // Pivot: syncWithoutDetaching prevents duplicates
     public function assignTeacherToStudent(Request $request, Student $student)
     {
         $request->validate(['teacher_id' => 'required|exists:teachers,id']);
-
-        // Avoid duplicate pivot insert (unique constraint)
         $student->teachers()->syncWithoutDetaching([$request->teacher_id]);
 
         $this->logActivity(

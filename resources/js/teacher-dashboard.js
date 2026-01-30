@@ -1,3 +1,8 @@
+/**
+ * * TEACHER DASHBOARD JS
+ * * Handles: lesson creation (AJAX), lesson deletion, form state persistence
+ */
+
 const lessonErrorBox = document.getElementById('lessonFormErrors');
 
 const clearLessonErrors = () => {
@@ -13,9 +18,13 @@ const showLessonErrors = (messages) => {
     lessonErrorBox.classList.remove('hidden');
 };
 
+// * Prevents double-submit while request is in flight
 let lessonSubmitting = false;
 
-// Create new lesson
+/**
+ * * CREATE LESSON: AJAX form submission
+ * ! Reloads page on success to show new lesson
+ */
 document.addEventListener('submit', function(e) {
     if (e.target.id === 'newLessonForm') {
         e.preventDefault();
@@ -27,6 +36,7 @@ document.addEventListener('submit', function(e) {
         const data = Object.fromEntries(formData.entries());
         clearLessonErrors();
         
+        // * Save form state to restore after reload
         const selectedStudent = data.student_id;
         const selectedDate = data.class_date;
 
@@ -42,6 +52,7 @@ document.addEventListener('submit', function(e) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // * Store in sessionStorage to restore after reload
                 sessionStorage.setItem('lastSelectedStudent', selectedStudent);
                 sessionStorage.setItem('lastSelectedDate', selectedDate);
                 location.reload();
@@ -61,7 +72,9 @@ document.addEventListener('submit', function(e) {
     }
 });
 
-// Restore form values after page load
+/**
+ * * RESTORE FORM STATE: Preserves selected student/date after page reload
+ */
 document.addEventListener('DOMContentLoaded', function() {
     const lastStudent = sessionStorage.getItem('lastSelectedStudent');
     const lastDate = sessionStorage.getItem('lastSelectedDate');
@@ -73,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // * Alpine.js calendar component - needs slight delay to initialize
     if (lastDate) {
         setTimeout(() => {
             const calendarContainer = document.querySelector('.calendar-container');
@@ -86,7 +100,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Delete lesson
+/**
+ * * DELETE LESSON: Global function called from lesson card onclick
+ * ! Confirms before deleting
+ */
 window.deleteLesson = function(lessonId) {
     if (!confirm('Are you sure you want to delete this lesson? This cannot be undone.')) {
         return;

@@ -9,71 +9,78 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
+/**
+ * Student - Represents a tutoring student
+ *
+ * Uses UUID for public-facing URLs instead of sequential IDs.
+ * Many-to-many with Teachers via student_teacher pivot table.
+ */
 class Student extends Model
 {
     use HasFactory;
 
-    protected $fillable = [ // fields that can be mass-assigned
+    protected $fillable = [
         'uuid',
         'name',
         'parent_name',
         'email',
         'goal',
         'description',
-        'status',
-    ];
-
-    protected $casts = [
-        'status' => StudentStatus::class,
+        'status',       // active, inactive, holiday
     ];
 
     protected $attributes = [
-        'status' => 'active', // Default status for new students (uses StudentStatus::ACTIVE)
+        'status' => 'active',
     ];
 
-    // Automatically generate UUI when creating a student
-    protected static function boot()
+    protected function casts(): array
+    {
+        return [
+            'status' => StudentStatus::class,
+        ];
+    }
+
+    // Auto-generate UUID on creation
+    protected static function boot(): void
     {
         parent::boot();
 
-        static::creating(function ($student) {
+        static::creating(function ($student): void {
             if (empty($student->uuid)) {
                 $student->uuid = (string) Str::uuid();
             }
         });
     }
 
-    // Relationship: a student has many lessons
     public function lessons(): HasMany
     {
         return $this->hasMany(Lesson::class);
     }
 
-    // Relationship: a student belongs to many teachers (many-to-many)
+    // Many-to-many via student_teacher pivot
     public function teachers(): BelongsToMany
     {
         return $this->belongsToMany(Teacher::class);
     }
 
-    // Use UUID for route model binding instead of ID
+    // Route model binding uses UUID, not ID
     public function getRouteKeyName()
     {
         return 'uuid';
     }
 
-    // Scope: Load student with full details (teachers and lessons count)
+    // Eager load with counts to prevent N+1
     public function scopeWithFullDetails($query)
     {
         return $query->withCount('teachers', 'lessons')->with('teachers');
     }
 
-    // Scope: Filter active students only
     public function scopeActive($query)
     {
         return $query->where('status', StudentStatus::ACTIVE);
     }
 
-    // Scope: Filter enrolled students (active or on holiday)
+    // Active OR holiday (still enrolled)
     public function scopeEnrolled($query)
     {
         return $query->whereIn('status', [StudentStatus::ACTIVE, StudentStatus::HOLIDAY]);

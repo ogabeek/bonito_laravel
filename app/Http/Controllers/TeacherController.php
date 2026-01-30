@@ -9,36 +9,28 @@ use App\Http\Requests\UpdateLessonRequest;
 use App\Models\Lesson;
 use App\Models\Teacher;
 use App\Repositories\LessonRepository;
+use App\Services\AuthenticationService;
 use App\Services\CalendarService;
 use App\Services\LessonStatisticsService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
+/**
+ * TeacherController - Teacher portal
+ *
+ * Each teacher has unique URL (/teacher/{id}) for password-only auth.
+ */
 class TeacherController extends Controller
 {
     use LogsActivityActions;
 
-    // Show login form
     public function showLogin(Teacher $teacher)
     {
         return view('teacher.login', compact('teacher'));
     }
 
-    // Handle login
-    public function login(TeacherLoginRequest $request, Teacher $teacher)
+    public function login(TeacherLoginRequest $request, Teacher $teacher, AuthenticationService $auth)
     {
-        $storedPassword = $teacher->password;
-        $isHashed = Hash::info($storedPassword)['algo'] !== null;
-        $valid = $isHashed
-            ? Hash::check($request->password, $storedPassword)
-            : hash_equals($storedPassword, $request->password);
-
-        if ($valid) {
-            // Upgrade legacy plain-text passwords transparently
-            if (! $isHashed) {
-                $teacher->update(['password' => Hash::make($request->password)]);
-            }
-
+        if ($auth->verifyPassword($request->password, $teacher->password)) {
             $request->session()->regenerate();
             session(['teacher_id' => $teacher->id]);
 
@@ -48,29 +40,21 @@ class TeacherController extends Controller
         return back()->withErrors(['password' => 'Incorrect password']);
     }
 
-    // Show dashboard
     public function dashboard(Teacher $teacher, CalendarService $calendar, LessonRepository $lessonRepo, LessonStatisticsService $statsService)
     {
-        // Get calendar data
         $calendarData = $calendar->getMonthData(request());
         $date = $calendarData['currentMonth'];
         $prevMonth = $calendarData['prevMonth'];
         $nextMonth = $calendarData['nextMonth'];
 
-        // Get only students assigned to this teacher
         $students = $teacher->students()->orderBy('name')->get();
-
-        // Get lessons for this month (newest first)
         $lessons = $lessonRepo->getForTeacher($teacher->id, $date);
-
-        // Calculate stats
         $stats = $statsService->calculateStats($lessons);
         $studentStats = $statsService->calculateStatsByStudent($lessons);
 
         return view('teacher.dashboard', compact('teacher', 'lessons', 'date', 'stats', 'studentStats', 'students', 'prevMonth', 'nextMonth'));
     }
 
-    // Logout
     public function logout(Request $request)
     {
         $request->session()->invalidate();
@@ -80,10 +64,12 @@ class TeacherController extends Controller
         return redirect('/');
     }
 
-    // Update lesson
+    // ═══════════════════════════════════════════════════════════════════
+    // LESSON CRUD - JSON API endpoints (called via JavaScript)
+    // ═══════════════════════════════════════════════════════════════════
+
     public function updateLesson(UpdateLessonRequest $request, Lesson $lesson)
     {
-        // Authorization already handled by UpdateLessonRequest::authorize()
         $teacherActor = Teacher::find(session('teacher_id'));
         $original = $lesson->getOriginal();
 
@@ -104,13 +90,15 @@ class TeacherController extends Controller
         return response()->json(['success' => true, 'lesson' => $lesson]);
     }
 
-    // Create new lesson
     public function createLesson(CreateLessonRequest $request)
     {
         $teacherActor = Teacher::find(session('teacher_id'));
+
         if (! $teacherActor) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
+
+        // Verify student is assigned to this teacher
         $assigned = $teacherActor->students()->where('students.id', $request->student_id)->exists();
         if (! $assigned) {
             return response()->json(['error' => 'Student not assigned to teacher'], 403);
@@ -140,7 +128,6 @@ class TeacherController extends Controller
         return response()->json(['success' => true, 'lesson' => $lesson]);
     }
 
-    // Delete lesson
     public function deleteLesson(Lesson $lesson)
     {
         $teacherActor = Teacher::find(session('teacher_id'));

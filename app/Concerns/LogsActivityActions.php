@@ -2,11 +2,16 @@
 
 namespace App\Concerns;
 
+/**
+ * * TRAIT: Activity logging helper for controllers
+ * * Uses spatie/laravel-activitylog package
+ */
 trait LogsActivityActions
 {
     /**
-    * Log an action with optional causer and properties.
-    */
+     * * Log an action with optional causer and properties
+     * ? Adds name/student_name automatically if available
+     */
     protected function logActivity(
         mixed $subject,
         string $action,
@@ -14,12 +19,12 @@ trait LogsActivityActions
         mixed $causer = null,
         ?string $logName = null,
     ): void {
-        // Enrich with names when available for quick identification in logs
+        // Auto-add name for quick log identification
         if (isset($subject->name)) {
             $properties['name'] = $subject->name;
         }
 
-        // Use already-loaded student relationship to avoid N+1 query
+        // * Uses already-loaded relationship to avoid N+1
         if (method_exists($subject, 'student') && $subject->relationLoaded('student') && $subject->student) {
             $properties['student_name'] = $subject->student->name;
         }

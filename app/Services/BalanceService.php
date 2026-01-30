@@ -3,47 +3,39 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 
+/**
+ * * SERVICE: Fetches "Paid Classes" from Google Sheets
+ * ! Payment data lives in Google Sheets (manual admin entry), not in database
+ * ? Why Google Sheets? Admin prefers spreadsheet for payment tracking
+ */
 class BalanceService
 {
+    public function __construct(
+        protected GoogleSheetsClient $sheetsClient
+    ) {}
+
+    /**
+     * * Returns [uuid => paid_classes_count] from Google Sheets
+     * ! Cached for 5 minutes to avoid API rate limits
+     */
     public function getBalances(): array
     {
-        $sheetId = config('services.sheets.balance_sheet_id');
         $tab = config('services.sheets.balance_sheet_tab', 'balances');
-
-        if (!$sheetId) {
-            return [];
-        }
-
         $cacheTtl = config('services.sheets.cache_ttl', 300);
 
-        return Cache::remember('balances.sheet', $cacheTtl, function () use ($sheetId, $tab) {
-            $credentialsPath = config('services.google.credentials_path');
-
-            if (!$credentialsPath || !file_exists($credentialsPath)) {
-                Log::warning('BalanceService: credentials missing or not found', ['path' => $credentialsPath]);
+        return Cache::remember('balances.sheet', $cacheTtl, function () use ($tab) {
+            if (! $this->sheetsClient->initialize(readonly: true)) {
                 return [];
             }
 
-            try {
-                $client = new \Google\Client();
-                $client->setAuthConfig($credentialsPath);
-                $client->setScopes([\Google\Service\Sheets::SPREADSHEETS_READONLY]);
-                $service = new \Google\Service\Sheets($client);
+            $rows = $this->sheetsClient->read($tab);
 
-                $response = $service->spreadsheets_values->get($sheetId, $tab);
-                $values = $response->getValues() ?? [];
-                $rows = collect($values);
-            } catch (\Throwable $e) {
-                Log::error('BalanceService: error fetching balances', ['error' => $e->getMessage()]);
+            if ($rows->isEmpty()) {
                 return [];
             }
 
-            if ($rows->count() === 0) {
-                return [];
-            }
-
+            // * pull(0) removes and returns first row (headers)
             $headers = array_map('strtolower', $rows->pull(0));
 
             $uuidIndex = array_search('uuid', $headers);
@@ -57,6 +49,7 @@ class BalanceService
             foreach ($rows as $row) {
                 $uuid = $row[$uuidIndex] ?? null;
                 $balance = $row[$balanceIndex] ?? null;
+
                 if ($uuid !== null && $balance !== null) {
                     $balances[$uuid] = is_numeric($balance) ? (int) $balance : $balance;
                 }
@@ -66,10 +59,17 @@ class BalanceService
         });
     }
 
+    /**
+     * Get paid classes for single student by UUID
+     */
     public function getBalanceForUuid(?string $uuid): ?int
     {
-        if (!$uuid) return null;
+        if (! $uuid) {
+            return null;
+        }
+
         $balances = $this->getBalances();
+
         return $balances[$uuid] ?? null;
     }
 }

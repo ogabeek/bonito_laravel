@@ -6,14 +6,15 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * * MIDDLEWARE: Protects admin routes
+ * ? Checks session('admin_authenticated') set during login
+ */
 class AdminAuthentication
 {
-    /**
-     * Handle an incoming request.
-     */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!session('admin_authenticated')) {
+        if (! session('admin_authenticated')) {
             return redirect()->route('admin.login');
         }
 

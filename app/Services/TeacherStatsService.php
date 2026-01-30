@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\Teacher;
 use Illuminate\Support\Collection;
 
+/**
+ * * SERVICE: Builds per-teacher student breakdown stats
+ * * Shows which students each teacher taught and their stats
+ */
 class TeacherStatsService
 {
     public function __construct(
@@ -12,20 +15,18 @@ class TeacherStatsService
     ) {}
 
     /**
-     * Build teacher-student stats breakdown for a period
-     *
-     * @param Collection $teachers Collection of teachers
-     * @param Collection $periodLessons Lessons for the period
-     * @return Collection Teacher ID => array of student stats
+     * * Returns [teacher_id => [{name: 'Student', stats: {...}}, ...]]
+     * * Used for drill-down view in admin dashboard
      */
     public function buildTeacherStudentStats(Collection $teachers, Collection $periodLessons): Collection
     {
-        return $teachers->mapWithKeys(function($teacher) use ($periodLessons) {
+        return $teachers->mapWithKeys(function ($teacher) use ($periodLessons) {
             $lessonsForTeacher = $periodLessons->where('teacher_id', $teacher->id);
             $byStudent = $lessonsForTeacher
                 ->groupBy('student_id')
-                ->map(function($studentLessons) {
+                ->map(function ($studentLessons) {
                     $student = $studentLessons->first()->student;
+
                     return [
                         'name' => $student?->name ?? 'Unknown',
                         'stats' => $this->statsService->calculateStats($studentLessons),
