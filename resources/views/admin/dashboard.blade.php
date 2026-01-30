@@ -14,6 +14,23 @@
 
     <x-error-list />
 
+    @php
+        $now = now();
+        $maintenanceStart = \Carbon\Carbon::parse('2026-01-30 00:00:00');
+        $maintenanceEnd = \Carbon\Carbon::parse('2026-02-01 00:00:00');
+        $isMaintenanceMode = $now->between($maintenanceStart, $maintenanceEnd);
+    @endphp
+
+    @if($isMaintenanceMode)
+        <x-info-banner type="warning" icon="🎓" dismissible class="mb-6">
+            <strong>Demo/Presentation Mode (Jan 30-31)</strong>
+            <p class="mt-1 text-sm">
+                Platform is being showcased for demonstration purposes. 
+                All functionality remains available for testing.
+            </p>
+        </x-info-banner>
+    @endif
+
     <x-card>
         <div class="border-b flex gap-4 px-4">
             <button @click="activeTab = 'calendar'" 
