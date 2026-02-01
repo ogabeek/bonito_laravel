@@ -35,4 +35,17 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json(['error' => 'Resource not found'], 404);
             }
         });
+
+        // * Handle CSRF token mismatch with friendly message
+        $exceptions->render(function (Illuminate\Session\TokenMismatchException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'error' => 'Your session has expired. Please refresh the page and try again.',
+                ], 419);
+            }
+
+            return back()
+                ->withInput()
+                ->withErrors(['csrf' => 'Your session has expired. Please try again.']);
+        });
     })->create();

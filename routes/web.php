@@ -17,6 +17,10 @@ Route::get('/', function () {
     return redirect()->route('admin.login');
 });
 
+// Return a fresh CSRF token (used by JS to refresh tokens for long-lived pages)
+Route::get('/csrf-token', function () {
+    return response()->json(['token' => csrf_token()]);
+});
 // * TEACHER ROUTES: /teacher/{slug}/...
 Route::prefix('teacher')->name('teacher.')->group(function () {
     // Public: login page and form submit
