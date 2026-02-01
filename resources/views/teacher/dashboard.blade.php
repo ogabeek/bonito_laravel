@@ -19,23 +19,6 @@
     {{-- * Shows validation errors from session --}}
     <x-error-list />
 
-    @php
-        $now = now();
-        $maintenanceStart = \Carbon\Carbon::parse('2026-01-30 00:00:00');
-        $maintenanceEnd = \Carbon\Carbon::parse('2026-02-01 00:00:00');
-        $isMaintenanceMode = $now->between($maintenanceStart, $maintenanceEnd);
-    @endphp
-
-    @if($isMaintenanceMode)
-        <x-info-banner type="warning" icon="🎓" class="mb-6">
-            <strong>Demo/Presentation Mode Active</strong>
-            <p class="mt-1 text-sm">
-                The platform is being showcased today. All features work normally! 
-                Back to regular operations on <strong>February 1st</strong>.
-            </p>
-        </x-info-banner>
-    @endif
-
     <x-info-banner type="tip" dismissible class="mb-6">
         <div class="font-medium mb-1">📝 How to use this page</div>
         <div class="text-xs opacity-90">
