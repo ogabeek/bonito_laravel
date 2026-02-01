@@ -9,10 +9,8 @@ use App\Http\Requests\CreateTeacherRequest;
 use App\Http\Requests\UpdateStudentRequest;
 use App\Models\Student;
 use App\Models\Teacher;
-use App\Repositories\LessonRepository;
 use App\Services\AuthenticationService;
 use App\Services\BillingDataService;
-use App\Services\CalendarService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Spatie\Activitylog\Models\Activity;
@@ -60,30 +58,9 @@ class AdminController extends Controller
         return redirect()->route('admin.login')->with('success', 'Logged out successfully');
     }
 
-    public function dashboard(Request $request, BillingDataService $billingService, CalendarService $calendar, LessonRepository $lessonRepo)
+    public function dashboard()
     {
-        $data = $billingService->build($request);
-
-        $calendarData = $calendar->getMonthData($request);
-        $data['daysInMonth'] = $calendarData['daysInMonth'];
-        $data['monthStart'] = $calendarData['monthStart'];
-
-        $monthLessons = $lessonRepo->getForMonth($data['currentMonth'], ['teacher', 'student']);
-
-        // Group by "studentId_date" for calendar cell lookup
-        $data['lessonsThisMonth'] = $monthLessons->groupBy(function ($lesson) {
-            return $lesson->student_id.'_'.$lesson->class_date->format('Y-m-d');
-        });
-
-        $data['stats'] = [
-            'teachers' => $data['teachers']->count(),
-            'students' => $data['students']->count(),
-            'lessons_this_month' => $monthLessons->count(),
-        ];
-
-        $data['archivedTeachers'] = Teacher::onlyTrashed()->get();
-
-        return view('admin.dashboard', $data);
+        return view('admin.dashboard');
     }
 
     public function billing(Request $request, BillingDataService $billingService)

@@ -58,28 +58,60 @@
                         </td>
                         <td class="px-3 py-2 text-xs">
                             @php 
-                                $status = $log->properties['attributes']['status'] ?? null;
-                                
-                                // Try to get status from subject's enum if it exists
-                                if ($status && $log->subject) {
-                                    $statusEnum = null;
-                                    if ($log->subject instanceof App\Models\Lesson) {
-                                        $statusEnum = App\Enums\LessonStatus::tryFrom($status);
-                                    } elseif ($log->subject instanceof App\Models\Student) {
-                                        $statusEnum = App\Enums\StudentStatus::tryFrom($status);
-                                    }
-                                    
-                                    if ($statusEnum) {
-                                        echo '<span class="inline-flex items-center rounded-full px-2 py-1 ' . $statusEnum->badgeClass() . '">';
-                                        echo $statusEnum->label();
-                                        echo '</span>';
-                                    } else {
-                                        echo '<span class="text-gray-400">—</span>';
-                                    }
-                                } else {
-                                    echo '<span class="text-gray-400">—</span>';
-                                }
+                                $props = collect($log->properties ?? [])
+                                    ->except(['action', 'student_id'])
+                                    ->sortBy(fn($v, $k) => match($k) {
+                                        'student_name', 'name' => 1,
+                                        'class_date' => 2,
+                                        'status' => 3,
+                                        'topic' => 4,
+                                        'comments' => 5,
+                                        'homework' => 6,
+                                        default => 99,
+                                    });
+                                $subjectType = $log->subject_type ?? null;
                             @endphp
+                            
+                            @if($props->isNotEmpty())
+                                <div class="text-gray-600 space-y-0.5">
+                                    @foreach($props as $key => $value)
+                                        @if(is_string($value) || is_numeric($value))
+                                            <div>
+                                                <span class="font-medium text-gray-700">{{ ucfirst(str_replace('_', ' ', $key)) }}:</span>
+                                                
+                                                @if($key === 'status')
+                                                    @php
+                                                        $statusEnum = null;
+                                                        if ($log->subject instanceof App\Models\Lesson) {
+                                                            $statusEnum = App\Enums\LessonStatus::tryFrom($value);
+                                                        } elseif ($log->subject instanceof App\Models\Student) {
+                                                            $statusEnum = App\Enums\StudentStatus::tryFrom($value);
+                                                        } elseif ($subjectType && str_contains($subjectType, 'Lesson')) {
+                                                            $statusEnum = App\Enums\LessonStatus::tryFrom($value);
+                                                        } elseif ($subjectType && str_contains($subjectType, 'Student')) {
+                                                            $statusEnum = App\Enums\StudentStatus::tryFrom($value);
+                                                        }
+                                                    @endphp
+                                                    
+                                                    @if($statusEnum)
+                                                        <span class="font-semibold {{ str_replace(['bg-', '100'], ['text-', '700'], $statusEnum->badgeClass()) }}">
+                                                            {{ $statusEnum->label() }}
+                                                        </span>
+                                                    @else
+                                                        {{ $value }}
+                                                    @endif
+                                                @elseif($key === 'class_date')
+                                                    {{ \Carbon\Carbon::parse($value)->format('M d, Y') }}
+                                                @else
+                                                    {{ $value }}
+                                                @endif
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            @else
+                                <span class="text-gray-400">—</span>
+                            @endif
                         </td>
                     </tr>
                 @empty

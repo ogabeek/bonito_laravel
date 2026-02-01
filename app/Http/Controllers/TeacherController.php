@@ -80,6 +80,9 @@ class TeacherController extends Controller
             'comments' => $request->comments,
         ]);
 
+        // Load student for activity log
+        $lesson->load('student');
+
         $this->logActivity(
             $lesson,
             'lesson_updated',
@@ -114,13 +117,19 @@ class TeacherController extends Controller
             'comments' => $request->comments,
         ]);
 
+        // Load student for activity log
+        $lesson->load('student');
+
         $this->logActivity(
             $lesson,
             'lesson_created',
             [
                 'student_id' => $request->student_id,
-                'status' => $request->status,
                 'class_date' => $request->class_date,
+                'status' => $request->status,
+                'topic' => $request->topic,
+                'homework' => $request->homework,
+                'comments' => $request->comments,
             ],
             $teacherActor
         );
@@ -136,6 +145,9 @@ class TeacherController extends Controller
         if (! $teacherActor || $lesson->teacher_id !== $teacherActor->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
+
+        // Load student for activity log before deleting
+        $lesson->load('student');
 
         $lesson->delete();
 
