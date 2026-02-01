@@ -60,6 +60,21 @@ return [
             'report' => false,
         ],
 
+        's3-backups' => [
+            'driver' => 's3',
+            'key' => env('AWS_BACKUP_ACCESS_KEY_ID', env('AWS_ACCESS_KEY_ID')),
+            'secret' => env('AWS_BACKUP_SECRET_ACCESS_KEY', env('AWS_SECRET_ACCESS_KEY')),
+            'region' => env('AWS_BACKUP_REGION', env('AWS_DEFAULT_REGION', 'eu-central-1')),
+            'bucket' => env('AWS_BACKUP_BUCKET', env('AWS_BUCKET')),
+            'root' => env('AWS_BACKUP_ROOT', 'backups'),
+            'url' => env('AWS_BACKUP_URL'),
+            'endpoint' => env('AWS_BACKUP_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'throw' => false,
+            'report' => false,
+            'visibility' => 'private',
+        ],
+
     ],
 
     /*
