@@ -105,6 +105,19 @@ class AdminController extends Controller
             ->with($exported ? 'success' : 'error', $exported ? 'Stats exported to sheet' : 'Failed to export stats');
     }
 
+    public function refreshBalance(Request $request, \App\Services\BalanceService $balanceService)
+    {
+        $balanceService->refreshCache();
+
+        return redirect()
+            ->route('admin.billing', [
+                'billing' => $request->boolean('billing') ? 1 : null,
+                'year' => $request->input('year'),
+                'month' => $request->input('month'),
+            ])
+            ->with('success', 'Balance data refreshed from Google Sheets');
+    }
+
     // ═══════════════════════════════════════════════════════════════════
     // TEACHER MANAGEMENT CRUD
     // ═══════════════════════════════════════════════════════════════════

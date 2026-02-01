@@ -16,6 +16,8 @@
         <a href="{{ route('admin.dashboard') }}" class="text-sm text-blue-600 hover:underline">Calendar</a>
     </x-page-header>
 
+    <x-session-alert />
+
     <x-card class="mb-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex flex-wrap items-center gap-3">
@@ -34,7 +36,16 @@
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <x-status-legend compact />
-                <form method="POST" action="{{ route('admin.billing.export') }}" class="ml-auto">
+                <form method="POST" action="{{ route('admin.billing.refresh') }}" class="inline">
+                    @csrf
+                    <input type="hidden" name="billing" value="{{ $billing ? 1 : 0 }}">
+                    <input type="hidden" name="year" value="{{ $currentMonth->year }}">
+                    <input type="hidden" name="month" value="{{ $currentMonth->month }}">
+                    <button type="submit" class="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700" title="Refresh balance data from Google Sheets">
+                        Refresh Balance
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('admin.billing.export') }}" class="inline">
                     @csrf
                     <input type="hidden" name="billing" value="{{ $billing ? 1 : 0 }}">
                     <input type="hidden" name="year" value="{{ $currentMonth->year }}">

@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Cache;
  * * SERVICE: Fetches "Paid Classes" from Google Sheets
  * ! Payment data lives in Google Sheets (manual admin entry), not in database
  * ? Why Google Sheets? Admin prefers spreadsheet for payment tracking
+ * 
+ * CACHING STRATEGY:
+ * - Automatic: Data cached for 5 minutes (300 seconds) to reduce API calls
+ * - Manual: Use refreshCache() to force immediate refresh without waiting
+ * - Best Practice: Use manual refresh after updating Google Sheets
  */
 class BalanceService
 {
@@ -71,5 +76,14 @@ class BalanceService
         $balances = $this->getBalances();
 
         return $balances[$uuid] ?? null;
+    }
+
+    /**
+     * * Clear the balance cache to force fresh fetch from Google Sheets
+     * * Use this when you need immediate data without waiting for cache expiry
+     */
+    public function refreshCache(): void
+    {
+        Cache::forget('balances.sheet');
     }
 }
