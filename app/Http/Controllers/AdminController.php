@@ -235,7 +235,10 @@ class AdminController extends Controller
 
     public function logs()
     {
-        $logs = Activity::latest()->with('subject')->limit(200)->get();
+        $logs = Activity::latest()
+            ->with(['subject', 'causer'])
+            ->limit(200)
+            ->get();
 
         return view('admin.logs', compact('logs'));
     }
