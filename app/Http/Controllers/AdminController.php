@@ -63,9 +63,9 @@ class AdminController extends Controller
         return view('admin.dashboard');
     }
 
-    public function billing(Request $request, BillingDataService $billingService)
+    public function billing()
     {
-        return view('admin.billing', $billingService->build($request));
+        return view('admin.billing');
     }
 
     public function exportBilling(Request $request, BillingDataService $billingService, \App\Services\StatsExportService $exporter)
