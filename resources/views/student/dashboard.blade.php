@@ -31,7 +31,9 @@
         title="All Lessons"
     />
 
-    <x-card :title="'📚 Lessons (' . $pastLessons->flatten()->count() . ')'">
+    <livewire:student-teacher-notes :student="$student" />
+
+    <x-card :title="'📚 Lessons (' . $pastLessons->flatten()->count() . ')'" class="mt-6">
         @if($pastLessons->isNotEmpty())
             <div class="space-y-4">
                 @foreach($pastLessons as $month => $lessons)
