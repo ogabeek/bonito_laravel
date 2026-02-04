@@ -8,7 +8,7 @@ new class extends Component
 {
     public Student $student;
 
-    #[Validate('nullable|string|max:10000')]
+    #[Validate('nullable|string|max:1000')]
     public string $notes = '';
 
     public bool $saved = false;
@@ -58,8 +58,12 @@ new class extends Component
                 wire:model="notes"
                 placeholder="Add here anything you would like to attach to be seen by the student"
                 rows="3"
+                maxlength="1000"
                 class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
             ></textarea>
+            @error('notes')
+                <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+            @enderror
             <div class="flex items-center gap-3 mt-2">
                 <button type="button" wire:click="save" class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
                     Save
