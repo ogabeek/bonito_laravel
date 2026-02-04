@@ -31,6 +31,8 @@
         title="All Lessons"
     />
 
+    <livewire:student-teacher-info :student="$student" />
+
     <livewire:student-teacher-notes :student="$student" />
 
     <x-card :title="'📚 Lessons (' . $pastLessons->flatten()->count() . ')'" class="mt-6">

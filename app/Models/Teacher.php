@@ -21,6 +21,10 @@ class Teacher extends Model
     protected $fillable = [
         'name',
         'password',  // Always hash before saving
+        'contact',
+        'zoom_link',
+        'zoom_id',
+        'zoom_passcode',
     ];
 
     public function lessons(): HasMany
