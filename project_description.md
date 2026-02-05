@@ -16,7 +16,7 @@ Online language school management (~10 teachers, ~100 students, ~200 lessons/mon
 |---------|----------------|
 | Data queries | `LessonRepository` |
 | Business logic | Services (`BalanceService`, `AuthenticationService`) |
-| Views | Livewire v4 functional components (`⚡` prefix) |
+| Views | Livewire Volt components (`resources/views/livewire/`) |
 | Reusable UI | Blade components (`resources/views/components/`) |
 | Activity logs | `Spatie\ActivityLog` via `LogsActivityActions` concern |
 
@@ -83,4 +83,3 @@ SENTRY_TRACES_SAMPLE_RATE=0.1
 
 ## Files AI Should Ignore
 `archive/`, `notes.md`, `TODO.md`, `Presentation/`
-- `Presentation/` folder

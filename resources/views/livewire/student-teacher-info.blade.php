@@ -2,7 +2,7 @@
 
 use App\Models\Student;
 use App\Models\Teacher;
-use Livewire\Component;
+use Livewire\Volt\Component;
 
 new class extends Component
 {
@@ -29,10 +29,10 @@ new class extends Component
     @if($teacher && ($teacher->contact || $teacher->zoom_link))
         <div class="mb-6 flex items-center gap-3 text-sm">
             @if($teacher->zoom_link)
-                <a 
-                    href="{{ $teacher->zoom_link }}" 
-                    target="_blank" 
-                    rel="noopener" 
+                <a
+                    href="{{ $teacher->zoom_link }}"
+                    target="_blank"
+                    rel="noopener"
                     class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 relative group"
                 >
                     Join Zoom

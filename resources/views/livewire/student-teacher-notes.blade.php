@@ -2,7 +2,7 @@
 
 use App\Models\Student;
 use Livewire\Attributes\Validate;
-use Livewire\Component;
+use Livewire\Volt\Component;
 
 new class extends Component
 {

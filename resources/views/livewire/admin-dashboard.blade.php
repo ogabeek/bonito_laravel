@@ -6,7 +6,7 @@ use App\Services\CalendarService;
 use App\Services\DashboardDataService;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
-use Livewire\Component;
+use Livewire\Volt\Component;
 
 new class extends Component
 {

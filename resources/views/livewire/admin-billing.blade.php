@@ -9,7 +9,7 @@ use App\Services\TeacherStatsService;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Lazy;
 use Livewire\Attributes\Url;
-use Livewire\Component;
+use Livewire\Volt\Component;
 
 new class extends Component
 {

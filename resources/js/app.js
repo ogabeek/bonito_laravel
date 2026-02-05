@@ -3,4 +3,4 @@
  * * Imports all JS modules
  */
 import './bootstrap';
-import './teacher-dashboard';
+// import './teacher-dashboard'; // Disabled: now using Livewire component

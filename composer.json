@@ -15,6 +15,7 @@
         "laravel/tinker": "^2.10.1",
         "league/flysystem-aws-s3-v3": "^3.0",
         "livewire/livewire": "^4.1",
+        "livewire/volt": "^1.10",
         "sentry/sentry-laravel": "^4.20",
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-backup": "^9.3"
