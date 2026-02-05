@@ -53,24 +53,24 @@ new class extends Component
 <div wire:key="student-notes-{{ $student->id }}">
     @if(session('teacher_id') || session('admin_authenticated'))
         {{-- Teacher/Admin view: editable --}}
-        <div class="mb-6 p-4 bg-white border rounded-lg shadow-sm">
+        <div class="mb-6">
             <textarea
                 wire:model="notes"
-                placeholder="Add here anything you would like to attach to be seen by the student"
+                placeholder="Notes for student..."
                 rows="3"
                 maxlength="1000"
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             ></textarea>
-            @error('notes')
-                <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
-            @enderror
-            <div class="flex items-center gap-3 mt-2">
-                <button type="button" wire:click="save" class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
+            <div class="flex items-center gap-2 mt-2">
+                <button type="button" wire:click="save" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
                     Save
                 </button>
                 @if($saved)
-                    <span class="text-green-600 text-sm">✓ Saved</span>
+                    <span class="text-green-600 text-sm">✓</span>
                 @endif
+                @error('notes')
+                    <span class="text-red-600 text-xs">{{ $message }}</span>
+                @enderror
             </div>
         </div>
     @elseif($notes)

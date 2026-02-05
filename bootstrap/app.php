@@ -24,6 +24,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.auth' => \App\Http\Middleware\AdminAuthentication::class,
             'teacher.auth' => \App\Http\Middleware\TeacherAuthentication::class,
         ]);
+
+        // * Exclude login routes from CSRF (no session to protect yet)
+        $middleware->validateCsrfTokens(except: [
+            'teacher/*/login',
+            'admin/login',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // * Sentry error tracking integration
