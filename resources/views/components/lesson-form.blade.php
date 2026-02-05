@@ -21,22 +21,22 @@
         <div>
             <label class="form-label">Status</label>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
-                <label class="status-btn-completed flex items-center justify-center border rounded cursor-pointer transition p-3 text-sm font-medium" title="Lesson completed successfully">
+                <label class="status-btn-completed flex items-center justify-center border rounded cursor-pointer transition px-3 py-2 text-sm font-medium" title="Lesson completed successfully">
                     <input type="radio" name="status" value="completed" class="status-radio hidden" checked>
                     <span>✓ Done</span>
                 </label>
 
-                <label class="status-btn-student-cancelled flex items-center justify-center border rounded cursor-pointer transition p-3 text-sm font-medium" title="Cancelled by student/parent (agreed)">
+                <label class="status-btn-student-cancelled flex items-center justify-center border rounded cursor-pointer transition px-3 py-2 text-sm font-medium" title="Cancelled by student/parent (agreed)">
                     <input type="radio" name="status" value="student_cancelled" class="status-radio hidden">
                     <span>C</span>
                 </label>
                 
-                <label class="status-btn-cancelled flex items-center justify-center border rounded cursor-pointer transition p-3 text-sm font-medium" title="Cancelled by teacher">
+                <label class="status-btn-cancelled flex items-center justify-center border rounded cursor-pointer transition px-3 py-2 text-sm font-medium" title="Cancelled by teacher">
                     <input type="radio" name="status" value="teacher_cancelled" class="status-radio hidden">
                     <span>CT</span>
                 </label>
 
-                <label class="status-btn-absent flex items-center justify-center border rounded cursor-pointer transition p-3 text-sm font-medium" title="Student was absent">
+                <label class="status-btn-absent flex items-center justify-center border rounded cursor-pointer transition px-3 py-2 text-sm font-medium" title="Student was absent">
                     <input type="radio" name="status" value="student_absent" class="status-radio hidden">
                     <span>A</span>
                 </label>
