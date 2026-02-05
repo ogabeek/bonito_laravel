@@ -200,6 +200,14 @@
     margin-bottom: var(--spacing-xs);
 }
 
+.form-checkbox {
+    width: 1rem;
+    height: 1rem;
+    background-color: #f3f4f6;
+    accent-color: var(--color-primary);
+    cursor: pointer;
+}
+
 /* CALENDAR - Month view date picker */
 .calendar-container {
     width: var(--calendar-width);

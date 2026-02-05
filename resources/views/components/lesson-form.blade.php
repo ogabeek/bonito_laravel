@@ -67,6 +67,21 @@
             </div>
         </div>
 
+        <!-- Absent Section - Only shown when A is selected -->
+        <div class="absent-section hidden flex flex-col gap-3" data-absent-section>
+            <div class="flex flex-col gap-2">
+                <label class="flex items-center gap-2 text-sm cursor-pointer">
+                    <input type="checkbox" name="absence_reminder_sent" value="1" class="form-checkbox">
+                    <span>Reminder was sent before class</span>
+                </label>
+                <label class="flex items-center gap-2 text-sm cursor-pointer">
+                    <input type="checkbox" name="absence_chat_notified" value="1" class="form-checkbox">
+                    <span>Texted to chat about waiting, no response</span>
+                </label>
+            </div>
+            <p class="text-xs text-gray-500 italic">If both steps were completed, the school recovers 50% of the lesson payment.</p>
+        </div>
+
         <!-- Shared notes/reason field -->
         <div class="comments-toggle text-xs">
             <button type="button" data-comments-toggle class="text-blue-600 hover:underline">+ Add notes</button>
@@ -88,6 +103,7 @@
 <script>
     const updateCommentsUI = (form, status) => {
         const completedSection = form.querySelector('.completed-section');
+        const absentSection = form.querySelector('[data-absent-section]');
         const commentsField = form.querySelector('[name="comments"]');
         const commentsLabel = form.querySelector('[data-comments-label]');
         const commentsSection = form.querySelector('[data-comments-section]');
@@ -99,6 +115,11 @@
             const showCompleted = status === 'completed';
             completedSection.classList.toggle('hidden', !showCompleted);
             topicField.toggleAttribute('required', showCompleted);
+        }
+
+        // Absent section visibility
+        if (absentSection) {
+            absentSection.classList.toggle('hidden', status !== 'student_absent');
         }
 
         // Comments field requirements and visibility
@@ -113,7 +134,7 @@
         }
 
         if (commentsSection && commentsToggle) {
-            if (status === 'teacher_cancelled') {
+            if (status === 'teacher_cancelled' || status === 'student_absent') {
                 commentsSection.classList.remove('hidden');
                 commentsToggle.classList.add('hidden');
             } else if (status === 'completed') {

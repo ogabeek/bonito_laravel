@@ -23,6 +23,8 @@ class Lesson extends Model
         'topic',
         'homework',
         'comments',
+        'absence_reminder_sent',
+        'absence_chat_notified',
     ];
 
     protected function casts(): array
@@ -30,6 +32,8 @@ class Lesson extends Model
         return [
             'class_date' => 'date',
             'status' => LessonStatus::class,
+            'absence_reminder_sent' => 'boolean',
+            'absence_chat_notified' => 'boolean',
         ];
     }
 
