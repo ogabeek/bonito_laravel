@@ -19,6 +19,10 @@
     {{-- * Shows validation errors from session --}}
     <x-error-list />
 
+    <x-info-banner type="warning" dismissible class="mb-4">
+        🚧 This platform is under active development. If you notice any bugs or have suggestions, please let us know!
+    </x-info-banner>
+
     <x-info-banner type="tip" dismissible class="mb-6">
         <div class="font-medium mb-1">📝 How to use this page</div>
         <div class="text-xs opacity-90">
