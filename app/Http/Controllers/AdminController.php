@@ -111,6 +111,33 @@ class AdminController extends Controller
         return redirect()->route('admin.dashboard')->with('success', "Teacher created! URL: {$request->getSchemeAndHttpHost()}/teacher/{$teacher->id}");
     }
 
+    public function editTeacherForm(Teacher $teacher)
+    {
+        return view('admin.teachers.edit', compact('teacher'));
+    }
+
+    public function updateTeacher(Request $request, Teacher $teacher)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'contact' => ['nullable', 'string', 'max:255'],
+            'zoom_link' => ['nullable', 'url', 'max:500'],
+            'zoom_id' => ['nullable', 'string', 'max:50'],
+            'zoom_passcode' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $original = $teacher->getOriginal();
+        $teacher->update($validated);
+
+        $this->logActivity(
+            $teacher,
+            'teacher_updated',
+            ['changes' => $teacher->getChanges(), 'original' => $original]
+        );
+
+        return redirect()->route('admin.teachers.edit', $teacher)->with('success', 'Teacher updated successfully!');
+    }
+
     public function deleteTeacher(Teacher $teacher)
     {
         $teacher->delete();

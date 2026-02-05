@@ -318,10 +318,9 @@ new class extends Component
                     {{-- Add Teacher Form --}}
                     @if($showAddTeacher)
                         <div class="bg-gray-50 rounded-lg p-4 mb-4">
-                            <form method="POST" action="{{ route('admin.teachers.create') }}" class="flex gap-4">
+                            <form method="POST" action="{{ route('admin.teachers.create') }}" class="flex gap-4 items-end">
                                 @csrf
-                                <input type="text" name="name" placeholder="Name *" required class="flex-1 px-3 py-2 border rounded">
-                                <input type="text" name="password" placeholder="Password *" required class="flex-1 px-3 py-2 border rounded">
+                                <x-teacher-form mode="create" />
                                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Create</button>
                             </form>
                         </div>
@@ -350,7 +349,8 @@ new class extends Component
                                     <td class="px-4 py-2 text-right">
                                         <x-stats-inline :stats="$ts" class="w-20 ml-auto text-gray-500" />
                                     </td>
-                                    <td class="px-4 py-2 text-right">
+                                    <td class="px-4 py-2 text-right flex gap-2 justify-end">
+                                        <a href="{{ route('admin.teachers.edit', $teacher) }}" class="text-blue-600 hover:text-blue-800">Edit</a>
                                         <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}" onsubmit="return confirm('Archive {{ $teacher->name }}? (Can be restored later)')">
                                             @csrf
                                             @method('DELETE')

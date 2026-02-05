@@ -63,6 +63,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Teachers CRUD
         Route::post('/teachers', [\App\Http\Controllers\AdminController::class, 'createTeacher'])->name('teachers.create');
+        Route::get('/teachers/{teacher}/edit', [\App\Http\Controllers\AdminController::class, 'editTeacherForm'])->name('teachers.edit');
+        Route::put('/teachers/{teacher}', [\App\Http\Controllers\AdminController::class, 'updateTeacher'])->name('teachers.update');
         Route::delete('/teachers/{teacher}', [\App\Http\Controllers\AdminController::class, 'deleteTeacher'])->name('teachers.delete');
         Route::post('/teachers/{teacher}/restore', [\App\Http\Controllers\AdminController::class, 'restoreTeacher'])->name('teachers.restore');
 
