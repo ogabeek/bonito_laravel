@@ -24,10 +24,10 @@
     </x-info-banner>
 
     <x-info-banner type="tip" dismissible class="mb-6">
-        <div class="font-medium mb-1">📝 How to use this page</div>
+        <div class="font-medium mb-1">How to use this page</div>
         <div class="text-xs opacity-90">
-            <strong>Mark a lesson:</strong> Use the form below to select a student, mark attendance (Done/C - Canceled /CT - Canceled by the Teacher /Absent (when student didn't appear withou any notifications (we need to inform parents in this case), add topic and homework.<br>
-            <strong>Quick tip:</strong> Click on any student's name in the list above to jump to their personal page.
+            <strong>Mark a lesson:</strong> Use the form below to select a student, lesson date,  mark attendance (Done/C - Canceled /CT - Canceled by the Teacher /Absent (when student didn't appear withou any notifications (we need to inform parents in this case), add topic and homework.<br>
+            <strong>Quick tip:</strong> Click on any student's name in the list above to jump to their personal page and add any additional info
         </div>
     </x-info-banner>
 

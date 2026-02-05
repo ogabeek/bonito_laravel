@@ -56,7 +56,7 @@ new class extends Component
         <div class="mb-6">
             <textarea
                 wire:model="notes"
-                placeholder="Notes for student..."
+                placeholder="Add anything here you want to be displayd on studet page (links, text, contacts etc...)"
                 rows="3"
                 maxlength="1000"
                 class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
