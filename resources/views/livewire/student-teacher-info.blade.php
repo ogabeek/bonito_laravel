@@ -12,16 +12,12 @@ new class extends Component
 
     public function mount(): void
     {
-        // Get the teacher who has taught this student the most
-        $teacherId = $this->student->lessons()
-            ->selectRaw('teacher_id, COUNT(*) as lesson_count')
-            ->groupBy('teacher_id')
-            ->orderByDesc('lesson_count')
-            ->value('teacher_id');
-
-        if ($teacherId) {
-            $this->teacher = Teacher::find($teacherId);
-        }
+        // Get the teacher from the most recent lesson
+        $this->teacher = $this->student->lessons()
+            ->with('teacher')
+            ->orderByDesc('class_date')
+            ->first()
+            ?->teacher;
     }
 }; ?>
 
