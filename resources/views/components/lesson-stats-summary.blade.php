@@ -1,15 +1,17 @@
-@props(['stats', 'date', 'prevMonth', 'nextMonth', 'routeName', 'routeParams' => []])
+@props(['stats', 'date', 'prevMonth', 'nextMonth', 'routeName', 'routeParams' => [], 'showNav' => true, 'title' => null])
 
 <x-card class="mb-6">
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-4">
-        <h2 class="text-lg sm:text-xl font-semibold">{{ $date->format('F Y') }}</h2>
-        <x-month-nav 
-            :currentMonth="$date" 
-            :prevMonth="$prevMonth" 
-            :nextMonth="$nextMonth" 
-            :routeName="$routeName" 
-            :routeParams="$routeParams" 
-        />
+        <h2 class="text-lg sm:text-xl font-semibold">{{ $title ?? $date->format('F Y') }}</h2>
+        @if($showNav)
+            <x-month-nav
+                :currentMonth="$date"
+                :prevMonth="$prevMonth"
+                :nextMonth="$nextMonth"
+                :routeName="$routeName"
+                :routeParams="$routeParams"
+            />
+        @endif
     </div>
     <div class="flex justify-center gap-2 sm:gap-4 mt-3 border-t pt-3 text-xs sm:text-base">
         <div class="flex items-center gap-1 sm:gap-2">

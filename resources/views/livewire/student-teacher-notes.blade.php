@@ -52,14 +52,21 @@ new class extends Component
 
 <div wire:key="student-notes-{{ $student->id }}">
     @if(session('teacher_id') || session('admin_authenticated'))
-        {{-- Teacher/Admin view: editable --}}
+        {{-- Teacher/Admin view: editable, styled to match student view --}}
         <div class="mb-6">
             <textarea
                 wire:model="notes"
-                placeholder="Add anything here you want to be displayd on studet page (links, text, contacts etc...)"
-                rows="3"
+                placeholder="Add anything here you want to be displayed on student page (links, text, contacts etc...)"
                 maxlength="1000"
-                class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                x-data="{
+                    resize() {
+                        $el.style.height = 'auto';
+                        $el.style.height = $el.scrollHeight + 'px';
+                    }
+                }"
+                x-init="resize(); Livewire.hook('morph.updated', ({ el }) => { if (el === $el) resize() })"
+                x-on:input="resize()"
+                class="w-full p-4 bg-blue-50 border border-blue-100 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none overflow-hidden min-h-[80px]"
             ></textarea>
             <div class="flex items-center gap-2 mt-2">
                 <button type="button" wire:click="save" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
@@ -74,7 +81,7 @@ new class extends Component
             </div>
         </div>
     @elseif($notes)
-        {{-- Student view: just the content, no extra chrome --}}
-        <div class="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-lg whitespace-pre-wrap text-sm text-gray-700">{{ $notes }}</div>
+        {{-- Student view: read-only with clickable links --}}
+        <div class="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-lg whitespace-pre-wrap text-sm text-gray-700">{!! Str::linkify($notes) !!}</div>
     @endif
 </div>
