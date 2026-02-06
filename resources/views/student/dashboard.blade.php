@@ -35,10 +35,10 @@
 
     <livewire:student-teacher-notes :student="$student" />
 
-    <x-card :title="'📚 Lessons (' . $pastLessons->flatten()->count() . ')'" class="mt-6">
-        @if($pastLessons->isNotEmpty())
+    <x-card :title="'📚 Lessons (' . $lessonsByMonth->flatten()->count() . ')'" class="mt-6">
+        @if($lessonsByMonth->isNotEmpty())
             <div class="space-y-4">
-                @foreach($pastLessons as $month => $lessons)
+                @foreach($lessonsByMonth as $month => $lessons)
                     @php
                         [$year, $monthNum] = explode('-', $month);
                         $monthName = \Carbon\Carbon::createFromDate($year, $monthNum, 1)->format('F Y');

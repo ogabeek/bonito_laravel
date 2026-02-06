@@ -15,13 +15,10 @@ class StudentController extends Controller
 {
     public function dashboard(Student $student, LessonRepository $lessonRepo, LessonStatisticsService $statsService)
     {
-        // Past lessons grouped by month
-        $pastLessons = $lessonRepo->getPastForStudent($student->id)
-            ->groupBy(fn ($lesson) => $lesson->class_date->format('Y-m'));
-
         $allLessons = $lessonRepo->getForStudent($student->id);
+        $lessonsByMonth = $allLessons->groupBy(fn ($lesson) => $lesson->class_date->format('Y-m'));
         $stats = $statsService->calculateStats($allLessons);
 
-        return view('student.dashboard', compact('student', 'pastLessons', 'stats'));
+        return view('student.dashboard', compact('student', 'lessonsByMonth', 'stats'));
     }
 }
