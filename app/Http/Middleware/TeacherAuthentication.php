@@ -14,12 +14,15 @@ class TeacherAuthentication
 {
     public function handle(Request $request, Closure $next): Response
     {
+        $teacher = $request->route('teacher');
+
         if (! session('teacher_id')) {
-            return redirect('/');
+            return $teacher
+                ? redirect()->route('teacher.login', $teacher->id)
+                : redirect('/');
         }
 
         // * Prevent Teacher A from accessing Teacher B's routes
-        $teacher = $request->route('teacher');
         if ($teacher && (int) session('teacher_id') !== $teacher->id) {
             return redirect()->route('teacher.login', $teacher->id);
         }

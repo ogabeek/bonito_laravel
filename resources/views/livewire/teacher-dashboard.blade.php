@@ -45,7 +45,11 @@ new class extends Component
 
     public function getDate(): Carbon
     {
-        return Carbon::createFromFormat('Y-m', $this->monthParam)->startOfMonth();
+        try {
+            return Carbon::createFromFormat('Y-m', $this->monthParam)->startOfMonth();
+        } catch (\Exception $e) {
+            return now()->startOfMonth();
+        }
     }
 
     public function getPrevMonth(): Carbon
