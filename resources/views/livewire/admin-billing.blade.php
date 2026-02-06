@@ -210,7 +210,10 @@ new class extends Component
 
 <div class="p-6 w-full mx-auto" x-data x-init="$wire.loadBalances()">
     <x-page-header title="Billing & Stats" :logoutRoute="route('admin.logout')">
-        <a href="{{ route('admin.dashboard') }}" class="text-sm text-blue-600 hover:underline">Calendar</a>
+        <div class="flex items-center gap-4">
+            <a href="{{ route('admin.dashboard') }}" class="text-sm text-blue-600 hover:underline">Calendar</a>
+            <a href="{{ route('admin.logs') }}" class="text-sm text-blue-600 hover:underline">Activity Logs</a>
+        </div>
     </x-page-header>
 
     <x-session-alert />

@@ -136,6 +136,9 @@ new class extends Component
                 'student_id' => $this->student_id,
                 'class_date' => $this->class_date,
                 'status' => $this->status,
+                'topic' => $this->topic,
+                'homework' => $this->homework,
+                'comments' => $this->comments,
             ],
             $this->teacher
         );
