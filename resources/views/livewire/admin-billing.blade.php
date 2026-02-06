@@ -273,27 +273,27 @@ new class extends Component
             {{-- Lessons Trend --}}
             <div class="bg-white p-2 rounded border border-gray-200">
                 <div class="text-[10px] text-gray-500 mb-1 font-medium">Lessons/Month</div>
-                <canvas id="lessonsTrendChart" style="height: 120px !important;"></canvas>
+                <div class="h-[120px]"><canvas id="lessonsTrendChart"></canvas></div>
             </div>
             {{-- Completion Rate Trend --}}
             <div class="bg-white p-2 rounded border border-gray-200">
                 <div class="text-[10px] text-gray-500 mb-1 font-medium">Completion Rate %</div>
-                <canvas id="completionTrendChart" style="height: 120px !important;"></canvas>
+                <div class="h-[120px]"><canvas id="completionTrendChart"></canvas></div>
             </div>
             {{-- Cancellations Trend --}}
             <div class="bg-white p-2 rounded border border-gray-200">
                 <div class="text-[10px] text-gray-500 mb-1 font-medium">Cancellations</div>
-                <canvas id="cancellationsTrendChart" style="height: 120px !important;"></canvas>
+                <div class="h-[120px]"><canvas id="cancellationsTrendChart"></canvas></div>
             </div>
             {{-- Teachers Workload --}}
             <div class="bg-white p-2 rounded border border-gray-200">
                 <div class="text-[10px] text-gray-500 mb-1 font-medium">Teacher Workload</div>
-                <canvas id="teacherWorkloadChart" style="height: 120px !important;"></canvas>
+                <div class="h-[120px]"><canvas id="teacherWorkloadChart"></canvas></div>
             </div>
             {{-- Top Students --}}
             <div class="bg-white p-2 rounded border border-gray-200">
                 <div class="text-[10px] text-gray-500 mb-1 font-medium">Top Students</div>
-                <canvas id="studentActivityChart" style="height: 120px !important;"></canvas>
+                <div class="h-[120px]"><canvas id="studentActivityChart"></canvas></div>
             </div>
         </div>
     </div>
