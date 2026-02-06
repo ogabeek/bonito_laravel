@@ -10,13 +10,16 @@
         :subtitle="$student->goal ? 'Goal: ' . $student->goal : null" 
     />
 
-    @if($stats['total'] === 0)
-        <x-info-banner type="success" dismissible class="mb-6">
-            <div class="font-medium mb-1">Welcome! 🎉</div>
-            <div class="text-xs opacity-90">
-                This is your personal learning dashboard. After each lesson, your teacher will log what you covered, 
-                homework assignments, and track your progress. Check back after your first class!
-            </div>
+    @if(config('banners.student_welcome.enabled') && $stats['total'] < 5)
+        <x-info-banner :type="config('banners.student_welcome.type')" dismissible class="mb-6">
+            <div class="font-medium mb-1">{{ config('banners.student_welcome.title') }}</div>
+            <div class="text-xs opacity-90">{{ config('banners.student_welcome.message') }}</div>
+        </x-info-banner>
+    @endif
+
+    @if(config('banners.student_info.enabled'))
+        <x-info-banner :type="config('banners.student_info.type')" id="student_info" class="mb-6">
+            {{ config('banners.student_info.message') }}
         </x-info-banner>
     @endif
 

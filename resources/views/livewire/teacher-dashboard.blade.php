@@ -216,17 +216,18 @@ new class extends Component
             </div>
         @endif
 
-        <x-info-banner type="warning" dismissible class="mb-4">
-            🚧 This platform is under active development. If you notice any bugs or have suggestions, please let us know!
-        </x-info-banner>
+        @if(config('banners.teacher_info.enabled'))
+            <x-info-banner :type="config('banners.teacher_info.type')" id="teacher_info" class="mb-4">
+                {{ config('banners.teacher_info.message') }}
+            </x-info-banner>
+        @endif
 
-        <x-info-banner type="tip" dismissible class="mb-6">
-            <div class="font-medium mb-1">How to use this page</div>
-            <div class="text-xs opacity-90">
-                <strong>Mark a lesson:</strong> Use the form below to select a student, lesson date, mark attendance (Done/C - Canceled /CT - Canceled by the Teacher /Absent (when student didn't appear withou any notifications (we need to inform parents in this case), add topic and homework.<br>
-                <strong>Quick tip:</strong> Click on any student's name in the list above to jump to their personal page and add any additional info
-            </div>
-        </x-info-banner>
+        @if(config('banners.teacher_howto.enabled'))
+            <x-info-banner :type="config('banners.teacher_howto.type')" id="teacher_howto" class="mb-6">
+                <div class="font-medium mb-1">{{ config('banners.teacher_howto.title') }}</div>
+                <div class="text-xs opacity-90">{!! config('banners.teacher_howto.message') !!}</div>
+            </x-info-banner>
+        @endif
 
         {{-- Student stats with month navigation --}}
         <x-card class="mb-6">
