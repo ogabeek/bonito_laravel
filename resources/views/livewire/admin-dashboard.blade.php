@@ -51,15 +51,20 @@ new class extends Component
     }
 
     #[Computed]
-    public function daysInMonth(): int
+    public function calendarDays(): array
     {
-        return $this->currentMonth->daysInMonth;
-    }
+        $tailDay = config('billing.period_end_day', 25);
+        $start = $this->currentMonth->copy()->subMonthNoOverflow()->day($tailDay);
+        $end = $this->currentMonth->copy()->endOfMonth();
 
-    #[Computed]
-    public function monthStart(): \Carbon\Carbon
-    {
-        return $this->currentMonth->copy()->startOfMonth();
+        $days = [];
+        $current = $start->copy();
+        while ($current <= $end) {
+            $days[] = $current->copy();
+            $current->addDay();
+        }
+
+        return $days;
     }
 
     #[Computed]
@@ -245,17 +250,17 @@ new class extends Component
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="cal-cell cal-sticky border-r bg-gray-50 min-w-[170px] text-sm">Student</th>
-                                        @for($day = 1; $day <= $this->daysInMonth; $day++)
+                                        @foreach($this->calendarDays as $date)
                                             @php
-                                                $date = $this->monthStart->copy()->addDays($day - 1);
+                                                $isPrevMonth = $date->month !== $this->currentMonth->month;
                                                 $isWeekend = $date->isWeekend();
                                                 $isToday = $date->isToday();
                                             @endphp
-                                            <th class="cal-cell cal-day border-l {{ $isWeekend ? 'bg-gray-100' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
-                                                <div class="cal-daynum">{{ $day }}</div>
+                                            <th class="cal-cell cal-day border-l {{ $isPrevMonth ? 'bg-gray-200 text-gray-400' : '' }} {{ $isWeekend && !$isPrevMonth ? 'bg-gray-100' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
+                                                <div class="cal-daynum">{{ $date->day }}</div>
                                                 <div class="cal-weekday">{{ substr($date->format('D'), 0, 2) }}</div>
                                             </th>
-                                        @endfor
+                                        @endforeach
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -278,15 +283,15 @@ new class extends Component
                                                         <div class="text-xs text-gray-500 ml-3.5">{{ $student->teachers->pluck('name')->join(', ') }}</div>
                                                     @endif
                                                 </td>
-                                                @for($day = 1; $day <= $this->daysInMonth; $day++)
+                                                @foreach($this->calendarDays as $date)
                                                     @php
-                                                        $date = $this->monthStart->copy()->addDays($day - 1);
+                                                        $isPrevMonth = $date->month !== $this->currentMonth->month;
                                                         $dateKey = $student->id . '_' . $date->format('Y-m-d');
                                                         $dayLessons = $this->lessonsThisMonth->get($dateKey, collect());
                                                         $isWeekend = $date->isWeekend();
                                                         $isToday = $date->isToday();
                                                     @endphp
-                                                    <td class="cal-cell cal-day cal-daycell border-l {{ $isWeekend ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
+                                                    <td class="cal-cell cal-day cal-daycell border-l {{ $isPrevMonth ? 'bg-gray-100' : '' }} {{ $isWeekend && !$isPrevMonth ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
                                                         <div class="flex flex-wrap justify-center gap-0.5">
                                                             @foreach($dayLessons as $lesson)
                                                                 <span class="cal-lesson-chip"
@@ -297,7 +302,7 @@ new class extends Component
                                                             @endforeach
                                                         </div>
                                                     </td>
-                                                @endfor
+                                                @endforeach
                                             </tr>
                                         @endif
                                     @endforeach

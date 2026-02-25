@@ -81,6 +81,13 @@ class LessonRepository
             ->get();
     }
 
+    public function getForDateRange(Carbon $start, Carbon $end, array $with = []): Collection
+    {
+        return $this->baseQuery($with)
+            ->whereBetween('class_date', [$start->startOfDay(), $end->endOfDay()])
+            ->get();
+    }
+
     public function getForYear(int $year, array $with = []): Collection
     {
         return $this->baseQuery($with)

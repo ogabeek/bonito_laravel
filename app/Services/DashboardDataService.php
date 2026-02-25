@@ -51,12 +51,15 @@ class DashboardDataService
     }
 
     /**
-     * * Get lessons for month, grouped by student_date for calendar lookup
+     * * Get lessons for calendar view (includes tail of previous month for billing context)
      */
     public function getLessonsForMonth(Carbon $month): Collection
     {
+        $tailStart = $month->copy()->subMonthNoOverflow()->day(config('billing.period_end_day', 25));
+        $end = $month->copy()->endOfMonth();
+
         return $this->lessonRepo
-            ->getForMonth($month, ['teacher', 'student'])
+            ->getForDateRange($tailStart, $end, ['teacher', 'student'])
             ->groupBy(fn ($lesson) => $lesson->student_id.'_'.$lesson->class_date->format('Y-m-d'));
     }
 
