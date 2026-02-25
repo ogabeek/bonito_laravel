@@ -99,11 +99,11 @@ class AdminController extends Controller
     // TEACHER MANAGEMENT CRUD
     // ═══════════════════════════════════════════════════════════════════
 
-    public function createTeacher(CreateTeacherRequest $request, AuthenticationService $auth)
+    public function createTeacher(CreateTeacherRequest $request)
     {
         $teacher = Teacher::create([
             'name' => $request->name,
-            'password' => $auth->hash($request->password),
+            'password' => $request->password,
         ]);
 
         $this->logActivity($teacher, 'teacher_created');
@@ -113,6 +113,8 @@ class AdminController extends Controller
 
     public function editTeacherForm(Teacher $teacher)
     {
+        $teacher->makeVisible('password');
+
         return view('admin.teachers.edit', compact('teacher'));
     }
 
@@ -120,11 +122,16 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'password' => ['nullable', 'string', 'min:4'],
             'contact' => ['nullable', 'string', 'max:255'],
             'zoom_link' => ['nullable', 'url', 'max:500'],
             'zoom_id' => ['nullable', 'string', 'max:50'],
             'zoom_passcode' => ['nullable', 'string', 'max:50'],
         ]);
+
+        if (empty($validated['password'])) {
+            unset($validated['password']);
+        }
 
         $original = $teacher->getOriginal();
         $teacher->update($validated);

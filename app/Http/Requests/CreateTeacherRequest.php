@@ -28,8 +28,8 @@ class CreateTeacherRequest extends FormRequest
     {
         return [
             'name.required' => 'Teacher name is required.',
-            'password.required' => 'Password is required.',
-            'password.min' => 'Password must be at least :min characters.',
+            'password.required' => 'PIN is required.',
+            'password.min' => 'PIN must be at least :min characters.',
         ];
     }
 }

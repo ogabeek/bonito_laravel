@@ -18,9 +18,11 @@ class Teacher extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $hidden = ['password'];
+
     protected $fillable = [
         'name',
-        'password',  // Always hash before saving
+        'password',
         'contact',
         'zoom_link',
         'zoom_id',

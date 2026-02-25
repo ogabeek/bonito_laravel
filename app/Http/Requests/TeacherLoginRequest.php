@@ -7,5 +7,11 @@ namespace App\Http\Requests;
  */
 class TeacherLoginRequest extends BaseLoginRequest
 {
-    // Inherits from BaseLoginRequest
+    public function messages(): array
+    {
+        return [
+            'password.required' => 'PIN is required',
+            'password.min' => 'PIN must be at least 4 characters',
+        ];
+    }
 }

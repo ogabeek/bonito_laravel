@@ -3,9 +3,10 @@
 @section('title', 'Teacher Login')
 
 @section('content')
-<x-login-card 
-    title="Teacher Login" 
+<x-login-card
+    title="Teacher Login"
     :action="route('teacher.login.submit', $teacher->id)"
+    inputLabel="PIN"
 >
     <p class="text-gray-600 mb-4">Hello, {{ $teacher->name }}</p>
 </x-login-card>

@@ -2,6 +2,7 @@
     'title',
     'subtitle' => null,
     'action',
+    'inputLabel' => 'Password',
 ])
 
 <div class="flex items-center justify-center min-h-screen">
@@ -25,7 +26,7 @@
             {{ $slot }}
             
             <div class="mb-4">
-                <label for="password" class="form-label">Password</label>
+                <label for="password" class="form-label">{{ $inputLabel }}</label>
                 <input 
                     type="password" 
                     name="password" 

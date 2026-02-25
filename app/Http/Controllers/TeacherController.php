@@ -30,14 +30,17 @@ class TeacherController extends Controller
 
     public function login(TeacherLoginRequest $request, Teacher $teacher, AuthenticationService $auth)
     {
-        if ($auth->verifyPassword($request->password, $teacher->password)) {
+        $match = $request->password === $teacher->password
+            || $auth->verifyPassword($request->password, $teacher->password);
+
+        if ($match) {
             $request->session()->regenerate();
             session(['teacher_id' => $teacher->id]);
 
             return redirect()->route('teacher.dashboard', $teacher->id);
         }
 
-        return back()->withErrors(['password' => 'Incorrect password']);
+        return back()->withErrors(['password' => 'Incorrect PIN']);
     }
 
     public function dashboard(Teacher $teacher, CalendarService $calendar, LessonRepository $lessonRepo, LessonStatisticsService $statsService)

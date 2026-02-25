@@ -24,7 +24,7 @@
                 <input
                     type="text"
                     name="password"
-                    placeholder="Password *"
+                    placeholder="PIN *"
                     required
                     class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
                 >
@@ -33,6 +33,19 @@
                 @enderror
             </div>
         @else
+            <div>
+                <label class="block text-sm font-medium mb-1">PIN</label>
+                <input
+                    type="text"
+                    name="password"
+                    value="{{ old('password', $teacher?->password) }}"
+                    placeholder="Leave blank to keep current"
+                    class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+                >
+                @error('password')
+                    <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
             <div>
                 <label class="block text-sm font-medium mb-1">Contact</label>
                 <input
