@@ -246,7 +246,9 @@ new class extends Component
 
                     <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
                         <div class="xl:col-span-4 overflow-x-auto border rounded">
-                            <table class="w-full text-sm">
+                            <table class="w-full text-sm cal-table"
+                                   x-data="{ hoverCol: -1 }"
+                                   @mouseleave="hoverCol = -1">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="cal-cell cal-sticky border-r bg-gray-50 min-w-[170px] text-sm">Student</th>
@@ -256,7 +258,9 @@ new class extends Component
                                                 $isWeekend = $date->isWeekend();
                                                 $isToday = $date->isToday();
                                             @endphp
-                                            <th class="cal-cell cal-day border-l {{ $isPrevMonth ? 'bg-gray-200 text-gray-400' : '' }} {{ $isWeekend && !$isPrevMonth ? 'bg-gray-100' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
+                                            <th class="cal-cell cal-day border-l {{ $isPrevMonth ? 'bg-gray-200 text-gray-400' : '' }} {{ $isWeekend && !$isPrevMonth ? 'bg-gray-100' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}"
+                                                @mouseenter="hoverCol = {{ $loop->index }}"
+                                                :class="hoverCol === {{ $loop->index }} && 'cal-col-hover'">
                                                 <div class="cal-daynum">{{ $date->day }}</div>
                                                 <div class="cal-weekday">{{ substr($date->format('D'), 0, 2) }}</div>
                                             </th>
@@ -291,7 +295,9 @@ new class extends Component
                                                         $isWeekend = $date->isWeekend();
                                                         $isToday = $date->isToday();
                                                     @endphp
-                                                    <td class="cal-cell cal-day cal-daycell border-l {{ $isPrevMonth ? 'bg-gray-100' : '' }} {{ $isWeekend && !$isPrevMonth ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}">
+                                                    <td class="cal-cell cal-day cal-daycell border-l {{ $isPrevMonth ? 'bg-gray-100' : '' }} {{ $isWeekend && !$isPrevMonth ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}"
+                                                        @mouseenter="hoverCol = {{ $loop->index }}"
+                                                        :class="hoverCol === {{ $loop->index }} && 'cal-col-hover'">
                                                         <div class="flex flex-wrap justify-center gap-0.5">
                                                             @foreach($dayLessons as $lesson)
                                                                 <span class="cal-lesson-chip"

@@ -120,6 +120,10 @@
     text-align: right;
 }
 
+.cal-col-hover {
+    background-color: #eff6ff !important; /* blue-50 */
+}
+
 .cal-lesson-chip {
     display: inline-block;
     padding: 2px 4px;
