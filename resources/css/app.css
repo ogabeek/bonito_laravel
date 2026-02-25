@@ -121,7 +121,7 @@
 }
 
 .cal-col-hover {
-    background-color: #eff6ff !important; /* blue-50 */
+    background-color: #f9fafb !important; /* gray-50, matches row hover */
 }
 
 .cal-lesson-chip {

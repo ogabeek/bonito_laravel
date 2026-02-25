@@ -327,7 +327,9 @@ new class extends Component
                             $studentCounts = $this->teacherStudentCounts[$teacher->id] ?? collect();
                         @endphp
                         <tr class="border-t align-top" wire:key="teacher-{{ $teacher->id }}">
-                            <td class="px-3 py-2 whitespace-nowrap">{{ $teacher->name }}</td>
+                            <td class="px-3 py-2 whitespace-nowrap">
+                                <a href="{{ route('admin.teachers.edit', $teacher) }}" class="text-blue-600 hover:underline">{{ $teacher->name }}</a>
+                            </td>
                             <td class="px-3 py-2 text-right align-top">
                                 <x-stats-inline :stats="$ts" class="w-24 ml-auto text-gray-500" />
                             </td>

@@ -10,6 +10,18 @@
         <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-900">← Back</a>
     </div>
 
+    @php $teacherUrl = url("/teacher/{$teacher->id}"); @endphp
+    <div class="flex items-center gap-2 mb-6 text-sm" x-data="{ copied: false }">
+        <span class="text-gray-500">Teacher link:</span>
+        <a href="{{ $teacherUrl }}" class="text-blue-600 hover:underline" target="_blank">{{ $teacherUrl }}</a>
+        <button type="button"
+                @click="navigator.clipboard.writeText('{{ $teacherUrl }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                class="px-2 py-0.5 text-xs border rounded hover:bg-gray-50"
+                x-text="copied ? 'Copied!' : 'Copy'">
+            Copy
+        </button>
+    </div>
+
     <x-session-alert />
 
     <x-card>
