@@ -14,6 +14,10 @@ class TeacherAuthentication
 {
     public function handle(Request $request, Closure $next): Response
     {
+        if (session('admin_authenticated')) {
+            return $next($request);
+        }
+
         $teacher = $request->route('teacher');
 
         if (! session('teacher_id')) {

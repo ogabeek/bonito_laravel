@@ -33,15 +33,22 @@
                 @enderror
             </div>
         @else
-            <div>
+            <div x-data="{ editing: false }">
                 <label class="block text-sm font-medium mb-1">PIN</label>
-                <input
-                    type="text"
-                    name="password"
-                    value="{{ old('password', $teacher?->password) }}"
-                    placeholder="Leave blank to keep current"
-                    class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
-                >
+                <div x-show="!editing" class="flex items-center gap-2">
+                    <span class="px-3 py-2 bg-gray-50 border rounded text-gray-700 flex-1">{{ $teacher?->password ? '••••' : '–' }}</span>
+                    <button type="button" @click="editing = true; $nextTick(() => $refs.pinInput.focus())" class="px-3 py-2 text-xs border rounded hover:bg-gray-50">Change</button>
+                </div>
+                <div x-show="editing" x-cloak class="flex items-center gap-2">
+                    <input
+                        x-ref="pinInput"
+                        type="text"
+                        name="password"
+                        placeholder="New PIN"
+                        class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    >
+                    <button type="button" @click="editing = false; $refs.pinInput.value = ''" class="px-3 py-2 text-xs border rounded hover:bg-gray-50">Cancel</button>
+                </div>
                 @error('password')
                     <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                 @enderror
