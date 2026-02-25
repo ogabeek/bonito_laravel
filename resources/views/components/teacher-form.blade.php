@@ -36,18 +36,18 @@
             <div x-data="{ editing: false }">
                 <label class="block text-sm font-medium mb-1">PIN</label>
                 <div x-show="!editing" class="flex items-center gap-2">
-                    <span class="px-3 py-2 bg-gray-50 border rounded text-gray-700 flex-1">{{ $teacher?->password ? '••••' : '–' }}</span>
-                    <button type="button" @click="editing = true; $nextTick(() => $refs.pinInput.focus())" class="px-3 py-2 text-xs border rounded hover:bg-gray-50">Change</button>
+                    <code class="px-3 py-2 bg-gray-50 border rounded text-gray-700 flex-1">{{ $teacher?->password ?: '–' }}</code>
+                    <button type="button" @click="editing = true; $nextTick(() => $refs.pinInput.select())" class="px-3 py-2 text-xs border rounded hover:bg-gray-50">Change</button>
                 </div>
                 <div x-show="editing" x-cloak class="flex items-center gap-2">
                     <input
                         x-ref="pinInput"
                         type="text"
                         name="password"
-                        placeholder="New PIN"
+                        value="{{ old('password', $teacher?->password) }}"
                         class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
                     >
-                    <button type="button" @click="editing = false; $refs.pinInput.value = ''" class="px-3 py-2 text-xs border rounded hover:bg-gray-50">Cancel</button>
+                    <button type="button" @click="editing = false; $refs.pinInput.value = '{{ $teacher?->password }}'" class="px-3 py-2 text-xs border rounded hover:bg-gray-50">Cancel</button>
                 </div>
                 @error('password')
                     <p class="text-red-600 text-xs mt-1">{{ $message }}</p>

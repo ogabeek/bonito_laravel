@@ -360,13 +360,22 @@ new class extends Component
                                     <td class="px-4 py-2 text-right">
                                         <x-stats-inline :stats="$ts" class="w-20 ml-auto text-gray-500" />
                                     </td>
-                                    <td class="px-4 py-2 text-right flex gap-2 justify-end">
-                                        <a href="{{ route('admin.teachers.edit', $teacher) }}" class="text-blue-600 hover:text-blue-800">Edit</a>
-                                        <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}" onsubmit="return confirm('Archive {{ $teacher->name }}? (Can be restored later)')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="text-orange-600 hover:text-orange-800">Archive</button>
-                                        </form>
+                                    <td class="px-4 py-2 text-right">
+                                        <div class="flex gap-4 justify-end items-center">
+                                            <a href="{{ route('admin.teachers.edit', $teacher) }}" class="text-blue-600 hover:text-blue-800">Edit</a>
+                                            <form method="POST" action="{{ route('admin.teachers.delete', $teacher) }}"
+                                                  x-data="{ armed: false }"
+                                                  @submit.prevent="if (armed) $el.submit(); else armed = true"
+                                                  @click.outside="armed = false">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                        class="text-xs px-2 py-1 rounded"
+                                                        :class="armed ? 'bg-orange-600 text-white' : 'text-gray-400 hover:text-orange-600'"
+                                                        x-text="armed ? 'Confirm?' : 'Archive'">
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
