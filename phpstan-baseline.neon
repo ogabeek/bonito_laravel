@@ -1,0 +1,85 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Cannot access property \$student on class\-string\|object\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Http/Controllers/AdminController.php
+
+		-
+			message: '#^Cannot call method relationLoaded\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/AdminController.php
+
+		-
+			message: '#^Cannot access property \$student on class\-string\|object\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Http/Controllers/TeacherController.php
+
+		-
+			message: '#^Cannot call method relationLoaded\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/TeacherController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:forMonth\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Repositories/LessonRepository.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:past\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Repositories/LessonRepository.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Student\:\:\$teacher_ids\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/DashboardDataService.php
+
+		-
+			message: '#^Parameter \#1 \$year of static method Carbon\\Carbon\:\:createFromDate\(\) expects int\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/StatsExportService.php
+
+		-
+			message: '#^Parameter \#2 \$month of static method Carbon\\Carbon\:\:createFromDate\(\) expects int\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/StatsExportService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Student\:\:\$class_balance\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/StudentBalanceService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Student\:\:\$paid_classes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/StudentBalanceService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Student\:\:\$teacher_ids\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/StudentBalanceService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Student\:\:\$used_classes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/StudentBalanceService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/TeacherStatsService.php
