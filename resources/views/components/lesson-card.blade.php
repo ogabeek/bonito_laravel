@@ -9,7 +9,7 @@
 
 @php
     $statusClass = $lesson->status->cssClass();
-    $classes = 'lesson-card group border-l-4 pl-3 sm:pl-4 pr-3 sm:pr-2 py-2 rounded-r flex flex-col sm:flex-row gap-1.5 sm:gap-4 min-h-[56px] sm:min-h-[60px] sm:items-center relative';
+    $classes = 'lesson-card group border-l-4 pl-3 sm:pl-4 pr-3 sm:pr-2 py-2 rounded-r grid grid-cols-1 sm:grid-cols-[6rem_minmax(0,1fr)] gap-x-4 gap-y-1.5 min-h-[74px] sm:min-h-[68px] items-center relative';
 
     if ($mutedOnMobile) {
         $classes .= ' lesson-card-muted-mobile';
@@ -20,14 +20,14 @@
      style="--lesson-card-bg: var(--color-status-{{ $statusClass }}-bg); --lesson-card-border: var(--color-status-{{ $statusClass }}-border); --lesson-card-color: var(--color-status-{{ $statusClass }}); background: var(--lesson-card-bg); border-color: var(--lesson-card-border);">
     
     {{-- Left: Date & Person --}}
-    <div class="sm:w-24 sm:shrink-0">
+    <div class="min-w-0">
         <div class="font-semibold text-xs sm:text-sm">{{ $lesson->class_date->format($dateFormat) }}</div>
         @if($showStudent)<div class="text-xs text-gray-600">{{ $lesson->student->name }}</div>@endif
         @if($showTeacher)<div class="text-xs text-gray-600">{{ $lesson->teacher->name }}</div>@endif
     </div>
     
     {{-- Right: Details --}}
-    <div class="flex-1 text-xs sm:text-sm leading-snug sm:text-right">
+    <div class="min-w-0 text-xs sm:text-sm leading-snug sm:text-right">
         @if($lesson->status->value === 'completed')
             <div><span class="text-gray-500">Topic:</span> {{ $lesson->topic }}</div>
             @if($lesson->homework)<div class="mt-1"><span class="text-gray-500">HW:</span> {{ $lesson->homework }}</div>@endif
