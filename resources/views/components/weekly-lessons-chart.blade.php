@@ -59,7 +59,7 @@
             <h2 class="text-lg sm:text-xl font-semibold mb-3">{{ $title }}</h2>
         @endif
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4 pb-4 border-b text-xs sm:text-sm">
-            <div class="flex flex-col items-center gap-1">
+            <div class="flex flex-col items-center gap-1 col-span-2 sm:col-span-1">
                 <span class="text-xl sm:text-2xl font-bold text-gray-800">{{ $stats['total'] }}</span>
                 <span class="text-gray-500">Total</span>
             </div>
