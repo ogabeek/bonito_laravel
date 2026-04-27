@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Student;
+use App\Models\Teacher;
 use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
 
@@ -41,28 +42,26 @@ new class extends Component
             'materials_url' => blank($this->materialsUrl) ? null : trim($this->materialsUrl),
         ]);
 
-        // Track who is making the change
         $causer = null;
         if (session('teacher_id')) {
-            $causer = \App\Models\Teacher::find(session('teacher_id'));
+            $causer = Teacher::find(session('teacher_id'));
         }
 
         activity()
             ->performedOn($this->student)
             ->causedBy($causer)
             ->withProperties([
-                'action' => 'updated_teacher_notes',
+                'action' => 'updated_student_resources',
                 'student_name' => $this->student->name,
             ])
-            ->log('updated teacher notes');
+            ->log('updated student resources');
 
         $this->saved = true;
     }
 }; ?>
 
-<div wire:key="student-notes-{{ $student->id }}">
+<div wire:key="student-resources-{{ $student->id }}">
     @if(session('teacher_id') || session('admin_authenticated'))
-        {{-- Teacher/Admin view: editable, styled to match student view --}}
         <div class="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-3 sm:p-4">
             <div class="mb-3 text-xs font-medium text-gray-500">From teacher</div>
             <label for="student-{{ $student->id }}-notes" class="mb-1 block text-xs font-medium text-gray-500">Teacher notes</label>
@@ -79,7 +78,7 @@ new class extends Component
                 }"
                 x-init="resize(); Livewire.hook('morph.updated', ({ el }) => { if (el === $el) resize() })"
                 x-on:input="resize()"
-                class="w-full p-3 bg-white border border-gray-200 rounded text-sm text-gray-700 focus:ring-2 focus:ring-gray-300 focus:border-gray-400 resize-none overflow-hidden min-h-[80px]"
+                class="min-h-[80px] w-full resize-none overflow-hidden rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-700 focus:border-gray-400 focus:ring-2 focus:ring-gray-300"
             ></textarea>
             <label for="student-{{ $student->id }}-materials" class="mt-3 mb-1 block text-xs font-medium text-gray-500">Materials link</label>
             <input
@@ -87,10 +86,10 @@ new class extends Component
                 type="url"
                 wire:model.blur="materialsUrl"
                 placeholder="https://..."
-                class="w-full rounded border-gray-200 bg-white text-sm text-gray-700 focus:border-gray-400 focus:ring-gray-300"
+                class="w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 focus:border-gray-400 focus:ring-gray-300"
             >
             <div class="flex items-center gap-2 mt-2">
-                <button type="button" wire:click="save" class="px-3 py-1 bg-gray-800 text-white rounded text-sm hover:bg-gray-900">
+                <button type="button" wire:click="save" class="h-8 rounded-md bg-gray-800 px-3 text-sm font-medium text-white hover:bg-gray-900">
                     Save
                 </button>
                 @if($saved)
@@ -105,7 +104,6 @@ new class extends Component
             </div>
         </div>
     @elseif($notes || $student->materials_url)
-        {{-- Student view: read-only with clickable links --}}
         <div class="space-y-5">
             @if($notes)
                 <div class="rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
@@ -114,7 +112,7 @@ new class extends Component
                 </div>
             @endif
             @if($student->materials_url)
-                <a href="{{ $student->materials_url }}" target="_blank" rel="noopener" class="flex w-full items-center justify-center rounded bg-gray-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-900">
+                <a href="{{ $student->materials_url }}" target="_blank" rel="noopener" class="flex h-9 w-full items-center justify-center rounded-md bg-gray-800 px-4 text-sm font-medium text-white transition-colors hover:bg-gray-900">
                     Class materials
                 </a>
             @endif

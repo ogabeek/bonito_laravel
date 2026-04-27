@@ -3,6 +3,11 @@
 @section('title', $student->name . "'s Lessons")
 
 @section('content')
+@php
+    $compactSectionGap = 'mb-6 sm:mb-7';
+    $sectionGap = 'mb-7 sm:mb-9';
+@endphp
+
 <div class="p-3 sm:p-6 max-w-4xl mx-auto flex flex-col">
     <div class="order-[10]">
         <x-page-header
@@ -13,7 +18,7 @@
 
     @if(config('banners.student_welcome.enabled'))
         <div class="order-[60] sm:order-[20]">
-            <x-info-banner :type="config('banners.student_welcome.type')" :icon="false" id="student_welcome" class="mb-6">
+            <x-info-banner :type="config('banners.student_welcome.type')" :icon="false" id="student_welcome" class="{{ $compactSectionGap }}">
                 <div class="font-medium mb-1">{{ config('banners.student_welcome.title') }}</div>
                 <div class="text-xs opacity-90">{{ config('banners.student_welcome.message') }}</div>
             </x-info-banner>
@@ -22,26 +27,26 @@
 
     @if(config('banners.student_info.enabled'))
         <div class="order-[60] sm:order-[30]">
-            <x-info-banner :type="config('banners.student_info.type')" id="student_info" class="mb-6">
+            <x-info-banner :type="config('banners.student_info.type')" id="student_info" class="{{ $compactSectionGap }}">
                 {{ config('banners.student_info.message') }}
             </x-info-banner>
         </div>
     @endif
 
-    <div class="order-[20] sm:order-[40] mb-4 sm:mb-5">
+    <div class="order-[20] sm:order-[40] {{ $compactSectionGap }}">
         <livewire:student-teacher-info :student="$student" />
     </div>
 
-    <div class="order-[30] sm:order-[50] mb-5 sm:mb-6">
-        <livewire:student-teacher-notes :student="$student" />
+    <div class="order-[30] sm:order-[50] {{ $sectionGap }}">
+        <livewire:student-teacher-resources :student="$student" />
     </div>
 
     @if($availableYears->count() > 1)
-        <div class="order-[40] sm:order-[60] mt-5 sm:mt-6 mb-3 flex justify-end">
-            <div class="inline-flex rounded border border-gray-200 bg-white p-0.5 text-xs shadow-sm">
+        <div class="order-[40] sm:order-[60] mb-3 flex justify-end">
+            <div class="inline-flex rounded-md border border-gray-200 bg-white p-0.5 text-xs">
                 @foreach($availableYears as $year)
                     <a href="{{ route('student.dashboard', ['student' => $student, 'year' => $year]) }}"
-                       class="{{ $year == $selectedYear ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-800' }} rounded px-2.5 py-1 font-medium transition-colors">
+                       class="{{ $year == $selectedYear ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-800' }} rounded-sm px-2.5 py-1 font-medium transition-colors">
                         {{ $year }}
                     </a>
                 @endforeach
@@ -49,14 +54,14 @@
         </div>
     @endif
 
-    <div class="order-[50] sm:order-[70] mb-4 sm:mb-5">
+    <div class="order-[50] sm:order-[70] {{ $sectionGap }}">
         <x-weekly-lessons-chart
             :distribution="$weeklyDistribution"
             :stats="$stats"
         />
     </div>
 
-    <x-card title="📚 Lessons" class="order-[70] sm:order-[80] mt-9 sm:mt-12">
+    <x-card title="📚 Lessons" class="order-[70] sm:order-[80] mt-8 sm:mt-10">
         @if($lessonsByMonth->isNotEmpty())
             <div class="space-y-4">
                 @foreach($lessonsByMonth as $month => $lessons)

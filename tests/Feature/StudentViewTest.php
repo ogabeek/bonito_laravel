@@ -106,7 +106,7 @@ it('shows neutral lesson status badges for non-completed lessons', function () {
 
     $this->get(route('student.dashboard', $student))
         ->assertSuccessful()
-        ->assertSee('Missing')
+        ->assertSee('Absent')
         ->assertSee('Canceled by student')
         ->assertSee('Canceled by teacher');
 });

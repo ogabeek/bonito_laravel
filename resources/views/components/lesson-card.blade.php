@@ -22,7 +22,7 @@
         default => 'text-gray-600 bg-gray-100 border-gray-200',
     };
     $statusLabel = match ($lesson->status->value) {
-        'student_absent' => 'Missing',
+        'student_absent' => 'Absent',
         'student_cancelled' => 'Canceled by student',
         'teacher_cancelled' => 'Canceled by teacher',
         default => $lesson->status->label(),
