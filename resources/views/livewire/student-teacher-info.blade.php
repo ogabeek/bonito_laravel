@@ -23,7 +23,7 @@ new class extends Component
 
 <div>
     @if($teacher)
-        <div class="mb-6 rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-sm sm:p-4">
+        <div class="mb-3 rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-sm sm:p-4">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div class="min-w-0">
                     <div class="text-xs font-medium text-gray-400">Teacher</div>
@@ -44,7 +44,7 @@ new class extends Component
 
                 @if($teacher->zoom_link)
                     <a href="{{ $teacher->zoom_link }}" target="_blank" rel="noopener"
-                       class="inline-flex w-full items-center justify-center rounded bg-gray-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-900 sm:w-auto">
+                       class="inline-flex self-start rounded bg-blue-600/80 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-600 sm:text-sm">
                         Join Zoom
                     </a>
                 @endif
