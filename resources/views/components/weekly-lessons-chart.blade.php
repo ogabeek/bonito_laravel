@@ -46,9 +46,6 @@
     $focusX = $currentMonth
         ? $left + ($currentMonth['startIndex'] * $slotWidth) + (($currentMonth['count'] * $slotWidth) / 2)
         : $width / 2;
-    $yearMarkers = $monthGroups
-        ->filter(fn ($month, $index) => $index === 0 || str_ends_with($month['key'], '-01'))
-        ->values();
 @endphp
 
 <x-card class="mb-6">
@@ -56,13 +53,20 @@
         @if($title)
             <h2 class="text-base sm:text-xl font-semibold mb-3">{{ $title }}</h2>
         @endif
-        <div class="grid grid-cols-[4.5rem_minmax(0,1fr)] sm:grid-cols-[5.5rem_1.5rem_minmax(0,1fr)] items-center gap-2 sm:gap-3 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b text-center">
-            <div class="flex flex-col items-center gap-0.5 sm:gap-1">
-                <span class="text-base sm:text-2xl font-bold text-gray-700 sm:text-gray-800">{{ $stats['total'] }}</span>
-                <span class="text-[10px] sm:text-sm leading-tight text-gray-400 sm:text-gray-500">Total</span>
+        <div class="grid grid-cols-[6.75rem_minmax(0,1fr)] sm:grid-cols-[8rem_minmax(0,1fr)] items-center gap-2 sm:gap-4 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b text-center">
+            <div class="relative flex h-20 items-center justify-center sm:h-24">
+                <svg class="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 128 92" fill="none" aria-hidden="true">
+                    <path d="M18 46c13-28 34-28 46 0s33 28 46 0" stroke="#bbf7d0" stroke-width="7" stroke-linecap="round" opacity="0.9" />
+                    <path d="M18 46c13 28 34 28 46 0s33-28 46 0" stroke="#d1d5db" stroke-width="7" stroke-linecap="round" opacity="0.86" />
+                    <path d="M25 46c11-19 28-19 39 0s28 19 39 0" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.8" />
+                    <ellipse cx="64" cy="46" rx="25" ry="18" fill="white" opacity="0.9" />
+                </svg>
+                <div class="relative flex flex-col items-center gap-0.5">
+                    <span class="text-2xl font-bold leading-none text-gray-800 sm:text-3xl">{{ $stats['total'] }}</span>
+                    <span class="text-[10px] font-medium leading-tight text-gray-500 sm:text-xs">Total</span>
+                </div>
             </div>
-            <div class="hidden sm:block text-lg font-medium text-gray-300">=</div>
-            <div class="grid grid-cols-4 gap-1.5 sm:gap-3 border-l border-gray-200 pl-2 sm:border-l-0 sm:pl-0">
+            <div class="grid grid-cols-4 gap-1.5 rounded-lg bg-gray-50/70 px-2 py-2 ring-1 ring-gray-100 sm:gap-3 sm:px-3">
                 <div class="flex flex-col items-center gap-0.5 sm:gap-1">
                     <span class="text-base sm:text-xl font-semibold text-gray-700 sm:[color:var(--color-status-completed)]">{{ $stats['completed'] }}</span>
                     <span class="text-[10px] sm:text-sm leading-tight text-gray-400 sm:text-gray-500">Completed</span>
@@ -140,15 +144,6 @@
                         opacity="0.07"
                     >{{ $monthCompleted }}</text>
                 @endif
-            @endforeach
-
-            @foreach($yearMarkers as $marker)
-                @php
-                    $markerStartX = $left + ($marker['startIndex'] * $slotWidth);
-                    $markerWidth = $marker['count'] * $slotWidth;
-                    $markerCenterX = $markerStartX + ($markerWidth / 2);
-                @endphp
-                <text x="{{ $markerCenterX }}" y="9" text-anchor="middle" font-size="10" font-weight="600" fill="#6b7280">{{ $marker['year'] }}</text>
             @endforeach
 
             @foreach($monthGroups as $month)

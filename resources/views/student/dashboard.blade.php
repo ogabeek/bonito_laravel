@@ -3,32 +3,41 @@
 @section('title', $student->name . "'s Lessons")
 
 @section('content')
-<div class="p-3 sm:p-6 max-w-4xl mx-auto">
-    
-    <x-page-header 
-        :title="$student->name" 
-        :subtitle="$student->goal ? 'Goal: ' . $student->goal : null" 
-    />
+<div class="p-3 sm:p-6 max-w-4xl mx-auto flex flex-col">
+    <div class="order-10">
+        <x-page-header
+            :title="$student->name"
+            :subtitle="$student->goal ? 'Goal: ' . $student->goal : null"
+        />
+    </div>
 
     @if(config('banners.student_welcome.enabled'))
-        <x-info-banner :type="config('banners.student_welcome.type')" :icon="false" id="student_welcome" class="mb-6">
-            <div class="font-medium mb-1">{{ config('banners.student_welcome.title') }}</div>
-            <div class="text-xs opacity-90">{{ config('banners.student_welcome.message') }}</div>
-        </x-info-banner>
+        <div class="order-60 sm:order-20">
+            <x-info-banner :type="config('banners.student_welcome.type')" :icon="false" id="student_welcome" class="mb-6">
+                <div class="font-medium mb-1">{{ config('banners.student_welcome.title') }}</div>
+                <div class="text-xs opacity-90">{{ config('banners.student_welcome.message') }}</div>
+            </x-info-banner>
+        </div>
     @endif
 
     @if(config('banners.student_info.enabled'))
-        <x-info-banner :type="config('banners.student_info.type')" id="student_info" class="mb-6">
-            {{ config('banners.student_info.message') }}
-        </x-info-banner>
+        <div class="order-60 sm:order-30">
+            <x-info-banner :type="config('banners.student_info.type')" id="student_info" class="mb-6">
+                {{ config('banners.student_info.message') }}
+            </x-info-banner>
+        </div>
     @endif
 
-    <livewire:student-teacher-info :student="$student" />
+    <div class="order-20 sm:order-40">
+        <livewire:student-teacher-info :student="$student" />
+    </div>
 
-    <livewire:student-teacher-notes :student="$student" />
+    <div class="order-30 sm:order-50">
+        <livewire:student-teacher-notes :student="$student" />
+    </div>
 
     @if($availableYears->count() > 1)
-        <div class="flex gap-2 mb-6">
+        <div class="order-40 sm:order-60 flex gap-2 mb-6">
             @foreach($availableYears as $year)
                 <a href="{{ route('student.dashboard', ['student' => $student, 'year' => $year]) }}"
                    class="{{ $year == $selectedYear ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} px-3 py-1.5 rounded-full text-sm font-medium transition-colors">
@@ -38,12 +47,14 @@
         </div>
     @endif
 
-    <x-weekly-lessons-chart
-        :distribution="$weeklyDistribution"
-        :stats="$stats"
-    />
+    <div class="order-50 sm:order-70">
+        <x-weekly-lessons-chart
+            :distribution="$weeklyDistribution"
+            :stats="$stats"
+        />
+    </div>
 
-    <x-card title="📚 Lessons" class="mt-6">
+    <x-card title="📚 Lessons" class="order-70 sm:order-80 mt-6">
         @if($lessonsByMonth->isNotEmpty())
             <div class="space-y-4">
                 @foreach($lessonsByMonth as $month => $lessons)
