@@ -9,7 +9,6 @@
     $rangeStart = $distribution['start'] ?? now()->copy()->subMonthsNoOverflow(5)->startOfMonth();
     $rangeEnd = $distribution['end'] ?? $rangeStart->copy()->addYear()->subDay();
     $total = (int) ($distribution['total'] ?? 0);
-    $max = max(1, (int) ($distribution['max'] ?? 1));
 
     $width = 760;
     $height = 132;
@@ -24,7 +23,6 @@
     $cellGap = 2;
     $cellHeight = min(10, ($plotHeight - (($cellRows - 1) * $cellGap)) / $cellRows);
     $cellWidth = max(6, min(10, $slotWidth - 2));
-    $stackHeight = ($cellRows * $cellHeight) + (($cellRows - 1) * $cellGap);
     $baseline = $top + $plotHeight;
 
     $monthGroups = $weeks
@@ -56,28 +54,28 @@
 <x-card class="mb-6">
     @if($stats)
         @if($title)
-            <h2 class="text-lg sm:text-xl font-semibold mb-3">{{ $title }}</h2>
+            <h2 class="text-base sm:text-xl font-semibold mb-3">{{ $title }}</h2>
         @endif
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4 pb-4 border-b text-xs sm:text-sm">
-            <div class="flex flex-col items-center gap-1 col-span-2 sm:col-span-1">
-                <span class="text-xl sm:text-2xl font-bold text-gray-800">{{ $stats['total'] }}</span>
-                <span class="text-gray-500">Total</span>
+        <div class="grid grid-cols-5 gap-1.5 sm:gap-3 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b text-center">
+            <div class="flex flex-col items-center gap-0.5 sm:gap-1">
+                <span class="text-base sm:text-2xl font-bold text-gray-800">{{ $stats['total'] }}</span>
+                <span class="text-[10px] sm:text-sm leading-tight text-gray-500">Total</span>
             </div>
-            <div class="flex flex-col items-center gap-1">
-                <span class="text-lg sm:text-xl font-semibold" style="color: var(--color-status-completed);">{{ $stats['completed'] }}</span>
-                <span class="text-center text-gray-600">Completed</span>
+            <div class="flex flex-col items-center gap-0.5 sm:gap-1">
+                <span class="text-base sm:text-xl font-semibold text-gray-800 sm:[color:var(--color-status-completed)]">{{ $stats['completed'] }}</span>
+                <span class="text-[10px] sm:text-sm leading-tight text-gray-500">Completed</span>
             </div>
-            <div class="flex flex-col items-center gap-1">
-                <span class="text-lg sm:text-xl font-semibold" style="color: var(--color-status-absent);">{{ $stats['student_absent'] }}</span>
-                <span class="text-center text-gray-600">Missed</span>
+            <div class="flex flex-col items-center gap-0.5 sm:gap-1">
+                <span class="text-base sm:text-xl font-semibold text-gray-800 sm:[color:var(--color-status-absent)]">{{ $stats['student_absent'] }}</span>
+                <span class="text-[10px] sm:text-sm leading-tight text-gray-500">Absent</span>
             </div>
-            <div class="flex flex-col items-center gap-1">
-                <span class="text-lg sm:text-xl font-semibold" style="color: var(--color-status-student-cancelled);">{{ $stats['student_cancelled'] }}</span>
-                <span class="text-center text-gray-600">Student cancelled</span>
+            <div class="flex flex-col items-center gap-0.5 sm:gap-1">
+                <span class="text-base sm:text-xl font-semibold text-gray-800 sm:[color:var(--color-status-student-cancelled)]">{{ $stats['student_cancelled'] }}</span>
+                <span class="text-[10px] sm:text-sm leading-tight text-gray-500">Student cancelled</span>
             </div>
-            <div class="flex flex-col items-center gap-1">
-                <span class="text-lg sm:text-xl font-semibold" style="color: var(--color-status-cancelled);">{{ $stats['teacher_cancelled'] }}</span>
-                <span class="text-center text-gray-600">Teacher cancelled</span>
+            <div class="flex flex-col items-center gap-0.5 sm:gap-1">
+                <span class="text-base sm:text-xl font-semibold text-gray-800 sm:[color:var(--color-status-cancelled)]">{{ $stats['teacher_cancelled'] }}</span>
+                <span class="text-[10px] sm:text-sm leading-tight text-gray-500">Teacher cancelled</span>
             </div>
         </div>
     @else
@@ -106,7 +104,7 @@
             viewBox="0 0 {{ $width }} {{ $height }}"
             role="img"
             aria-label="Weekly class distribution from {{ $rangeStart->format('M Y') }} to {{ $rangeEnd->format('M Y') }}"
-            class="min-w-[720px] w-full h-auto"
+            class="min-w-[640px] sm:min-w-[720px] w-full h-auto"
         >
             <rect x="0" y="0" width="{{ $width }}" height="{{ $height }}" fill="white" />
 
@@ -117,28 +115,6 @@
                         $monthWidth = $month['count'] * $slotWidth;
                     @endphp
                     <rect x="{{ $monthStartX }}" y="{{ $top }}" width="{{ $monthWidth }}" height="{{ $baseline - $top }}" fill="#f0fdf4" />
-                @endif
-            @endforeach
-
-            {{-- Background month totals --}}
-            @foreach($monthGroups as $month)
-                @php
-                    $monthCompleted = $month['weeks']->sum('completed');
-                    $mStartX = $left + ($month['startIndex'] * $slotWidth);
-                    $mWidth = $month['count'] * $slotWidth;
-                    $mCenterX = $mStartX + ($mWidth / 2);
-                @endphp
-                @if($monthCompleted > 0)
-                    <text
-                        x="{{ $mCenterX }}"
-                        y="{{ $top + $plotHeight * 0.55 }}"
-                        text-anchor="middle"
-                        dominant-baseline="central"
-                        font-size="24"
-                        font-weight="700"
-                        fill="#000"
-                        opacity="0.07"
-                    >{{ $monthCompleted }}</text>
                 @endif
             @endforeach
 
@@ -178,7 +154,7 @@
                 @endphp
                 @if($count > 0)
                     <g>
-                        <title>{{ $start }} - {{ $end }}: {{ $count }} {{ Str::plural('class', $count) }} ({{ $completed }} completed, {{ $other }} other)</title>
+                        <title>{{ $start }} - {{ $end }}: {{ $count }} {{ Str::plural('class', $count) }} ({{ $completed }} completed, {{ $other }} not completed)</title>
                         @for($cell = 1; $cell <= $visibleCount; $cell++)
                             @php
                                 $y = $baseline - ($cell * $cellHeight) - (($cell - 1) * $cellGap);

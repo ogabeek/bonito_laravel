@@ -20,7 +20,8 @@ class StudentController extends Controller
     {
         $allLessons = $lessonRepo->getForStudent($student->id);
 
-        $availableYears = $allLessons->map(fn ($l) => $l->class_date->year)
+        $availableYears = $allLessons->toBase()
+            ->map(fn ($l) => $l->class_date->year)
             ->push(now()->year)
             ->unique()
             ->sortDesc()

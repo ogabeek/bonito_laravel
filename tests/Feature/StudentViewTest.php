@@ -63,7 +63,7 @@ it('shows empty state when no lessons', function () {
         ->assertSuccessful();
 });
 
-it('displays teacher name on lessons', function () {
+it('does not repeat teacher name on student lesson cards', function () {
     $teacher = Teacher::factory()->create(['name' => 'Test Teacher Name']);
     $student = Student::factory()->create();
     $teacher->students()->attach($student);
@@ -76,10 +76,10 @@ it('displays teacher name on lessons', function () {
 
     $this->get(route('student.dashboard', $student))
         ->assertSuccessful()
-        ->assertSee('Test Teacher Name');
+        ->assertDontSee('Test Teacher Name');
 });
 
-it('shows rolling weekly class distribution', function () {
+it('shows weekly class distribution for the selected year', function () {
     Carbon::setTestNow(Carbon::create(2026, 2, 15));
 
     $teacher = Teacher::factory()->create();
@@ -113,8 +113,8 @@ it('shows rolling weekly class distribution', function () {
     try {
         $this->get(route('student.dashboard', $student))
             ->assertSuccessful()
-            ->assertSee('Weekly Class Distribution')
-            ->assertSee('Dec 29 - Jan 4: 2 classes');
+            ->assertSee('2026')
+            ->assertSee('Jan 1 - Jan 7: 2 classes');
     } finally {
         Carbon::setTestNow();
     }

@@ -37,7 +37,6 @@
     <x-weekly-lessons-chart
         :distribution="$weeklyDistribution"
         :stats="$stats"
-        :title="(string) $selectedYear"
     />
 
     <livewire:student-teacher-info :student="$student" />
@@ -55,7 +54,7 @@
                         <div class="text-sm font-semibold text-gray-700 mb-2">{{ $monthName }}</div>
                         <div class="space-y-2">
                             @foreach($lessons as $lesson)
-                                <x-lesson-card :lesson="$lesson" :showTeacher="true" />
+                                <x-lesson-card :lesson="$lesson" :mutedOnMobile="true" />
                             @endforeach
                         </div>
                     </div>

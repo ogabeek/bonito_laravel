@@ -4,10 +4,20 @@
     'showStudent' => false,
     'showDelete' => false,
     'dateFormat' => 'D, M d',
+    'mutedOnMobile' => false,
 ])
 
-<div {{ $attributes->merge(['class' => 'lesson-card group border-l-4 pl-3 sm:pl-4 pr-2 py-2 rounded-r flex flex-col sm:flex-row gap-2 sm:gap-4 min-h-[60px] sm:items-center relative']) }}
-     style="background: var(--color-status-{{ $lesson->status->cssClass() }}-bg); border-color: var(--color-status-{{ $lesson->status->cssClass() }}-border);">
+@php
+    $statusClass = $lesson->status->cssClass();
+    $classes = 'lesson-card group border-l-4 pl-3 sm:pl-4 pr-3 sm:pr-2 py-2 rounded-r flex flex-col sm:flex-row gap-1.5 sm:gap-4 min-h-[56px] sm:min-h-[60px] sm:items-center relative';
+
+    if ($mutedOnMobile) {
+        $classes .= ' lesson-card-muted-mobile';
+    }
+@endphp
+
+<div {{ $attributes->merge(['class' => $classes]) }}
+     style="--lesson-card-bg: var(--color-status-{{ $statusClass }}-bg); --lesson-card-border: var(--color-status-{{ $statusClass }}-border); --lesson-card-color: var(--color-status-{{ $statusClass }}); background: var(--lesson-card-bg); border-color: var(--lesson-card-border);">
     
     {{-- Left: Date & Person --}}
     <div class="sm:w-24 sm:shrink-0">
@@ -17,12 +27,12 @@
     </div>
     
     {{-- Right: Details --}}
-    <div class="flex-1 text-xs sm:text-sm sm:text-right">
+    <div class="flex-1 text-xs sm:text-sm leading-snug sm:text-right">
         @if($lesson->status->value === 'completed')
             <div><span class="text-gray-500">Topic:</span> {{ $lesson->topic }}</div>
             @if($lesson->homework)<div class="mt-1"><span class="text-gray-500">HW:</span> {{ $lesson->homework }}</div>@endif
         @else
-            <div style="color: var(--color-status-{{ $lesson->status->cssClass() }});">
+            <div style="color: var(--lesson-card-color);">
                 @if($lesson->status->value === 'student_absent')
                     ⚠ Student Absent
                 @elseif($lesson->status->value === 'student_cancelled')

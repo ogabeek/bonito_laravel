@@ -138,6 +138,13 @@
     margin-bottom: 1px;
 }
 
+@media (max-width: 639px) {
+    .lesson-card-muted-mobile {
+        background: color-mix(in srgb, var(--lesson-card-bg) 35%, white) !important;
+        border-color: color-mix(in srgb, var(--lesson-card-border) 70%, white) !important;
+    }
+}
+
 /* =============================================================================
    UTILITY CLASSES
    ============================================================================= */
