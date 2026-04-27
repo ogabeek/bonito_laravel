@@ -29,7 +29,6 @@ new class extends Component
             <div class="flex items-center justify-between gap-3">
                 <button type="button" wire:click="$toggle('open')" class="min-w-0 flex-1 text-left">
                     <div class="truncate font-semibold text-gray-800">With {{ $teacher->name }}</div>
-                    <div class="text-xs text-gray-500">Contact and lesson links</div>
                 </button>
 
                 <div class="flex shrink-0 items-center gap-2">
@@ -40,8 +39,11 @@ new class extends Component
                         </a>
                     @endif
                     @if($teacher->contact || $teacher->zoom_id || $teacher->zoom_passcode)
-                        <button type="button" wire:click="$toggle('open')" class="rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700">
-                            {{ $open ? 'Hide' : 'Details' }}
+                        <button type="button" wire:click="$toggle('open')" class="inline-flex items-center gap-1 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700">
+                            <span>{{ $open ? 'Hide' : 'Details' }}</span>
+                            <svg class="{{ $open ? 'rotate-180' : '' }} h-3 w-3 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+                            </svg>
                         </button>
                     @endif
                 </div>
