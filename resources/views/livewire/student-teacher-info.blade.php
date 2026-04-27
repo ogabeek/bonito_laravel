@@ -25,7 +25,7 @@ new class extends Component
 
 <div>
     @if($teacher)
-        <div class="mb-3 rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-sm sm:p-4">
+        <div class="mb-3 text-sm">
             <div class="flex items-center justify-between gap-3">
                 <button type="button" wire:click="$toggle('open')" class="min-w-0 flex-1 text-left">
                     <div class="truncate font-semibold text-gray-800">With {{ $teacher->name }}</div>
@@ -50,7 +50,7 @@ new class extends Component
             </div>
 
             @if($open && ($teacher->contact || $teacher->zoom_id || $teacher->zoom_passcode))
-                <div class="mt-3 border-t border-gray-100 pt-3 text-xs text-gray-500">
+                <div class="mt-2 text-xs text-gray-500">
                     @if($teacher->contact)
                         <a href="mailto:{{ $teacher->contact }}" class="block break-all underline decoration-gray-300 underline-offset-2 hover:text-gray-700">
                             {{ $teacher->contact }}

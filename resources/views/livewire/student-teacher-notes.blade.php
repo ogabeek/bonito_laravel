@@ -114,7 +114,7 @@ new class extends Component
                 </div>
             @endif
             @if($student->materials_url)
-                <a href="{{ $student->materials_url }}" target="_blank" rel="noopener" class="inline-flex items-center justify-center rounded-full bg-gray-800 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-900">
+                <a href="{{ $student->materials_url }}" target="_blank" rel="noopener" class="flex w-full items-center justify-center rounded bg-gray-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-900">
                     Class materials
                 </a>
             @endif
