@@ -53,18 +53,10 @@
         @if($title)
             <h2 class="text-base sm:text-xl font-semibold mb-3">{{ $title }}</h2>
         @endif
-        <div class="grid grid-cols-[6.75rem_minmax(0,1fr)] sm:grid-cols-[8rem_minmax(0,1fr)] items-center gap-2 sm:gap-4 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b text-center">
-            <div class="relative flex h-20 items-center justify-center sm:h-24">
-                <svg class="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 128 92" fill="none" aria-hidden="true">
-                    <path d="M18 46c13-28 34-28 46 0s33 28 46 0" stroke="#bbf7d0" stroke-width="7" stroke-linecap="round" opacity="0.9" />
-                    <path d="M18 46c13 28 34 28 46 0s33-28 46 0" stroke="#d1d5db" stroke-width="7" stroke-linecap="round" opacity="0.86" />
-                    <path d="M25 46c11-19 28-19 39 0s28 19 39 0" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.8" />
-                    <ellipse cx="64" cy="46" rx="25" ry="18" fill="white" opacity="0.9" />
-                </svg>
-                <div class="relative flex flex-col items-center gap-0.5">
-                    <span class="text-2xl font-bold leading-none text-gray-800 sm:text-3xl">{{ $stats['total'] }}</span>
-                    <span class="text-[10px] font-medium leading-tight text-gray-500 sm:text-xs">Total</span>
-                </div>
+        <div class="grid grid-cols-[4.75rem_minmax(0,1fr)] sm:grid-cols-[6rem_minmax(0,1fr)] items-center gap-3 sm:gap-5 mb-5 sm:mb-6 pb-4 sm:pb-5 border-b text-center">
+            <div class="flex flex-col items-center gap-1">
+                <span class="text-2xl font-bold leading-none text-gray-800 sm:text-3xl">{{ $stats['total'] }}</span>
+                <span class="text-[10px] font-medium leading-tight text-gray-500 sm:text-xs">Total</span>
             </div>
             <div class="grid grid-cols-4 gap-1.5 rounded-lg bg-gray-50/70 px-2 py-2 ring-1 ring-gray-100 sm:gap-3 sm:px-3">
                 <div class="flex flex-col items-center gap-0.5 sm:gap-1">

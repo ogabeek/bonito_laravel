@@ -28,16 +28,16 @@
         </div>
     @endif
 
-    <div class="order-[20] sm:order-[40]">
+    <div class="order-[20] sm:order-[40] mb-2 sm:mb-3">
         <livewire:student-teacher-info :student="$student" />
     </div>
 
-    <div class="order-[30] sm:order-[50]">
+    <div class="order-[30] sm:order-[50] mb-2 sm:mb-3">
         <livewire:student-teacher-notes :student="$student" />
     </div>
 
     @if($availableYears->count() > 1)
-        <div class="order-[40] sm:order-[60] flex gap-2 mb-6">
+        <div class="order-[40] sm:order-[60] flex gap-2 mb-7 sm:mb-8">
             @foreach($availableYears as $year)
                 <a href="{{ route('student.dashboard', ['student' => $student, 'year' => $year]) }}"
                    class="{{ $year == $selectedYear ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} px-3 py-1.5 rounded-full text-sm font-medium transition-colors">
@@ -54,7 +54,7 @@
         />
     </div>
 
-    <x-card title="📚 Lessons" class="order-[70] sm:order-[80] mt-6">
+    <x-card title="📚 Lessons" class="order-[70] sm:order-[80] mt-7 sm:mt-8">
         @if($lessonsByMonth->isNotEmpty())
             <div class="space-y-4">
                 @foreach($lessonsByMonth as $month => $lessons)

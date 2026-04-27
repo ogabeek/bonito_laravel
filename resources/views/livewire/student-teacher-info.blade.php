@@ -25,7 +25,7 @@ new class extends Component
 
 <div>
     @if($teacher)
-        <div class="mb-3 text-sm">
+        <div class="text-sm">
             <div class="flex items-center justify-between gap-3">
                 <button type="button" wire:click="$toggle('open')" class="min-w-0 flex-1 text-left">
                     <div class="truncate font-semibold text-gray-800">With {{ $teacher->name }}</div>
