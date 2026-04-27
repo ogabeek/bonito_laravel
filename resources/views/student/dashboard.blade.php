@@ -37,24 +37,26 @@
     </div>
 
     @if($availableYears->count() > 1)
-        <div class="order-[40] sm:order-[60] flex gap-2 mb-7 sm:mb-8">
-            @foreach($availableYears as $year)
-                <a href="{{ route('student.dashboard', ['student' => $student, 'year' => $year]) }}"
-                   class="{{ $year == $selectedYear ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }} px-3 py-1.5 rounded-full text-sm font-medium transition-colors">
-                    {{ $year }}
-                </a>
-            @endforeach
+        <div class="order-[40] sm:order-[60] mt-4 sm:mt-5 mb-2 flex justify-end">
+            <div class="inline-flex rounded border border-gray-200 bg-white p-0.5 text-xs shadow-sm">
+                @foreach($availableYears as $year)
+                    <a href="{{ route('student.dashboard', ['student' => $student, 'year' => $year]) }}"
+                       class="{{ $year == $selectedYear ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-800' }} rounded px-2.5 py-1 font-medium transition-colors">
+                        {{ $year }}
+                    </a>
+                @endforeach
+            </div>
         </div>
     @endif
 
-    <div class="order-[50] sm:order-[70]">
+    <div class="order-[50] sm:order-[70] mb-2 sm:mb-3">
         <x-weekly-lessons-chart
             :distribution="$weeklyDistribution"
             :stats="$stats"
         />
     </div>
 
-    <x-card title="📚 Lessons" class="order-[70] sm:order-[80] mt-7 sm:mt-8">
+    <x-card title="📚 Lessons" class="order-[70] sm:order-[80] mt-8 sm:mt-10">
         @if($lessonsByMonth->isNotEmpty())
             <div class="space-y-4">
                 @foreach($lessonsByMonth as $month => $lessons)
