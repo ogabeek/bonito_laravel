@@ -106,7 +106,7 @@ new class extends Component
         </div>
     @elseif($notes || $student->materials_url)
         {{-- Student view: read-only with clickable links --}}
-        <div class="space-y-4">
+        <div class="space-y-5">
             @if($notes)
                 <div class="rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
                     <div class="border-b border-gray-200 px-4 py-2 text-xs font-medium text-gray-500">From teacher</div>

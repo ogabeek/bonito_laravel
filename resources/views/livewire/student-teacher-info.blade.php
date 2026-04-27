@@ -50,7 +50,7 @@ new class extends Component
             </div>
 
             @if($open && ($teacher->contact || $teacher->zoom_id || $teacher->zoom_passcode))
-                <div class="mt-2 text-xs text-gray-500">
+                <div class="mt-3 text-xs text-gray-500">
                     @if($teacher->contact)
                         <a href="mailto:{{ $teacher->contact }}" class="block break-all underline decoration-gray-300 underline-offset-2 hover:text-gray-700">
                             {{ $teacher->contact }}

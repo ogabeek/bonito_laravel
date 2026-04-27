@@ -28,16 +28,16 @@
         </div>
     @endif
 
-    <div class="order-[20] sm:order-[40] mb-2 sm:mb-3">
+    <div class="order-[20] sm:order-[40] mb-4 sm:mb-5">
         <livewire:student-teacher-info :student="$student" />
     </div>
 
-    <div class="order-[30] sm:order-[50] mb-2 sm:mb-3">
+    <div class="order-[30] sm:order-[50] mb-5 sm:mb-6">
         <livewire:student-teacher-notes :student="$student" />
     </div>
 
     @if($availableYears->count() > 1)
-        <div class="order-[40] sm:order-[60] mt-4 sm:mt-5 mb-2 flex justify-end">
+        <div class="order-[40] sm:order-[60] mt-5 sm:mt-6 mb-3 flex justify-end">
             <div class="inline-flex rounded border border-gray-200 bg-white p-0.5 text-xs shadow-sm">
                 @foreach($availableYears as $year)
                     <a href="{{ route('student.dashboard', ['student' => $student, 'year' => $year]) }}"
@@ -49,14 +49,14 @@
         </div>
     @endif
 
-    <div class="order-[50] sm:order-[70] mb-2 sm:mb-3">
+    <div class="order-[50] sm:order-[70] mb-4 sm:mb-5">
         <x-weekly-lessons-chart
             :distribution="$weeklyDistribution"
             :stats="$stats"
         />
     </div>
 
-    <x-card title="📚 Lessons" class="order-[70] sm:order-[80] mt-8 sm:mt-10">
+    <x-card title="📚 Lessons" class="order-[70] sm:order-[80] mt-9 sm:mt-12">
         @if($lessonsByMonth->isNotEmpty())
             <div class="space-y-4">
                 @foreach($lessonsByMonth as $month => $lessons)
