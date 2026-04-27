@@ -1,5 +1,7 @@
 @props([
     'distribution',
+    'stats' => null,
+    'title' => null,
 ])
 
 @php
@@ -52,16 +54,44 @@
 @endphp
 
 <x-card class="mb-6">
-    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
-        <div>
-            <h2 class="text-lg sm:text-xl font-semibold">Weekly Class Distribution</h2>
+    @if($stats)
+        @if($title)
+            <h2 class="text-lg sm:text-xl font-semibold mb-3">{{ $title }}</h2>
+        @endif
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4 pb-4 border-b text-xs sm:text-sm">
+            <div class="flex flex-col items-center gap-1">
+                <span class="text-xl sm:text-2xl font-bold text-gray-800">{{ $stats['total'] }}</span>
+                <span class="text-gray-500">Total</span>
+            </div>
+            <div class="flex flex-col items-center gap-1">
+                <span class="text-lg sm:text-xl font-semibold" style="color: var(--color-status-completed);">{{ $stats['completed'] }}</span>
+                <span class="text-center text-gray-600">Completed</span>
+            </div>
+            <div class="flex flex-col items-center gap-1">
+                <span class="text-lg sm:text-xl font-semibold" style="color: var(--color-status-absent);">{{ $stats['student_absent'] }}</span>
+                <span class="text-center text-gray-600">Missed</span>
+            </div>
+            <div class="flex flex-col items-center gap-1">
+                <span class="text-lg sm:text-xl font-semibold" style="color: var(--color-status-student-cancelled);">{{ $stats['student_cancelled'] }}</span>
+                <span class="text-center text-gray-600">Student cancelled</span>
+            </div>
+            <div class="flex flex-col items-center gap-1">
+                <span class="text-lg sm:text-xl font-semibold" style="color: var(--color-status-cancelled);">{{ $stats['teacher_cancelled'] }}</span>
+                <span class="text-center text-gray-600">Teacher cancelled</span>
+            </div>
         </div>
+    @else
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+            <div>
+                <h2 class="text-lg sm:text-xl font-semibold">Weekly Class Distribution</h2>
+            </div>
 
-        <div class="flex shrink-0 items-center gap-3 text-[10px] text-gray-500">
-            <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-sm bg-green-600"></span>Completed</span>
-            <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-sm bg-gray-300"></span>Other</span>
+            <div class="flex shrink-0 items-center gap-3 text-[10px] text-gray-500">
+                <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-sm bg-green-600"></span>Completed</span>
+                <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-sm bg-gray-300"></span>Other</span>
+            </div>
         </div>
-    </div>
+    @endif
 
     <div
         class="overflow-x-auto"
@@ -87,6 +117,28 @@
                         $monthWidth = $month['count'] * $slotWidth;
                     @endphp
                     <rect x="{{ $monthStartX }}" y="{{ $top }}" width="{{ $monthWidth }}" height="{{ $baseline - $top }}" fill="#f0fdf4" />
+                @endif
+            @endforeach
+
+            {{-- Background month totals --}}
+            @foreach($monthGroups as $month)
+                @php
+                    $monthCompleted = $month['weeks']->sum('completed');
+                    $mStartX = $left + ($month['startIndex'] * $slotWidth);
+                    $mWidth = $month['count'] * $slotWidth;
+                    $mCenterX = $mStartX + ($mWidth / 2);
+                @endphp
+                @if($monthCompleted > 0)
+                    <text
+                        x="{{ $mCenterX }}"
+                        y="{{ $top + $plotHeight * 0.55 }}"
+                        text-anchor="middle"
+                        dominant-baseline="central"
+                        font-size="24"
+                        font-weight="700"
+                        fill="#000"
+                        opacity="0.07"
+                    >{{ $monthCompleted }}</text>
                 @endif
             @endforeach
 

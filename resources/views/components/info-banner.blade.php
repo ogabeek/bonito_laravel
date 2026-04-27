@@ -45,7 +45,7 @@
         {{-- Full banner --}}
         <div x-show="!hidden && !dismissed" {{ $attributes->merge(['class' => "border rounded-lg p-3 sm:p-4 text-sm {$colorClass}"]) }}>
             <div class="flex gap-3">
-                @if($icon || $defaultIcon)
+                @if($icon !== false && ($icon || $defaultIcon))
                     <div class="text-lg shrink-0">{{ $icon ?? $defaultIcon }}</div>
                 @endif
                 <div class="flex-1">{{ $slot }}</div>
@@ -63,7 +63,7 @@
     {{-- Simple dismiss: just hides for current page view --}}
     <div x-data="{ show: true }" x-show="show" {{ $attributes->merge(['class' => "border rounded-lg p-3 sm:p-4 text-sm {$colorClass}"]) }}>
         <div class="flex gap-3">
-            @if($icon || $defaultIcon)
+            @if($icon !== false && ($icon || $defaultIcon))
                 <div class="text-lg shrink-0">{{ $icon ?? $defaultIcon }}</div>
             @endif
             <div class="flex-1">{{ $slot }}</div>
@@ -74,7 +74,7 @@
     {{-- Non-dismissible --}}
     <div {{ $attributes->merge(['class' => "border rounded-lg p-3 sm:p-4 text-sm {$colorClass}"]) }}>
         <div class="flex gap-3">
-            @if($icon || $defaultIcon)
+            @if($icon !== false && ($icon || $defaultIcon))
                 <div class="text-lg shrink-0">{{ $icon ?? $defaultIcon }}</div>
             @endif
             <div class="flex-1">{{ $slot }}</div>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use App\Repositories\LessonRepository;
 use App\Services\LessonStatisticsService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /**
@@ -14,18 +16,31 @@ use Illuminate\View\View;
  */
 class StudentController extends Controller
 {
-    public function dashboard(Student $student, LessonRepository $lessonRepo, LessonStatisticsService $statsService): View
+    public function dashboard(Request $request, Student $student, LessonRepository $lessonRepo, LessonStatisticsService $statsService): View
     {
         $allLessons = $lessonRepo->getForStudent($student->id);
-        $lessonsByMonth = $allLessons->groupBy(fn ($lesson) => $lesson->class_date->format('Y-m'));
-        $stats = $statsService->calculateStats($allLessons);
-        $distributionStart = now()->copy()->subMonthsNoOverflow(5)->startOfMonth();
+
+        $availableYears = $allLessons->map(fn ($l) => $l->class_date->year)
+            ->push(now()->year)
+            ->unique()
+            ->sortDesc()
+            ->values();
+        $selectedYear = (int) $request->input('year', now()->year);
+
+        $yearLessons = $allLessons->filter(fn ($l) => $l->class_date->year === $selectedYear);
+        $lessonsByMonth = $yearLessons->groupBy(fn ($l) => $l->class_date->format('Y-m'));
+        $stats = $statsService->calculateStats($yearLessons);
+
+        $distributionStart = Carbon::create($selectedYear, 1, 1);
         $weeklyDistribution = $statsService->calculateWeeklyDistributionForRange(
             $allLessons,
             $distributionStart,
-            $distributionStart->copy()->addYear()->subDay()
+            $distributionStart->copy()->endOfYear()
         );
 
-        return view('student.dashboard', compact('student', 'lessonsByMonth', 'stats', 'weeklyDistribution'));
+        return view('student.dashboard', compact(
+            'student', 'lessonsByMonth', 'stats', 'weeklyDistribution',
+            'availableYears', 'selectedYear'
+        ));
     }
 }
