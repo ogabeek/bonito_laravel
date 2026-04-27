@@ -63,20 +63,22 @@ it('shows empty state when no lessons', function () {
         ->assertSuccessful();
 });
 
-it('does not repeat teacher name on student lesson cards', function () {
+it('shows teacher name once as page-level teacher info', function () {
     $teacher = Teacher::factory()->create(['name' => 'Test Teacher Name']);
     $student = Student::factory()->create();
     $teacher->students()->attach($student);
 
-    Lesson::factory()->create([
+    Lesson::factory()->count(2)->create([
         'teacher_id' => $teacher->id,
         'student_id' => $student->id,
         'class_date' => now()->subDay(),
     ]);
 
-    $this->get(route('student.dashboard', $student))
-        ->assertSuccessful()
-        ->assertDontSee('Test Teacher Name');
+    $response = $this->get(route('student.dashboard', $student));
+
+    $response->assertSuccessful();
+
+    expect(substr_count(strip_tags($response->getContent()), 'Test Teacher Name'))->toBe(1);
 });
 
 it('shows neutral lesson status badges for non-completed lessons', function () {

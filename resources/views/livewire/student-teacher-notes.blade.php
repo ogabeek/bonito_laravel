@@ -66,10 +66,10 @@ new class extends Component
                 }"
                 x-init="resize(); Livewire.hook('morph.updated', ({ el }) => { if (el === $el) resize() })"
                 x-on:input="resize()"
-                class="w-full p-4 bg-blue-50 border border-blue-100 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none overflow-hidden min-h-[80px]"
+                class="w-full p-4 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:ring-2 focus:ring-gray-300 focus:border-gray-400 resize-none overflow-hidden min-h-[80px]"
             ></textarea>
             <div class="flex items-center gap-2 mt-2">
-                <button type="button" wire:click="save" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                <button type="button" wire:click="save" class="px-3 py-1 bg-gray-800 text-white rounded text-sm hover:bg-gray-900">
                     Save
                 </button>
                 @if($saved)
@@ -82,6 +82,6 @@ new class extends Component
         </div>
     @elseif($notes)
         {{-- Student view: read-only with clickable links --}}
-        <div class="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-lg whitespace-pre-wrap text-sm text-gray-700">{!! Str::linkify($notes) !!}</div>
+        <div class="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg whitespace-pre-wrap text-sm text-gray-700 [&_a]:text-gray-600 [&_a]:underline [&_a]:decoration-gray-300 [&_a]:underline-offset-2 hover:[&_a]:text-gray-800">{!! Str::linkify($notes) !!}</div>
     @endif
 </div>

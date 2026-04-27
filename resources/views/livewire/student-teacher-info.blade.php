@@ -12,34 +12,43 @@ new class extends Component
 
     public function mount(): void
     {
-        // Get the teacher from the most recent lesson
         $this->teacher = $this->student->lessons()
             ->with('teacher')
             ->orderByDesc('class_date')
             ->first()
-            ?->teacher;
+            ?->teacher
+            ?? $this->student->teachers()->orderBy('name')->first();
     }
 }; ?>
 
 <div>
-    @if($teacher && ($teacher->contact || $teacher->zoom_link))
-        <div class="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-            @if($teacher->zoom_link)
-                <a href="{{ $teacher->zoom_link }}" target="_blank" rel="noopener"
-                   class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                    Join Zoom
-                </a>
-                @if($teacher->zoom_id || $teacher->zoom_passcode)
-                    <span class="text-xs text-gray-500">
-                        @if($teacher->zoom_id)ID: {{ $teacher->zoom_id }}@endif
-                        @if($teacher->zoom_id && $teacher->zoom_passcode) · @endif
-                        @if($teacher->zoom_passcode)Pass: {{ $teacher->zoom_passcode }}@endif
-                    </span>
+    @if($teacher)
+        <div class="mb-6 rounded-lg border border-gray-200 bg-white p-3 text-sm shadow-sm sm:p-4">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="min-w-0">
+                    <div class="text-xs font-medium text-gray-400">Teacher</div>
+                    <div class="font-semibold text-gray-800">{{ $teacher->name }}</div>
+                    @if($teacher->contact)
+                        <a href="mailto:{{ $teacher->contact }}" class="mt-1 block break-all text-gray-500 underline decoration-gray-300 underline-offset-2 hover:text-gray-700">
+                            {{ $teacher->contact }}
+                        </a>
+                    @endif
+                    @if($teacher->zoom_id || $teacher->zoom_passcode)
+                        <div class="mt-1 text-xs text-gray-500">
+                            @if($teacher->zoom_id)ID: {{ $teacher->zoom_id }}@endif
+                            @if($teacher->zoom_id && $teacher->zoom_passcode) · @endif
+                            @if($teacher->zoom_passcode)Pass: {{ $teacher->zoom_passcode }}@endif
+                        </div>
+                    @endif
+                </div>
+
+                @if($teacher->zoom_link)
+                    <a href="{{ $teacher->zoom_link }}" target="_blank" rel="noopener"
+                       class="inline-flex w-full items-center justify-center rounded bg-gray-800 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-900 sm:w-auto">
+                        Join Zoom
+                    </a>
                 @endif
-            @endif
-            @if($teacher->contact)
-                <a href="mailto:{{ $teacher->contact }}" class="text-gray-600 hover:text-blue-600">{{ $teacher->contact }}</a>
-            @endif
+            </div>
         </div>
     @endif
 </div>

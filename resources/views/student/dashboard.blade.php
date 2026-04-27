@@ -23,6 +23,10 @@
         </x-info-banner>
     @endif
 
+    <livewire:student-teacher-info :student="$student" />
+
+    <livewire:student-teacher-notes :student="$student" />
+
     @if($availableYears->count() > 1)
         <div class="flex gap-2 mb-6">
             @foreach($availableYears as $year)
@@ -38,10 +42,6 @@
         :distribution="$weeklyDistribution"
         :stats="$stats"
     />
-
-    <livewire:student-teacher-info :student="$student" />
-
-    <livewire:student-teacher-notes :student="$student" />
 
     <x-card title="📚 Lessons" class="mt-6">
         @if($lessonsByMonth->isNotEmpty())
