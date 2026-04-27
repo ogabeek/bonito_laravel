@@ -111,6 +111,20 @@ it('shows neutral lesson status badges for non-completed lessons', function () {
         ->assertSee('Canceled by teacher');
 });
 
+it('shows teacher materials as a parent-facing button', function () {
+    $student = Student::factory()->create([
+        'teacher_notes' => 'Practice before next class.',
+        'materials_url' => 'https://example.com/materials',
+    ]);
+
+    $this->get(route('student.dashboard', $student))
+        ->assertSuccessful()
+        ->assertSee('From teacher')
+        ->assertSee('Practice before next class.')
+        ->assertSee('Open materials')
+        ->assertSee('https://example.com/materials');
+});
+
 it('shows weekly class distribution for the selected year', function () {
     Carbon::setTestNow(Carbon::create(2026, 2, 15));
 

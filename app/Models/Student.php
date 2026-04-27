@@ -28,6 +28,7 @@ class Student extends Model
         'description',
         'status',       // active, inactive, holiday
         'teacher_notes',
+        'materials_url',
     ];
 
     protected $attributes = [
