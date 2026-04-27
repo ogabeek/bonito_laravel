@@ -5,7 +5,7 @@ use App\Services\LessonStatisticsService;
 use Carbon\Carbon;
 
 beforeEach(function () {
-    $this->service = new LessonStatisticsService();
+    $this->service = new LessonStatisticsService;
 });
 
 it('calculates stats for empty collection', function () {
@@ -88,4 +88,24 @@ it('groups stats by month', function () {
         ->and($statsByMonth['2025-02']['total'])->toBe(1)
         ->and($statsByMonth['2025-02']['student_absent'])->toBe(1)
         ->and($statsByMonth['2025-03']['total'])->toBe(1);
+});
+
+it('calculates weekly distribution for a selected calendar year', function () {
+    $lessons = collect([
+        (object) ['class_date' => Carbon::create(2026, 1, 1), 'status' => LessonStatus::COMPLETED],
+        (object) ['class_date' => Carbon::create(2026, 1, 7), 'status' => LessonStatus::STUDENT_ABSENT],
+        (object) ['class_date' => Carbon::create(2026, 2, 1), 'status' => LessonStatus::COMPLETED],
+        (object) ['class_date' => Carbon::create(2025, 1, 1), 'status' => LessonStatus::COMPLETED],
+    ]);
+
+    $distribution = $this->service->calculateWeeklyDistribution($lessons, 2026);
+
+    expect($distribution['year'])->toBe(2026)
+        ->and($distribution['weeks'])->toHaveCount(53)
+        ->and($distribution['weeks'][0]['count'])->toBe(2)
+        ->and($distribution['weeks'][0]['completed'])->toBe(1)
+        ->and($distribution['weeks'][0]['other'])->toBe(1)
+        ->and($distribution['weeks'][4]['count'])->toBe(1)
+        ->and($distribution['total'])->toBe(3)
+        ->and($distribution['max'])->toBe(2);
 });

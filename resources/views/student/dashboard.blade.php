@@ -32,6 +32,11 @@
         :routeParams="['student' => $student]" 
         :showNav="false" 
         title="All Lessons"
+        :friendlyLabels="true"
+    />
+
+    <x-weekly-lessons-chart
+        :distribution="$weeklyDistribution"
     />
 
     <livewire:student-teacher-info :student="$student" />

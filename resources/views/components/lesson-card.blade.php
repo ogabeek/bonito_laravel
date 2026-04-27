@@ -26,7 +26,7 @@
                 @if($lesson->status->value === 'student_absent')
                     ⚠ Student Absent
                 @elseif($lesson->status->value === 'student_cancelled')
-                    📘 Student Cancelled
+                    🏃‍➡️ Student Cancelled
                 @else
                     🚫 Cancelled
                 @endif

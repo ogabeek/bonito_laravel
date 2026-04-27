@@ -3,6 +3,7 @@
 use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Teacher;
+use Carbon\Carbon;
 
 it('shows student dashboard via uuid', function () {
     $student = Student::factory()->create();
@@ -76,4 +77,45 @@ it('displays teacher name on lessons', function () {
     $this->get(route('student.dashboard', $student))
         ->assertSuccessful()
         ->assertSee('Test Teacher Name');
+});
+
+it('shows rolling weekly class distribution', function () {
+    Carbon::setTestNow(Carbon::create(2026, 2, 15));
+
+    $teacher = Teacher::factory()->create();
+    $student = Student::factory()->create();
+    $teacher->students()->attach($student);
+
+    Lesson::factory()->create([
+        'teacher_id' => $teacher->id,
+        'student_id' => $student->id,
+        'class_date' => '2026-01-01',
+    ]);
+
+    Lesson::factory()->studentAbsent()->create([
+        'teacher_id' => $teacher->id,
+        'student_id' => $student->id,
+        'class_date' => '2026-01-02',
+    ]);
+
+    Lesson::factory()->create([
+        'teacher_id' => $teacher->id,
+        'student_id' => $student->id,
+        'class_date' => '2026-02-01',
+    ]);
+
+    Lesson::factory()->create([
+        'teacher_id' => $teacher->id,
+        'student_id' => $student->id,
+        'class_date' => '2025-01-01',
+    ]);
+
+    try {
+        $this->get(route('student.dashboard', $student))
+            ->assertSuccessful()
+            ->assertSee('Weekly Class Distribution')
+            ->assertSee('Dec 29 - Jan 4: 2 classes');
+    } finally {
+        Carbon::setTestNow();
+    }
 });
