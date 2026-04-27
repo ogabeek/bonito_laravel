@@ -56,26 +56,29 @@
         @if($title)
             <h2 class="text-base sm:text-xl font-semibold mb-3">{{ $title }}</h2>
         @endif
-        <div class="grid grid-cols-5 gap-1.5 sm:gap-3 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b text-center">
+        <div class="grid grid-cols-[4.5rem_minmax(0,1fr)] sm:grid-cols-[5.5rem_1.5rem_minmax(0,1fr)] items-center gap-2 sm:gap-3 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b text-center">
             <div class="flex flex-col items-center gap-0.5 sm:gap-1">
                 <span class="text-base sm:text-2xl font-bold text-gray-700 sm:text-gray-800">{{ $stats['total'] }}</span>
                 <span class="text-[10px] sm:text-sm leading-tight text-gray-400 sm:text-gray-500">Total</span>
             </div>
-            <div class="flex flex-col items-center gap-0.5 sm:gap-1">
-                <span class="text-base sm:text-xl font-semibold text-gray-700 sm:[color:var(--color-status-completed)]">{{ $stats['completed'] }}</span>
-                <span class="text-[10px] sm:text-sm leading-tight text-gray-400 sm:text-gray-500">Completed</span>
-            </div>
-            <div class="flex flex-col items-center gap-0.5 sm:gap-1">
-                <span class="text-base sm:text-xl font-semibold text-gray-700 sm:[color:var(--color-status-absent)]">{{ $stats['student_absent'] }}</span>
-                <span class="text-[10px] sm:text-sm leading-tight text-gray-400 sm:text-gray-500">Absent</span>
-            </div>
-            <div class="flex flex-col items-center gap-0.5 sm:gap-1">
-                <span class="text-base sm:text-xl font-semibold text-gray-700 sm:[color:var(--color-status-student-cancelled)]">{{ $stats['student_cancelled'] }}</span>
-                <span class="text-[10px] sm:text-sm leading-tight text-gray-400 sm:text-gray-500">Student cancelled</span>
-            </div>
-            <div class="flex flex-col items-center gap-0.5 sm:gap-1">
-                <span class="text-base sm:text-xl font-semibold text-gray-700 sm:[color:var(--color-status-cancelled)]">{{ $stats['teacher_cancelled'] }}</span>
-                <span class="text-[10px] sm:text-sm leading-tight text-gray-400 sm:text-gray-500">Teacher cancelled</span>
+            <div class="hidden sm:block text-lg font-medium text-gray-300">=</div>
+            <div class="grid grid-cols-4 gap-1.5 sm:gap-3 border-l border-gray-200 pl-2 sm:border-l-0 sm:pl-0">
+                <div class="flex flex-col items-center gap-0.5 sm:gap-1">
+                    <span class="text-base sm:text-xl font-semibold text-gray-700 sm:[color:var(--color-status-completed)]">{{ $stats['completed'] }}</span>
+                    <span class="text-[10px] sm:text-sm leading-tight text-gray-400 sm:text-gray-500">Completed</span>
+                </div>
+                <div class="flex flex-col items-center gap-0.5 sm:gap-1">
+                    <span class="text-base sm:text-xl font-semibold text-gray-700 sm:[color:var(--color-status-absent)]">{{ $stats['student_absent'] }}</span>
+                    <span class="text-[10px] sm:text-sm leading-tight text-gray-400 sm:text-gray-500">Absent</span>
+                </div>
+                <div class="flex flex-col items-center gap-0.5 sm:gap-1">
+                    <span class="text-base sm:text-xl font-semibold text-gray-700 sm:[color:var(--color-status-student-cancelled)]">{{ $stats['student_cancelled'] }}</span>
+                    <span class="text-[10px] sm:text-sm leading-tight text-gray-400 sm:text-gray-500">Student cancelled</span>
+                </div>
+                <div class="flex flex-col items-center gap-0.5 sm:gap-1">
+                    <span class="text-base sm:text-xl font-semibold text-gray-700 sm:[color:var(--color-status-cancelled)]">{{ $stats['teacher_cancelled'] }}</span>
+                    <span class="text-[10px] sm:text-sm leading-tight text-gray-400 sm:text-gray-500">Teacher cancelled</span>
+                </div>
             </div>
         </div>
     @else
