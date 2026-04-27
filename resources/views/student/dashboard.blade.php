@@ -10,8 +10,8 @@
         :subtitle="$student->goal ? 'Goal: ' . $student->goal : null" 
     />
 
-    @if(config('banners.student_welcome.enabled') && $stats['total'] < 5)
-        <x-info-banner :type="config('banners.student_welcome.type')" :icon="false" dismissible class="mb-6">
+    @if(config('banners.student_welcome.enabled'))
+        <x-info-banner :type="config('banners.student_welcome.type')" :icon="false" id="student_welcome" class="mb-6">
             <div class="font-medium mb-1">{{ config('banners.student_welcome.title') }}</div>
             <div class="text-xs opacity-90">{{ config('banners.student_welcome.message') }}</div>
         </x-info-banner>
@@ -44,7 +44,7 @@
 
     <livewire:student-teacher-notes :student="$student" />
 
-    <x-card :title="'📚 Lessons (' . $lessonsByMonth->flatten()->count() . ')'" class="mt-6">
+    <x-card title="📚 Lessons" class="mt-6">
         @if($lessonsByMonth->isNotEmpty())
             <div class="space-y-4">
                 @foreach($lessonsByMonth as $month => $lessons)
