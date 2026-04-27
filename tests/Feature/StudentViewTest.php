@@ -122,7 +122,6 @@ it('shows teacher materials as a parent-facing button', function () {
         ->assertSee('From teacher')
         ->assertSee('Practice before next class.')
         ->assertSee('Class materials')
-        ->assertSee('Open materials')
         ->assertSee('https://example.com/materials');
 });
 

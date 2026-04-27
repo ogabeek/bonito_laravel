@@ -34,13 +34,13 @@ new class extends Component
                 <div class="flex shrink-0 items-center gap-2">
                     @if($teacher->zoom_link)
                         <a href="{{ $teacher->zoom_link }}" target="_blank" rel="noopener"
-                           class="inline-flex self-start rounded bg-blue-600/80 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-600 sm:text-sm">
+                           class="inline-flex h-8 w-[5.75rem] items-center justify-center rounded bg-blue-600/80 px-3 text-xs font-medium text-white transition-colors hover:bg-blue-600">
                             Join Zoom
                         </a>
                     @endif
                     @if($teacher->contact || $teacher->zoom_id || $teacher->zoom_passcode)
-                        <button type="button" wire:click="$toggle('open')" class="inline-flex items-center gap-1 rounded border border-gray-200 px-2.5 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700">
-                            <span>{{ $open ? 'Hide' : 'Details' }}</span>
+                        <button type="button" wire:click="$toggle('open')" aria-expanded="{{ $open ? 'true' : 'false' }}" class="inline-flex h-8 w-[5.75rem] items-center justify-center gap-1 rounded border border-gray-200 px-2.5 text-xs font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700">
+                            <span>Details</span>
                             <svg class="{{ $open ? 'rotate-180' : '' }} h-3 w-3 transition-transform" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
                             </svg>
