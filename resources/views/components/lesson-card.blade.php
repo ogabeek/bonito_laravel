@@ -21,18 +21,18 @@
     
     {{-- Left: Date & Person --}}
     <div class="min-w-0">
-        <div class="font-semibold text-xs sm:text-sm">{{ $lesson->class_date->format($dateFormat) }}</div>
-        @if($showStudent)<div class="text-xs text-gray-600">{{ $lesson->student->name }}</div>@endif
-        @if($showTeacher)<div class="text-xs text-gray-600">{{ $lesson->teacher->name }}</div>@endif
+        <div class="font-semibold text-xs sm:text-sm text-gray-800">{{ $lesson->class_date->format($dateFormat) }}</div>
+        @if($showStudent)<div class="text-xs text-gray-500 truncate">{{ $lesson->student->name }}</div>@endif
+        @if($showTeacher)<div class="text-xs text-gray-500 truncate">{{ $lesson->teacher->name }}</div>@endif
     </div>
     
     {{-- Right: Details --}}
-    <div class="min-w-0 text-xs sm:text-sm leading-snug sm:text-right">
+    <div class="min-w-0 text-xs sm:text-sm leading-snug text-gray-700 sm:text-right">
         @if($lesson->status->value === 'completed')
             <div><span class="text-gray-500">Topic:</span> {{ $lesson->topic }}</div>
             @if($lesson->homework)<div class="mt-1"><span class="text-gray-500">HW:</span> {{ $lesson->homework }}</div>@endif
         @else
-            <div style="color: var(--lesson-card-color);">
+            <div class="lesson-status-text font-medium sm:font-normal" style="color: var(--lesson-card-color);">
                 @if($lesson->status->value === 'student_absent')
                     ⚠ Student Absent
                 @elseif($lesson->status->value === 'student_cancelled')
@@ -41,7 +41,7 @@
                     🚫 Cancelled
                 @endif
             </div>
-            @if($lesson->comments)<div class="text-gray-500 text-xs mt-1">{{ $lesson->comments }}</div>@endif
+            @if($lesson->comments)<div class="text-gray-500 text-xs leading-snug mt-1">{{ $lesson->comments }}</div>@endif
         @endif
     </div>
     

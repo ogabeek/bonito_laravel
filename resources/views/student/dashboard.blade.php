@@ -51,7 +51,7 @@
                         $monthName = \Carbon\Carbon::createFromFormat('Y-m', $month)->format('F');
                     @endphp
                     <div>
-                        <div class="text-sm font-semibold text-gray-700 mb-2">{{ $monthName }}</div>
+                        <div class="text-xs sm:text-sm font-semibold text-gray-500 mb-2">{{ $monthName }}</div>
                         <div class="space-y-2">
                             @foreach($lessons as $lesson)
                                 <x-lesson-card :lesson="$lesson" :mutedOnMobile="true" />
