@@ -4,20 +4,33 @@
     'showStudent' => false,
     'showDelete' => false,
     'dateFormat' => 'D, M d',
-    'mutedOnMobile' => false,
+    'neutralNonCompleted' => false,
 ])
 
 @php
     $statusClass = $lesson->status->cssClass();
+    $isCompleted = $lesson->status->value === 'completed';
+    $useNeutralStatus = $neutralNonCompleted && ! $isCompleted;
     $classes = 'lesson-card group border-l-4 pl-3 sm:pl-4 pr-3 sm:pr-2 py-2 rounded-r grid grid-cols-1 sm:grid-cols-[6rem_minmax(0,1fr)] gap-x-4 gap-y-1.5 min-h-[74px] sm:min-h-[68px] items-center relative';
-
-    if ($mutedOnMobile) {
-        $classes .= ' lesson-card-muted-mobile';
-    }
+    $cardBackground = $useNeutralStatus ? '#f9fafb' : "var(--color-status-{$statusClass}-bg)";
+    $cardBorder = $useNeutralStatus ? '#d1d5db' : "var(--color-status-{$statusClass}-border)";
+    $cardColor = $useNeutralStatus ? '#6b7280' : "var(--color-status-{$statusClass})";
+    $badgeClass = match ($lesson->status->value) {
+        'student_absent' => 'text-red-700 bg-red-50 border-red-200',
+        'student_cancelled' => 'text-gray-600 bg-gray-100 border-gray-200',
+        'teacher_cancelled' => 'text-orange-700 bg-orange-50 border-orange-200',
+        default => 'text-gray-600 bg-gray-100 border-gray-200',
+    };
+    $statusLabel = match ($lesson->status->value) {
+        'student_absent' => 'Missing',
+        'student_cancelled' => 'Canceled by student',
+        'teacher_cancelled' => 'Canceled by teacher',
+        default => $lesson->status->label(),
+    };
 @endphp
 
 <div {{ $attributes->merge(['class' => $classes]) }}
-     style="--lesson-card-bg: var(--color-status-{{ $statusClass }}-bg); --lesson-card-border: var(--color-status-{{ $statusClass }}-border); --lesson-card-color: var(--color-status-{{ $statusClass }}); background: var(--lesson-card-bg); border-color: var(--lesson-card-border);">
+     style="--lesson-card-bg: {{ $cardBackground }}; --lesson-card-border: {{ $cardBorder }}; --lesson-card-color: {{ $cardColor }}; background: var(--lesson-card-bg); border-color: var(--lesson-card-border);">
     
     {{-- Left: Date & Person --}}
     <div class="min-w-0">
@@ -32,16 +45,29 @@
             <div><span class="text-gray-500">Topic:</span> {{ $lesson->topic }}</div>
             @if($lesson->homework)<div class="mt-1"><span class="text-gray-500">HW:</span> {{ $lesson->homework }}</div>@endif
         @else
-            <div class="lesson-status-text font-medium sm:font-normal" style="color: var(--lesson-card-color);">
-                @if($lesson->status->value === 'student_absent')
-                    ⚠ Student Absent
-                @elseif($lesson->status->value === 'student_cancelled')
-                    🏃‍➡️ Student Cancelled
-                @else
-                    🚫 Cancelled
+            @if($neutralNonCompleted)
+                <div class="flex items-start {{ $lesson->comments ? 'justify-between' : 'justify-end' }} gap-3 sm:justify-end">
+                    @if($lesson->comments)
+                        <div class="min-w-0 text-left sm:text-right text-gray-500 text-xs leading-snug">{{ $lesson->comments }}</div>
+                    @endif
+                    <span class="{{ $badgeClass }} shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium leading-5">
+                        {{ $statusLabel }}
+                    </span>
+                </div>
+            @else
+                <div class="lesson-status-text font-medium sm:font-normal" style="color: var(--lesson-card-color);">
+                    @if($lesson->status->value === 'student_absent')
+                        ⚠ Student Absent
+                    @elseif($lesson->status->value === 'student_cancelled')
+                        🏃‍➡️ Canceled by student
+                    @else
+                        🚫 Cancelled
+                    @endif
+                </div>
+                @if($lesson->comments)
+                    <div class="text-gray-500 text-xs leading-snug mt-1">{{ $lesson->comments }}</div>
                 @endif
-            </div>
-            @if($lesson->comments)<div class="text-gray-500 text-xs leading-snug mt-1">{{ $lesson->comments }}</div>@endif
+            @endif
         @endif
     </div>
     

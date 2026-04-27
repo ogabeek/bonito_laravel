@@ -79,6 +79,36 @@ it('does not repeat teacher name on student lesson cards', function () {
         ->assertDontSee('Test Teacher Name');
 });
 
+it('shows neutral lesson status badges for non-completed lessons', function () {
+    $teacher = Teacher::factory()->create();
+    $student = Student::factory()->create();
+    $teacher->students()->attach($student);
+
+    Lesson::factory()->studentAbsent()->create([
+        'teacher_id' => $teacher->id,
+        'student_id' => $student->id,
+        'class_date' => now()->subDays(3),
+    ]);
+
+    Lesson::factory()->studentCancelled()->create([
+        'teacher_id' => $teacher->id,
+        'student_id' => $student->id,
+        'class_date' => now()->subDays(2),
+    ]);
+
+    Lesson::factory()->teacherCancelled()->create([
+        'teacher_id' => $teacher->id,
+        'student_id' => $student->id,
+        'class_date' => now()->subDay(),
+    ]);
+
+    $this->get(route('student.dashboard', $student))
+        ->assertSuccessful()
+        ->assertSee('Missing')
+        ->assertSee('Canceled by student')
+        ->assertSee('Canceled by teacher');
+});
+
 it('shows weekly class distribution for the selected year', function () {
     Carbon::setTestNow(Carbon::create(2026, 2, 15));
 

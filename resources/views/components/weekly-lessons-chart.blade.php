@@ -118,6 +118,27 @@
                 @endif
             @endforeach
 
+            @foreach($monthGroups as $month)
+                @php
+                    $monthCompleted = $month['weeks']->sum('completed');
+                    $monthStartX = $left + ($month['startIndex'] * $slotWidth);
+                    $monthWidth = $month['count'] * $slotWidth;
+                    $monthCenterX = $monthStartX + ($monthWidth / 2);
+                @endphp
+                @if($monthCompleted > 0)
+                    <text
+                        x="{{ $monthCenterX }}"
+                        y="{{ $top + $plotHeight * 0.55 }}"
+                        text-anchor="middle"
+                        dominant-baseline="central"
+                        font-size="24"
+                        font-weight="700"
+                        fill="#000"
+                        opacity="0.07"
+                    >{{ $monthCompleted }}</text>
+                @endif
+            @endforeach
+
             @foreach($yearMarkers as $marker)
                 @php
                     $markerStartX = $left + ($marker['startIndex'] * $slotWidth);
