@@ -21,12 +21,29 @@
     </div>
 
     @if(config('banners.student_welcome.enabled'))
-        <div class="order-[60] sm:order-[20]">
-            <x-info-banner :type="config('banners.student_welcome.type')" :icon="false" id="student_welcome" class="{{ $compactSectionGap }}">
-                <div class="font-medium mb-1">{{ config('banners.student_welcome.title') }}</div>
-                <div class="text-xs opacity-90">{{ config('banners.student_welcome.message') }}</div>
-            </x-info-banner>
-        </div>
+        @php
+            // Show the welcome/help banner only for the first 2 visits.
+            // We use a session counter so this works for parents and students
+            // and does not rely on client-side storage.
+            $welcomeCount = session('student_welcome_seen_count', 0);
+        @endphp
+
+        @if($welcomeCount < 2)
+            <div class="order-[60] sm:order-[20]">
+                <x-info-banner :type="config('banners.student_welcome.type')" :icon="false" id="student_welcome" class="{{ $compactSectionGap }}">
+                    <div class="font-medium mb-1">{{ config('banners.student_welcome.title') }}</div>
+                    <div class="text-xs opacity-90">
+                        {{-- Revised copy: keep the opening sentence, make it more general and polite. --}}
+                        This is your personal learning dashboard. After each lesson your teacher records what you covered, any homework, and your progress. Use this page to review past lessons and materials.
+                    </div>
+                </x-info-banner>
+            </div>
+
+            {{-- Increment the session counter so the banner only shows a limited number of times --}}
+            @php
+                session()->put('student_welcome_seen_count', $welcomeCount + 1);
+            @endphp
+        @endif
     @endif
 
     @if(config('banners.student_info.enabled'))
