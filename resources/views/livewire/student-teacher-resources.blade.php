@@ -103,19 +103,12 @@ new class extends Component
                 @enderror
             </div>
         </div>
-    @elseif($notes || $student->materials_url)
+    @elseif($notes)
         <div class="space-y-5">
-            @if($notes)
-                <div class="rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
-                    <div class="border-b border-gray-200 px-4 py-2 text-xs font-medium text-gray-500">From teacher</div>
-                    <div class="whitespace-pre-wrap px-4 py-3 [&_a]:text-gray-600 [&_a]:underline [&_a]:decoration-gray-300 [&_a]:underline-offset-2 hover:[&_a]:text-gray-800">{!! Str::linkify($notes) !!}</div>
-                </div>
-            @endif
-            @if($student->materials_url)
-                <a href="{{ $student->materials_url }}" target="_blank" rel="noopener" class="flex h-9 w-full items-center justify-center rounded-md bg-gray-800 px-4 text-sm font-medium text-white transition-colors hover:bg-gray-900">
-                    Class materials
-                </a>
-            @endif
+            <div class="rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
+                <div class="border-b border-gray-200 px-4 py-2 text-xs font-medium text-gray-500">From teacher</div>
+                <div class="whitespace-pre-wrap px-4 py-3 [&_a]:text-gray-600 [&_a]:underline [&_a]:decoration-gray-300 [&_a]:underline-offset-2 hover:[&_a]:text-gray-800">{!! Str::linkify($notes) !!}</div>
+            </div>
         </div>
     @endif
 </div>

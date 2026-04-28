@@ -6,6 +6,9 @@
 @php
     $compactSectionGap = 'mb-6 sm:mb-7';
     $sectionGap = 'mb-7 sm:mb-9';
+    $hasTeacherResources = session('teacher_id') || session('admin_authenticated') || filled($student->teacher_notes);
+    $hasMaterials = filled($student->materials_url);
+    $lessonsTopMargin = $hasMaterials ? 'mt-0' : 'mt-8 sm:mt-10';
 @endphp
 
 <div class="p-3 sm:p-6 max-w-4xl mx-auto flex flex-col">
@@ -37,9 +40,11 @@
         <livewire:student-teacher-info :student="$student" />
     </div>
 
-    <div class="order-[30] sm:order-[50] {{ $sectionGap }}">
-        <livewire:student-teacher-resources :student="$student" />
-    </div>
+    @if($hasTeacherResources)
+        <div class="order-[30] sm:order-[50] {{ $sectionGap }}">
+            <livewire:student-teacher-resources :student="$student" />
+        </div>
+    @endif
 
     @if($availableYears->count() > 1)
         <div class="order-[40] sm:order-[60] mb-3 flex justify-end">
@@ -61,7 +66,28 @@
         />
     </div>
 
-    <x-card title="📚 Lessons" class="order-[70] sm:order-[80] mt-8 sm:mt-10">
+    @if($hasMaterials)
+        <div class="order-[65] sm:order-[75] mb-3 sm:mb-4">
+            <a href="{{ $student->materials_url }}" target="_blank" rel="noopener" class="group flex min-h-11 w-full items-center justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700 shadow-sm shadow-blue-950/5 transition-colors hover:border-blue-300 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-200">
+                <span class="flex min-w-0 items-center gap-2">
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/80 text-blue-600 ring-1 ring-blue-100">
+                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M3.5 4A1.5 1.5 0 0 0 2 5.5v9A1.5 1.5 0 0 0 3.5 16h13a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 16.5 6H10L8.6 4.6A2 2 0 0 0 7.17 4H3.5Z" />
+                        </svg>
+                    </span>
+                    <span class="truncate">Class materials</span>
+                </span>
+                <span class="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-blue-600">
+                    Open
+                    <svg class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 0 1 0-1.06L12.94 6H8.75a.75.75 0 0 1 0-1.5h6a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0V7.06l-7.72 7.72a.75.75 0 0 1-1.06 0Z" clip-rule="evenodd" />
+                    </svg>
+                </span>
+            </a>
+        </div>
+    @endif
+
+    <x-card title="📚 Lessons" class="order-[70] sm:order-[80] {{ $lessonsTopMargin }}">
         @if($lessonsByMonth->isNotEmpty())
             <div class="space-y-4">
                 @foreach($lessonsByMonth as $month => $lessons)
