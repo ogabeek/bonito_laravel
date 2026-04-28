@@ -84,7 +84,7 @@
             </div>
 
             <div class="flex shrink-0 items-center gap-3 text-[10px] text-gray-500">
-                <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-sm bg-green-600"></span>Completed</span>
+                <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-sm bg-green-400"></span>Completed</span>
                 <span class="flex items-center gap-1"><span class="h-2.5 w-2.5 rounded-sm bg-gray-300"></span>Other</span>
             </div>
         </div>
@@ -171,7 +171,7 @@
                                 $y = $baseline - ($cell * $cellHeight) - (($cell - 1) * $cellGap);
                                 $visibleCompleted = min($completed, $cellRows);
                                 $isCompletedCell = $cell <= $visibleCompleted;
-                                $cellFill = $isCompletedCell ? '#2f855a' : '#d1d5db';
+                                $cellFill = $isCompletedCell ? '#4ade80' : '#d1d5db';
                                 $cellHeightForWeek = $cell === 1 && $count === 1 ? $cellHeight * 1.55 : $cellHeight;
                                 $cellY = $cell === 1 && $count === 1 ? $baseline - $cellHeightForWeek : $y;
                             @endphp
