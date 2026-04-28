@@ -27,22 +27,22 @@
     --color-student-finished: #d8b4fe;      /* purple-300 - light purple */
     --color-student-dropped: #fca5a5;       /* red-300 - light red */
 
-    /* Lesson status colors */
+    /* Lesson status colors — text stays saturated for readability, bg/border muted */
     --color-status-completed: #16a34a;
-    --color-status-completed-bg: #dcfce7;
-    --color-status-completed-border: #22c55e;
-    
+    --color-status-completed-bg: #f0fdf4;
+    --color-status-completed-border: #86efac;
+
     --color-status-absent: #dc2626;
-    --color-status-absent-bg: #fee2e2;
-    --color-status-absent-border: #ef4444;
+    --color-status-absent-bg: #fef2f2;
+    --color-status-absent-border: #fca5a5;
 
     --color-status-student-cancelled: #2563eb;          /* blue */
-    --color-status-student-cancelled-bg: #dbeafe;
-    --color-status-student-cancelled-border: #60a5fa;
-    
+    --color-status-student-cancelled-bg: #eff6ff;
+    --color-status-student-cancelled-border: #93c5fd;
+
     --color-status-cancelled: #ea580c;
-    --color-status-cancelled-bg: #ffedd5;
-    --color-status-cancelled-border: #f97316;
+    --color-status-cancelled-bg: #fff7ed;
+    --color-status-cancelled-border: #fdba74;
 }
 
 /* Custom status buttons (checked styling) */

@@ -6,7 +6,8 @@
 @php
     $compactSectionGap = 'mb-6 sm:mb-7';
     $sectionGap = 'mb-7 sm:mb-9';
-    $hasTeacherResources = session('teacher_id') || session('admin_authenticated') || filled($student->teacher_notes);
+    $canEditResources = session('teacher_id') || session('admin_authenticated');
+    $hasTeacherResources = $canEditResources || filled($student->teacher_notes);
     $hasMaterials = filled($student->materials_url);
     $lessonsTopMargin = $hasMaterials ? 'mt-0' : 'mt-8 sm:mt-10';
 @endphp
@@ -42,7 +43,14 @@
 
     @if($hasTeacherResources)
         <div class="order-[30] sm:order-[50] {{ $sectionGap }}">
-            <livewire:student-teacher-resources :student="$student" />
+            @if($canEditResources)
+                <livewire:student-teacher-resources :student="$student" />
+            @else
+                <div class="rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
+                    <div class="border-b border-gray-200 px-4 py-2 text-xs font-medium text-gray-500">From teacher</div>
+                    <div class="whitespace-pre-wrap px-4 py-3 [&_a]:text-gray-600 [&_a]:underline [&_a]:decoration-gray-300 [&_a]:underline-offset-2 hover:[&_a]:text-gray-800">{!! Str::linkify($student->teacher_notes) !!}</div>
+                </div>
+            @endif
         </div>
     @endif
 
@@ -87,7 +95,7 @@
         </div>
     @endif
 
-    <x-card title="📚 Lessons" class="order-[70] sm:order-[80] {{ $lessonsTopMargin }}">
+    <x-card title="Lessons" class="order-[70] sm:order-[80] {{ $lessonsTopMargin }}">
         @if($lessonsByMonth->isNotEmpty())
             <div class="space-y-4">
                 @foreach($lessonsByMonth as $month => $lessons)

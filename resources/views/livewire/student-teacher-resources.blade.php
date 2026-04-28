@@ -35,6 +35,8 @@ new class extends Component
 
     public function save(): void
     {
+        abort_unless($this->canEdit(), 403);
+
         $this->validate();
 
         $this->student->update([
@@ -58,10 +60,15 @@ new class extends Component
 
         $this->saved = true;
     }
+
+    public function canEdit(): bool
+    {
+        return (bool) session('teacher_id') || (bool) session('admin_authenticated');
+    }
 }; ?>
 
 <div wire:key="student-resources-{{ $student->id }}">
-    @if(session('teacher_id') || session('admin_authenticated'))
+    @if($this->canEdit())
         <div class="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-3 sm:p-4">
             <div class="mb-3 text-xs font-medium text-gray-500">From teacher</div>
             <label for="student-{{ $student->id }}-notes" class="mb-1 block text-xs font-medium text-gray-500">Teacher notes</label>
@@ -101,13 +108,6 @@ new class extends Component
                 @error('materialsUrl')
                     <span class="text-red-600 text-xs">{{ $message }}</span>
                 @enderror
-            </div>
-        </div>
-    @elseif($notes)
-        <div class="space-y-5">
-            <div class="rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-700">
-                <div class="border-b border-gray-200 px-4 py-2 text-xs font-medium text-gray-500">From teacher</div>
-                <div class="whitespace-pre-wrap px-4 py-3 [&_a]:text-gray-600 [&_a]:underline [&_a]:decoration-gray-300 [&_a]:underline-offset-2 hover:[&_a]:text-gray-800">{!! Str::linkify($notes) !!}</div>
             </div>
         </div>
     @endif

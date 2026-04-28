@@ -138,6 +138,20 @@ it('shows class materials without requiring teacher notes', function () {
         ->assertDontSee('From teacher');
 });
 
+it('does not mount the editable teacher resources component for public visitors', function () {
+    $student = Student::factory()->create([
+        'teacher_notes' => 'Original note.',
+        'materials_url' => 'https://example.com/materials',
+    ]);
+
+    $this->get(route('student.dashboard', $student))
+        ->assertSuccessful()
+        ->assertSee('Original note.')
+        ->assertDontSeeLivewire('student-teacher-resources')
+        ->assertDontSee('wire:model="notes"', false)
+        ->assertDontSee('wire:click="save"', false);
+});
+
 it('shows weekly class distribution for the selected year', function () {
     Carbon::setTestNow(Carbon::create(2026, 2, 15));
 

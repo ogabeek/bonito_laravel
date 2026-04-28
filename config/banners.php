@@ -19,7 +19,7 @@ return [
     // Student welcome: shown if < 5 lessons
     'student_welcome' => [
         'enabled' => true,
-        'type' => 'success',
+        'type' => 'info',
         'title' => 'Welcome! 🎉',
         'message' => 'This is your personal learning dashboard. After each lesson, your teacher will log what you covered, homework assignments, and track your progress. Check back after your first class!',
     ],
