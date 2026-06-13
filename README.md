@@ -55,10 +55,10 @@ Simplified management system for online school with ~10 teachers, ~100 students,
 - Twice daily: 4:30 AM and 4:30 PM CET (Europe/Madrid timezone)
 - Retention: 360 days (all), 720 days (daily), 3 years (monthly)
 - **Dual Storage:**
-  - Local: `storage/app/private/Laravel/`
+  - Local: `storage/app/private/Boniato School/`
   - AWS S3: `s3://boniato-school-backups/backups/`
 - Package: spatie/laravel-backup
-- Scheduler: Laravel cron (Forge handles automatically)
+- Scheduler: Laravel cron via `/etc/cron.d/laravel-scheduler` (`php artisan schedule:run` every minute)
 - Setup: See `docs/AWS_S3_BACKUP_SETUP.md`
 
 

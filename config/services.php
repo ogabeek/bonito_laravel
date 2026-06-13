@@ -19,8 +19,4 @@ return [
         'cache_ttl' => env('GOOGLE_SHEETS_CACHE_TTL', 300),
     ],
 
-    'forge' => [
-        'heartbeat_url' => env('FORGE_HEARTBEAT_URL'),
-    ],
-
 ];
