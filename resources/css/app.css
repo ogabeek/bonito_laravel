@@ -120,8 +120,30 @@
     text-align: right;
 }
 
-.cal-col-hover {
-    background-color: #f9fafb !important; /* gray-50, matches row hover */
+/* Sticky day-number header: stays pinned to the top of the scroll box while
+   scrolling students. The top-left corner is sticky on both axes, so it must
+   sit above both the sticky header row and the sticky student column. */
+.cal-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+.cal-table thead th.cal-sticky {
+    z-index: 30;
+}
+
+/* Crosshair hover: a faint neutral darken overlay (not a solid fill) so the
+   highlighted row/column stays subtle yet visible over weekend and today
+   shading instead of blending into the gray weekend tint. */
+.cal-col-hover,
+.cal-table tbody tr:hover td {
+    background-image: linear-gradient(rgba(17, 24, 39, 0.04), rgba(17, 24, 39, 0.04));
+}
+
+/* Billing period boundary: a thin, soft divider on the first day of each
+   billing period (config billing.period_start_day) marking the 24-23 cycle. */
+.cal-period-start {
+    border-left: 1px dashed rgba(239, 68, 68, 0.5) !important;
 }
 
 .cal-lesson-chip {

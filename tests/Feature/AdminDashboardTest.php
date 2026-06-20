@@ -1,9 +1,11 @@
 <?php
 
+use App\Enums\StudentStatus;
 use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Volt\Volt;
 
 beforeEach(function () {
     config(['app.admin_password' => Hash::make('test-password')]);
@@ -67,6 +69,22 @@ it('loads billing page with stats', function () {
     $this->withSession(['admin_authenticated' => true])
         ->get(route('admin.billing'))
         ->assertSuccessful();
+});
+
+it('hides and shows students by status via the calendar toggle', function () {
+    Student::factory()->create(['name' => 'Active Annie']);
+    Student::factory()->create(['name' => 'Dropped Dan', 'status' => StudentStatus::DROPPED]);
+
+    Volt::test('admin-dashboard')
+        ->assertSee('Active Annie')
+        ->assertSee('Dropped Dan')
+        ->call('toggleStatus', StudentStatus::DROPPED->value)
+        ->assertSet('hiddenStatuses', [StudentStatus::DROPPED->value])
+        ->assertSee('Active Annie')
+        ->assertDontSee('Dropped Dan')
+        ->call('toggleStatus', StudentStatus::DROPPED->value)
+        ->assertSet('hiddenStatuses', [])
+        ->assertSee('Dropped Dan');
 });
 
 it('navigates between months on dashboard', function () {

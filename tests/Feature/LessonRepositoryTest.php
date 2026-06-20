@@ -25,18 +25,20 @@ function lessonOn(string $date, LessonStatus $status = LessonStatus::COMPLETED, 
 }
 
 describe('getForPeriod (billing window)', function () {
-    it('includes only lessons between the 26th of the prev month and the 25th', function () {
-        // Billing period for Feb 2026 = Jan 26 -> Feb 25.
-        lessonOn('2026-01-25'); // day before window -> excluded
-        lessonOn('2026-01-26'); // window start -> included
+    it('includes only lessons within the billing window (period start -> end)', function () {
+        config(['billing.period_start_day' => 24, 'billing.period_end_day' => 23]);
+
+        // Billing period for Feb 2026 = Jan 24 -> Feb 23.
+        lessonOn('2026-01-23'); // day before window -> excluded
+        lessonOn('2026-01-24'); // window start -> included
         lessonOn('2026-02-10'); // mid window -> included
-        lessonOn('2026-02-25'); // window end -> included
-        lessonOn('2026-02-26'); // day after window -> excluded
+        lessonOn('2026-02-23'); // window end -> included
+        lessonOn('2026-02-24'); // day after window -> excluded
 
         $lessons = $this->repo->getForPeriod(Carbon::create(2026, 2, 15), isBilling: true);
 
         expect($lessons->pluck('class_date')->map->toDateString()->sort()->values()->all())
-            ->toBe(['2026-01-26', '2026-02-10', '2026-02-25']);
+            ->toBe(['2026-01-24', '2026-02-10', '2026-02-23']);
     });
 
     it('falls back to the calendar month when billing is off', function () {

@@ -36,7 +36,8 @@ class StatsExportService
     protected function buildRows(array $payload): array
     {
         $currentMonthLabel = $payload['currentMonth']->format('F Y');
-        $modeLabel = $payload['billing'] ? 'Billing (26-25)' : 'Calendar';
+        $periodLabel = config('billing.period_start_day').'-'.config('billing.period_end_day');
+        $modeLabel = $payload['billing'] ? "Billing ({$periodLabel})" : 'Calendar';
         $periodStats = $payload['periodStats'];
         $studentStats = $payload['studentStats'];
         $teacherStats = $payload['teacherStats'];

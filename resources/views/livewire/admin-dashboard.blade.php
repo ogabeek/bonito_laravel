@@ -1,8 +1,6 @@
 <?php
 
-use App\Enums\StudentStatus;
 use App\Models\Teacher;
-use App\Services\CalendarService;
 use App\Services\DashboardDataService;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
@@ -20,9 +18,15 @@ new class extends Component
     public bool $billing = false;
 
     public string $activeTab = 'calendar';
+
     public string $teacherFilter = '';
-    public string $statusFilter = '';
+
+    /** @var array<int, string> Student status values hidden from the calendar */
+    #[Url]
+    public array $hiddenStatuses = [];
+
     public bool $showAddTeacher = false;
+
     public bool $showAddStudent = false;
 
     public function mount(): void
@@ -71,6 +75,35 @@ new class extends Component
     public function students(): \Illuminate\Support\Collection
     {
         return app(DashboardDataService::class)->getStudents();
+    }
+
+    /**
+     * Students after applying the teacher and status filters.
+     */
+    #[Computed]
+    public function visibleStudents(): \Illuminate\Support\Collection
+    {
+        return $this->students->filter(function ($student) {
+            $matchesTeacher = $this->teacherFilter === '' || in_array((int) $this->teacherFilter, $student->teacher_ids);
+            $matchesStatus = ! in_array($student->status->value, $this->hiddenStatuses, true);
+
+            return $matchesTeacher && $matchesStatus;
+        });
+    }
+
+    /**
+     * Student count per status (respecting the teacher filter) for the toggle pills.
+     *
+     * @return array<string, int>
+     */
+    #[Computed]
+    public function statusCounts(): array
+    {
+        return $this->students
+            ->filter(fn ($student) => $this->teacherFilter === '' || in_array((int) $this->teacherFilter, $student->teacher_ids))
+            ->groupBy(fn ($student) => $student->status->value)
+            ->map->count()
+            ->toArray();
     }
 
     #[Computed]
@@ -130,12 +163,34 @@ new class extends Component
     {
         $this->activeTab = $tab;
     }
+
+    public function toggleStatus(string $status): void
+    {
+        if (in_array($status, $this->hiddenStatuses, true)) {
+            $this->hiddenStatuses = array_values(array_diff($this->hiddenStatuses, [$status]));
+
+            return;
+        }
+
+        $this->hiddenStatuses[] = $status;
+    }
 };
 ?>
 
 <div class="p-6 w-full mx-auto">
     <x-page-header title="Admin Dashboard" :logoutRoute="route('admin.logout')">
         <div class="flex items-center gap-4">
+            <div class="flex items-center gap-1">
+                <button wire:click="setTab('calendar')"
+                        class="px-3 py-1 text-sm rounded {{ $activeTab === 'calendar' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100' }}">
+                    Calendar
+                </button>
+                <button wire:click="setTab('teachers')"
+                        class="px-3 py-1 text-sm rounded {{ $activeTab === 'teachers' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100' }}">
+                    Teachers
+                </button>
+            </div>
+            <span class="w-px h-5 bg-gray-200"></span>
             <a href="{{ route('admin.billing') }}" class="text-sm text-blue-600 hover:underline">Billing / Stats</a>
             <a href="{{ route('admin.logs') }}" class="text-sm text-blue-600 hover:underline">Activity Logs</a>
         </div>
@@ -144,17 +199,6 @@ new class extends Component
     <x-error-list />
 
     <x-card>
-        <div class="border-b flex gap-4 px-4">
-            <button wire:click="setTab('calendar')"
-                    class="py-3 font-medium {{ $activeTab === 'calendar' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600' }}">
-                Calendar
-            </button>
-            <button wire:click="setTab('teachers')"
-                    class="py-3 font-medium {{ $activeTab === 'teachers' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600' }}">
-                Teachers
-            </button>
-        </div>
-
         <div class="p-6">
             {{-- Calendar Tab --}}
             @if($activeTab === 'calendar')
@@ -183,7 +227,7 @@ new class extends Component
                                 </button>
                                 <button wire:click="$set('billing', true)"
                                         class="px-3 py-1 text-xs rounded {{ $billing ? 'bg-blue-100 text-blue-700' : 'text-gray-600 bg-gray-100' }}">
-                                    26-25
+                                    {{ config('billing.period_start_day') }}-{{ config('billing.period_end_day') }}
                                 </button>
                             </div>
                         </div>
@@ -228,24 +272,32 @@ new class extends Component
                     @endif
 
                     {{-- Filters --}}
-                    <div class="mb-4 flex gap-3">
+                    <div class="mb-4 flex flex-wrap items-center gap-3">
                         <select wire:model.live="teacherFilter" class="pl-3 pr-8 py-2 border rounded">
                             <option value="">All Teachers</option>
                             @foreach($this->teachers as $teacher)
                                 <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
                             @endforeach
                         </select>
-                        <select wire:model.live="statusFilter" class="pl-3 pr-8 py-2 border rounded">
-                            <option value="">All Statuses</option>
-                            @foreach(StudentStatus::cases() as $statusOption)
-                                <option value="{{ $statusOption->value }}">{{ $statusOption->label() }}</option>
+                        <div class="flex flex-wrap items-center gap-2">
+                            @foreach(\App\Enums\StudentStatus::cases() as $statusOption)
+                                @php $isHidden = in_array($statusOption->value, $hiddenStatuses, true); @endphp
+                                <button type="button"
+                                        wire:click="toggleStatus('{{ $statusOption->value }}')"
+                                        aria-pressed="{{ $isHidden ? 'false' : 'true' }}"
+                                        title="{{ $isHidden ? 'Show' : 'Hide' }} {{ $statusOption->label() }}"
+                                        class="flex items-center gap-1.5 px-3 py-1 text-xs border rounded-full transition {{ $isHidden ? 'opacity-40 bg-gray-50 text-gray-500' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
+                                    <x-student-status-dot :status="$statusOption" :size="8" />
+                                    {{ $statusOption->label() }}
+                                    <span class="text-gray-400">{{ $this->statusCounts[$statusOption->value] ?? 0 }}</span>
+                                </button>
                             @endforeach
-                        </select>
+                        </div>
                         <span wire:loading class="text-sm text-gray-500 self-center">Loading...</span>
                     </div>
 
                     <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
-                        <div class="xl:col-span-4 overflow-x-auto border rounded">
+                        <div class="xl:col-span-4 overflow-auto max-h-[70vh] border rounded">
                             <table class="w-full text-sm cal-table"
                                    x-data="{ hoverCol: -1 }"
                                    @mouseleave="hoverCol = -1">
@@ -257,8 +309,15 @@ new class extends Component
                                                 $isPrevMonth = $date->month !== $this->currentMonth->month;
                                                 $isWeekend = $date->isWeekend();
                                                 $isToday = $date->isToday();
+                                                $isPeriodStart = $date->day === (int) config('billing.period_start_day');
+                                                $headBg = match (true) {
+                                                    $isPrevMonth => 'bg-gray-200 text-gray-400',
+                                                    $isToday => 'bg-blue-50',
+                                                    $isWeekend => 'bg-gray-100',
+                                                    default => 'bg-gray-50',
+                                                };
                                             @endphp
-                                            <th class="cal-cell cal-day border-l {{ $isPrevMonth ? 'bg-gray-200 text-gray-400' : '' }} {{ $isWeekend && !$isPrevMonth ? 'bg-gray-100' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}"
+                                            <th class="cal-cell cal-day border-l {{ $isPeriodStart ? 'cal-period-start' : '' }} {{ $headBg }}"
                                                 @mouseenter="hoverCol = {{ $loop->index }}"
                                                 :class="hoverCol === {{ $loop->index }} && 'cal-col-hover'">
                                                 <div class="cal-daynum">{{ $date->day }}</div>
@@ -268,13 +327,8 @@ new class extends Component
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($this->students as $student)
-                                        @php
-                                            $matchesTeacher = $teacherFilter === '' || in_array((int) $teacherFilter, $student->teacher_ids);
-                                            $matchesStatus = $statusFilter === '' || $statusFilter === $student->status->value;
-                                        @endphp
-                                        @if($matchesTeacher && $matchesStatus)
-                                            <tr class="border-t hover:bg-gray-50" wire:key="student-{{ $student->id }}">
+                                    @forelse($this->visibleStudents as $student)
+                                            <tr class="border-t" wire:key="student-{{ $student->id }}">
                                                 <td class="cal-cell cal-sticky border-r bg-white align-middle">
                                                     <div class="flex items-center gap-1 min-w-0">
                                                         <x-student-status-dot :status="$student->status" />
@@ -294,8 +348,9 @@ new class extends Component
                                                         $dayLessons = $this->lessonsThisMonth->get($dateKey, collect());
                                                         $isWeekend = $date->isWeekend();
                                                         $isToday = $date->isToday();
+                                                        $isPeriodStart = $date->day === (int) config('billing.period_start_day');
                                                     @endphp
-                                                    <td class="cal-cell cal-day cal-daycell border-l {{ $isPrevMonth ? 'bg-gray-100' : '' }} {{ $isWeekend && !$isPrevMonth ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}"
+                                                    <td class="cal-cell cal-day cal-daycell border-l {{ $isPeriodStart ? 'cal-period-start' : '' }} {{ $isPrevMonth ? 'bg-gray-100' : '' }} {{ $isWeekend && !$isPrevMonth ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}"
                                                         @mouseenter="hoverCol = {{ $loop->index }}"
                                                         :class="hoverCol === {{ $loop->index }} && 'cal-col-hover'">
                                                         <div class="flex flex-wrap justify-center gap-0.5">
@@ -310,8 +365,13 @@ new class extends Component
                                                     </td>
                                                 @endforeach
                                             </tr>
-                                        @endif
-                                    @endforeach
+                                    @empty
+                                        <tr>
+                                            <td colspan="{{ count($this->calendarDays) + 1 }}" class="px-4 py-6 text-center text-sm text-gray-500">
+                                                No students match the current filters.
+                                            </td>
+                                        </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>

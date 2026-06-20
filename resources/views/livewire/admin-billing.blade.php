@@ -235,7 +235,7 @@ new class extends Component
                     </button>
                     <button wire:click="$set('billing', true)"
                             class="px-3 py-1 text-xs rounded {{ $billing ? 'bg-blue-100 text-blue-700' : 'text-gray-600 bg-gray-100' }}">
-                        26-25
+                        {{ config('billing.period_start_day') }}-{{ config('billing.period_end_day') }}
                     </button>
                 </div>
                 <span wire:loading class="text-sm text-gray-500">Loading...</span>
