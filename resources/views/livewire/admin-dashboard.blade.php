@@ -354,6 +354,11 @@ new class extends Component
                                                     @if($student->teachers->count() > 0)
                                                         <div class="text-xs text-gray-500 ml-3.5">{{ $student->teachers->pluck('name')->join(', ') }}</div>
                                                     @endif
+                                                    @if($student->hasPendingVacation())
+                                                        <div class="ml-3.5 mt-0.5 flex items-center gap-1 text-[11px] font-medium text-blue-600" title="On vacation">
+                                                            🏖 {{ $student->vacationLabel() }}
+                                                        </div>
+                                                    @endif
                                                 </td>
                                                 @foreach($this->calendarDays as $date)
                                                     @php
@@ -369,9 +374,9 @@ new class extends Component
                                                         :class="hoverCol === {{ $loop->index }} && 'cal-col-hover'">
                                                         <div class="flex flex-wrap justify-center gap-0.5">
                                                             @foreach($dayLessons as $lesson)
-                                                                <span class="cal-lesson-chip"
+                                                                <span class="cal-lesson-chip {{ $lesson->refund_requested ? 'ring-1 ring-amber-500' : '' }}"
                                                                      style="background: var(--color-status-{{ $lesson->status->cssClass() }}-bg); color: var(--color-status-{{ $lesson->status->cssClass() }});"
-                                                                     title="{{ $lesson->teacher->name }} - {{ $lesson->status->label() }}">
+                                                                     title="{{ $lesson->teacher->name }} - {{ $lesson->status->label() }}{{ $lesson->refund_requested ? ' · refund requested' : '' }}">
                                                                     {{ substr($lesson->teacher->name, 0, 1) }}
                                                                 </span>
                                                             @endforeach

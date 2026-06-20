@@ -34,6 +34,11 @@ class Teacher extends Model
         return $this->hasMany(Lesson::class);
     }
 
+    public function feedbackThreads(): HasMany
+    {
+        return $this->hasMany(FeedbackThread::class);
+    }
+
     // Many-to-many via student_teacher pivot
     public function students(): BelongsToMany
     {

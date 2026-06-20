@@ -42,13 +42,13 @@
     {{-- Right: Details --}}
     <div class="min-w-0 text-xs sm:text-sm leading-snug text-gray-700 sm:text-right">
         @if($lesson->status->value === 'completed')
-            <div><span class="text-gray-500">Topic:</span> {{ $lesson->topic }}</div>
-            @if($lesson->homework)<div class="mt-1"><span class="text-gray-500">HW:</span> {{ $lesson->homework }}</div>@endif
+            <div class="[&_a]:break-words"><span class="text-gray-500">Topic:</span> {!! Str::linkify($lesson->topic) !!}</div>
+            @if($lesson->homework)<div class="mt-1 [&_a]:break-words"><span class="text-gray-500">HW:</span> {!! Str::linkify($lesson->homework) !!}</div>@endif
         @else
             @if($neutralNonCompleted)
                 <div class="flex items-start {{ $lesson->comments ? 'justify-between' : 'justify-end' }} gap-3 sm:justify-end">
                     @if($lesson->comments)
-                        <div class="min-w-0 text-left sm:text-right text-gray-500 text-xs leading-snug">{{ $lesson->comments }}</div>
+                        <div class="min-w-0 text-left sm:text-right text-gray-500 text-xs leading-snug [&_a]:break-words">{!! Str::linkify($lesson->comments) !!}</div>
                     @endif
                     <span class="{{ $badgeClass }} shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-medium leading-5">
                         {{ $statusLabel }}
@@ -65,7 +65,12 @@
                     @endif
                 </div>
                 @if($lesson->comments)
-                    <div class="text-gray-500 text-xs leading-snug mt-1">{{ $lesson->comments }}</div>
+                    <div class="text-gray-500 text-xs leading-snug mt-1 [&_a]:break-words">{!! Str::linkify($lesson->comments) !!}</div>
+                @endif
+                @if($lesson->refund_requested)
+                    <div class="mt-1">
+                        <span class="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">↩ Refund requested</span>
+                    </div>
                 @endif
             @endif
         @endif

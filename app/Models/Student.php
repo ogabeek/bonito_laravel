@@ -37,6 +37,8 @@ class Student extends Model
         'status',       // active, inactive, holiday
         'teacher_notes',
         'materials_url',
+        'vacation_starts_on',
+        'vacation_ends_on',
     ];
 
     protected $attributes = [
@@ -47,7 +49,31 @@ class Student extends Model
     {
         return [
             'status' => StudentStatus::class,
+            'vacation_starts_on' => 'date',
+            'vacation_ends_on' => 'date',
         ];
+    }
+
+    /**
+     * Whether the recorded vacation is still relevant (active or upcoming),
+     * i.e. it ends today or later. Past vacations are ignored.
+     */
+    public function hasPendingVacation(): bool
+    {
+        return $this->vacation_ends_on !== null
+            && $this->vacation_ends_on->gte(now()->startOfDay());
+    }
+
+    /**
+     * Short "M j – M j" label for the vacation period, or null when unset.
+     */
+    public function vacationLabel(): ?string
+    {
+        if ($this->vacation_starts_on === null || $this->vacation_ends_on === null) {
+            return null;
+        }
+
+        return $this->vacation_starts_on->format('M j').' – '.$this->vacation_ends_on->format('M j');
     }
 
     // Auto-generate UUID on creation

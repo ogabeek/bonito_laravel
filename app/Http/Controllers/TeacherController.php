@@ -120,6 +120,7 @@ class TeacherController extends Controller
             'comments' => $request->comments,
             'absence_reminder_sent' => $request->boolean('absence_reminder_sent'),
             'absence_chat_notified' => $request->boolean('absence_chat_notified'),
+            'refund_requested' => $request->boolean('refund_requested'),
         ]);
 
         // Load student for activity log

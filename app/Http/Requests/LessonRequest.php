@@ -19,8 +19,9 @@ abstract class LessonRequest extends FormRequest
             // * Topic required only for completed lessons
             'topic' => 'required_if:status,'.LessonStatus::COMPLETED->value.'|nullable|string',
             'homework' => 'nullable|string',
-            // * Comments required only when teacher cancels
-            'comments' => 'required_if:status,'.LessonStatus::TEACHER_CANCELLED->value.'|nullable|string',
+            // * Comments required when teacher cancels OR student is absent
+            'comments' => 'required_if:status,'.LessonStatus::TEACHER_CANCELLED->value.','.LessonStatus::STUDENT_ABSENT->value.'|nullable|string',
+            'refund_requested' => 'boolean',
         ];
     }
 
@@ -28,7 +29,7 @@ abstract class LessonRequest extends FormRequest
     {
         return [
             'topic.required_if' => 'Topic is required for completed lessons.',
-            'comments.required_if' => 'Reason is required when cancelling a lesson.',
+            'comments.required_if' => 'A note is required when cancelling a lesson or marking a student absent.',
         ];
     }
 }

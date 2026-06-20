@@ -9,6 +9,8 @@
         <a href="{{ route('admin.dashboard') }}" class="text-gray-600 hover:text-gray-900">← Back</a>
     </div>
 
+    <livewire:admin-feedback />
+
     <x-card>
         <table class="w-full text-sm">
             <thead class="bg-gray-50">

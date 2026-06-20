@@ -31,6 +31,7 @@ new class extends Component
     public string $comments = '';
     public bool $absence_reminder_sent = false;
     public bool $absence_chat_notified = false;
+    public bool $refund_requested = false;
 
     // UI state
     public bool $showSuccess = false;
@@ -105,7 +106,9 @@ new class extends Component
             'status' => 'required|in:completed,student_cancelled,teacher_cancelled,student_absent',
             'topic' => 'required_if:status,completed|nullable|string|max:500',
             'homework' => 'nullable|string|max:1000',
-            'comments' => 'required_if:status,teacher_cancelled|nullable|string|max:1000',
+            'comments' => 'required_if:status,teacher_cancelled,student_absent|nullable|string|max:1000',
+        ], [
+            'comments.required_if' => 'A note is required when cancelling a lesson or marking a student absent.',
         ]);
 
         // Verify student belongs to this teacher
@@ -125,6 +128,7 @@ new class extends Component
             'comments' => $this->comments ?: null,
             'absence_reminder_sent' => $this->absence_reminder_sent,
             'absence_chat_notified' => $this->absence_chat_notified,
+            'refund_requested' => $this->status === 'student_absent' ? $this->refund_requested : false,
         ]);
 
         $lesson->load('student');
@@ -146,7 +150,7 @@ new class extends Component
         // Reset form but keep student and date for convenience
         $keepStudent = $this->student_id;
         $keepDate = $this->class_date;
-        $this->reset(['topic', 'homework', 'comments', 'absence_reminder_sent', 'absence_chat_notified']);
+        $this->reset(['topic', 'homework', 'comments', 'absence_reminder_sent', 'absence_chat_notified', 'refund_requested']);
         $this->status = 'completed';
         $this->student_id = $keepStudent;
         $this->class_date = $keepDate;
@@ -198,7 +202,9 @@ new class extends Component
         <x-page-header
             :title="$this->teacher->name . \"'s Dashboard\""
             :logoutRoute="route('teacher.logout')"
-        />
+        >
+            <livewire:teacher-feedback :teacher="$this->teacher" />
+        </x-page-header>
 
         {{-- Validation Errors --}}
         @if($errors->any())
@@ -365,6 +371,10 @@ new class extends Component
                                     <span>Texted to chat about waiting, no response</span>
                                 </label>
                                 <p class="text-xs text-gray-500 italic">If both steps were completed, the school recovers 50% of the lesson payment.</p>
+                                <label class="flex items-center gap-2 text-sm cursor-pointer mt-1 pt-2 border-t border-gray-100">
+                                    <input type="checkbox" wire:model="refund_requested" class="form-checkbox">
+                                    <span>Request refund for this class</span>
+                                </label>
                             </div>
                         @endif
 
@@ -374,7 +384,12 @@ new class extends Component
                                 <label class="form-label">Reason *</label>
                                 <textarea wire:model="comments" rows="2" placeholder="Why was it cancelled?" class="form-input w-full" required></textarea>
                             </div>
-                        @elseif($status === 'student_cancelled' || $status === 'student_absent')
+                        @elseif($status === 'student_absent')
+                            <div>
+                                <label class="form-label">Notes *</label>
+                                <textarea wire:model="comments" rows="2" placeholder="What happened?" class="form-input w-full" required></textarea>
+                            </div>
+                        @elseif($status === 'student_cancelled')
                             <div>
                                 <label class="form-label">Notes (optional)</label>
                                 <textarea wire:model="comments" rows="2" placeholder="Add notes" class="form-input w-full"></textarea>

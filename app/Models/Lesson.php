@@ -27,6 +27,7 @@ class Lesson extends Model
         'comments',
         'absence_reminder_sent',
         'absence_chat_notified',
+        'refund_requested',
     ];
 
     protected function casts(): array
@@ -36,6 +37,7 @@ class Lesson extends Model
             'status' => LessonStatus::class,
             'absence_reminder_sent' => 'boolean',
             'absence_chat_notified' => 'boolean',
+            'refund_requested' => 'boolean',
         ];
     }
 
