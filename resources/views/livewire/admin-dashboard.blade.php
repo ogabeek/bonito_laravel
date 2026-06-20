@@ -359,6 +359,11 @@ new class extends Component
                                                             🏖 {{ $student->vacationLabel() }}
                                                         </div>
                                                     @endif
+                                                    @if($student->status_note)
+                                                        <div class="ml-3.5 mt-0.5 text-[11px] italic text-gray-500 truncate" title="{{ $student->status_note }}">
+                                                            {{ $student->status_note }}
+                                                        </div>
+                                                    @endif
                                                 </td>
                                                 @foreach($this->calendarDays as $date)
                                                     @php

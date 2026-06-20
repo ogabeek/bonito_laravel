@@ -7,6 +7,7 @@
 
 use App\Models\Teacher;
 use App\Models\Lesson;
+use App\Enums\StudentStatus;
 use App\Concerns\LogsActivityActions;
 use App\Repositories\LessonRepository;
 use App\Services\LessonStatisticsService;
@@ -196,6 +197,51 @@ new class extends Component
     {
         $this->showSuccess = false;
     }
+
+    /**
+     * Change an assigned student's status from the list (via the status dot).
+     * Holiday carries a vacation date range; any non-active status carries a note.
+     */
+    public function saveStudentStatus(int $studentId, string $status, ?string $start = null, ?string $end = null, ?string $note = null): void
+    {
+        $student = $this->teacher->students()->find($studentId);
+        if (! $student || ! in_array($status, StudentStatus::values(), true)) {
+            return;
+        }
+
+        $status = StudentStatus::from($status);
+
+        // Vacation dates only apply to the holiday status.
+        $startDate = $endDate = null;
+        if ($status === StudentStatus::HOLIDAY) {
+            $startDate = $start ?: null;
+            $endDate = $end ?: $startDate;          // a single day is a one-day holiday
+            if ($startDate && $endDate && $endDate < $startDate) {
+                [$startDate, $endDate] = [$endDate, $startDate];
+            }
+        }
+
+        // A note is kept for any non-active status; switching to active clears it.
+        $statusNote = ($status === StudentStatus::ACTIVE || blank($note)) ? null : trim($note);
+
+        $from = $student->status->value;
+
+        $student->update([
+            'status' => $status,
+            'vacation_starts_on' => $startDate,
+            'vacation_ends_on' => $endDate,
+            'status_note' => $statusNote,
+        ]);
+
+        $this->logActivity(
+            $student,
+            'student_status_updated',
+            ['from' => $from, 'to' => $status->value, 'note' => $statusNote],
+            $this->teacher
+        );
+
+        unset($this->students);
+    }
 };
 ?>
 
@@ -234,7 +280,7 @@ new class extends Component
                 </div>
             </div>
             @if($this->students->count() > 0)
-                <x-student-stats-list :students="$this->students" :stats="$this->studentStats" :totalStats="$this->stats" :showBalance="false" />
+                <x-student-stats-list :students="$this->students" :stats="$this->studentStats" :totalStats="$this->stats" :showBalance="false" :editable="true" />
             @else
                 <x-empty-state message="No students assigned" />
             @endif

@@ -41,6 +41,7 @@ class Student extends Model
         'materials_url',
         'vacation_starts_on',
         'vacation_ends_on',
+        'status_note',
     ];
 
     protected $attributes = [

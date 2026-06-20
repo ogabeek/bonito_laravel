@@ -16,10 +16,6 @@ new class extends Component
 
     public string $materialsUrl = '';
 
-    public string $vacationStart = '';
-
-    public string $vacationEnd = '';
-
     public bool $saved = false;
 
     public function mount(): void
@@ -28,8 +24,6 @@ new class extends Component
         $this->description = $this->student->description ?? '';
         $this->notes = $this->student->teacher_notes ?? '';
         $this->materialsUrl = $this->student->materials_url ?? '';
-        $this->vacationStart = $this->student->vacation_starts_on?->format('Y-m-d') ?? '';
-        $this->vacationEnd = $this->student->vacation_ends_on?->format('Y-m-d') ?? '';
     }
 
     protected function rules(): array
@@ -39,8 +33,6 @@ new class extends Component
             'description' => 'nullable|string|max:2000',
             'notes' => 'nullable|string|max:1000',
             'materialsUrl' => 'nullable|url|max:2048',
-            'vacationStart' => 'nullable|date',
-            'vacationEnd' => 'nullable|date',
         ];
     }
 
@@ -60,19 +52,11 @@ new class extends Component
 
         $this->validate();
 
-        if ($this->vacationStart && $this->vacationEnd && $this->vacationEnd < $this->vacationStart) {
-            $this->addError('vacationEnd', 'Vacation end must be on or after the start date.');
-
-            return;
-        }
-
         $this->student->update([
             'goal' => blank($this->goal) ? null : trim($this->goal),
             'description' => blank($this->description) ? null : trim($this->description),
             'teacher_notes' => $this->notes,
             'materials_url' => blank($this->materialsUrl) ? null : trim($this->materialsUrl),
-            'vacation_starts_on' => $this->vacationStart ?: null,
-            'vacation_ends_on' => $this->vacationEnd ?: null,
         ]);
 
         $causer = null;
@@ -103,36 +87,16 @@ new class extends Component
         <div class="mb-6 space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-3 sm:p-4">
             <div class="text-xs font-medium text-gray-500">From teacher</div>
 
-            <div class="grid gap-3 sm:grid-cols-2">
-                <div>
-                    <label for="student-{{ $student->id }}-goal" class="mb-1 block text-xs font-medium text-gray-500">Goal</label>
-                    <input
-                        id="student-{{ $student->id }}-goal"
-                        type="text"
-                        wire:model.blur="goal"
-                        maxlength="500"
-                        placeholder="e.g. Reach B2 by summer"
-                        class="w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 focus:border-gray-400 focus:ring-gray-300"
-                    >
-                </div>
-                <div>
-                    <label for="student-{{ $student->id }}-vacation-start" class="mb-1 block text-xs font-medium text-gray-500">Vacation period</label>
-                    <div class="flex items-center gap-2">
-                        <input
-                            id="student-{{ $student->id }}-vacation-start"
-                            type="date"
-                            wire:model.blur="vacationStart"
-                            class="w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 focus:border-gray-400 focus:ring-gray-300"
-                        >
-                        <span class="text-gray-400">–</span>
-                        <input
-                            id="student-{{ $student->id }}-vacation-end"
-                            type="date"
-                            wire:model.blur="vacationEnd"
-                            class="w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 focus:border-gray-400 focus:ring-gray-300"
-                        >
-                    </div>
-                </div>
+            <div>
+                <label for="student-{{ $student->id }}-goal" class="mb-1 block text-xs font-medium text-gray-500">Goal</label>
+                <input
+                    id="student-{{ $student->id }}-goal"
+                    type="text"
+                    wire:model.blur="goal"
+                    maxlength="500"
+                    placeholder="e.g. Reach B2 by summer"
+                    class="w-full rounded-md border-gray-200 bg-white text-sm text-gray-700 focus:border-gray-400 focus:ring-gray-300"
+                >
             </div>
 
             <div>
@@ -188,8 +152,6 @@ new class extends Component
                 @error('description') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                 @error('notes') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
                 @error('materialsUrl') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
-                @error('vacationStart') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
-                @error('vacationEnd') <span class="text-red-600 text-xs">{{ $message }}</span> @enderror
             </div>
         </div>
     @endif
