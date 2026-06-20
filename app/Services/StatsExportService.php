@@ -78,7 +78,7 @@ class StatsExportService
         $rows[] = ['Year to Date', 'Done', 'C', 'CT', 'A', 'Total'];
         foreach ($yearStatsByMonth as $ym => $stats) {
             [$year, $month] = explode('-', $ym);
-            $label = Carbon::createFromDate($year, $month, 1)->format('M');
+            $label = Carbon::createFromDate((int) $year, (int) $month, 1)->format('M');
             $rows[] = $this->buildStatsRow($label, $stats);
         }
 

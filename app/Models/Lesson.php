@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\LessonStatus;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -48,21 +50,36 @@ class Lesson extends Model
         return $this->belongsTo(Student::class);
     }
 
-    // Scope: ->forMonth($carbonDate)
-    public function scopeForMonth($query, $date)
+    /**
+     * Scope: ->forMonth($carbonDate)
+     *
+     * @param  Builder<Lesson>  $query
+     * @return Builder<Lesson>
+     */
+    public function scopeForMonth(Builder $query, Carbon $date): Builder
     {
         return $query->whereYear('class_date', $date->year)
             ->whereMonth('class_date', $date->month);
     }
 
-    // Scope: ->past() - lessons before today
-    public function scopePast($query)
+    /**
+     * Scope: ->past() - lessons before today
+     *
+     * @param  Builder<Lesson>  $query
+     * @return Builder<Lesson>
+     */
+    public function scopePast(Builder $query): Builder
     {
         return $query->where('class_date', '<', now()->startOfDay());
     }
 
-    // Scope: ->withStatus(LessonStatus::COMPLETED)
-    public function scopeWithStatus($query, LessonStatus $status)
+    /**
+     * Scope: ->withStatus(LessonStatus::COMPLETED)
+     *
+     * @param  Builder<Lesson>  $query
+     * @return Builder<Lesson>
+     */
+    public function scopeWithStatus(Builder $query, LessonStatus $status): Builder
     {
         return $query->where('status', $status);
     }

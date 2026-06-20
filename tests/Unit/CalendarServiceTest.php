@@ -5,7 +5,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 beforeEach(function () {
-    $this->service = new CalendarService();
+    $this->service = new CalendarService;
     Carbon::setTestNow(Carbon::create(2025, 6, 15));
 });
 

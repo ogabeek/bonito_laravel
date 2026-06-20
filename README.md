@@ -103,5 +103,5 @@ Simplified management system for online school with ~10 teachers, ~100 students,
 **Current pain points:**
 Make a platform for Teachers to mark attendance, topic, HW  -> student see it -> admin have calculation of all classes
 
-<img src="image-1.png" alt="Alt Text" width="200" >
+<img src="docs/image-1.png" alt="Alt Text" width="200" >
 

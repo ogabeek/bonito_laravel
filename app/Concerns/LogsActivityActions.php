@@ -2,6 +2,9 @@
 
 namespace App\Concerns;
 
+use App\Models\Lesson;
+use Illuminate\Database\Eloquent\Model;
+
 /**
  * * TRAIT: Activity logging helper for controllers
  * * Uses spatie/laravel-activitylog package
@@ -13,20 +16,21 @@ trait LogsActivityActions
      * ? Adds name/student_name automatically if available
      */
     protected function logActivity(
-        mixed $subject,
+        Model $subject,
         string $action,
         array $properties = [],
-        mixed $causer = null,
+        ?Model $causer = null,
         ?string $logName = null,
     ): void {
         // Auto-add name for quick log identification
-        if (isset($subject->name)) {
-            $properties['name'] = $subject->name;
+        $name = $subject->getAttribute('name');
+        if ($name !== null) {
+            $properties['name'] = $name;
         }
 
-        // * Uses already-loaded relationship to avoid N+1
-        if (method_exists($subject, 'student') && $subject->relationLoaded('student') && $subject->student) {
-            $properties['student_name'] = $subject->student->name;
+        // * Lessons carry a student; include its name (already-loaded) for log matching
+        if ($subject instanceof Lesson && $subject->relationLoaded('student') && $subject->student) {
+            $properties['student_name'] = $subject->student->getAttribute('name');
         }
 
         $logger = activity($logName);

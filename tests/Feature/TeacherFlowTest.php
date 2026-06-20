@@ -53,11 +53,11 @@ it('shows teacher dashboard with their students', function () {
         ->assertSee($student->name);
 });
 
-it('redirects unauthenticated teacher to home', function () {
+it('redirects unauthenticated teacher to their login page', function () {
     $teacher = Teacher::factory()->create();
 
     $this->get(route('teacher.dashboard', $teacher))
-        ->assertRedirect('/');
+        ->assertRedirect(route('teacher.login', $teacher));
 });
 
 it('prevents teacher from accessing another teacher dashboard', function () {

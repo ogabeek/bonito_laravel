@@ -16,6 +16,9 @@ class LessonRepository
 {
     /**
      * * Base query builder with optional eager loading
+     *
+     * @param  array<int, string>  $with
+     * @return Builder<Lesson>
      */
     protected function baseQuery(array $with = []): Builder
     {

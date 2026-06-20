@@ -14,6 +14,14 @@ use Illuminate\Support\Str;
  *
  * Uses UUID for public-facing URLs instead of sequential IDs.
  * Many-to-many with Teachers via student_teacher pivot table.
+ *
+ * Runtime-computed balance attributes (set by StudentBalanceService::mapBalances,
+ * not persisted) — declared so static analysis recognizes them:
+ *
+ * @property array<int, int> $teacher_ids
+ * @property int|null $paid_classes
+ * @property int $used_classes
+ * @property int|null $class_balance
  */
 class Student extends Model
 {

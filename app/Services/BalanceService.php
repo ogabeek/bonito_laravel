@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
  * * SERVICE: Fetches "Paid Classes" from Google Sheets
  * ! Payment data lives in Google Sheets (manual admin entry), not in database
  * ? Why Google Sheets? Admin prefers spreadsheet for payment tracking
- * 
+ *
  * CACHING STRATEGY:
  * - Automatic: Data cached for 5 minutes (300 seconds) to reduce API calls
  * - Manual: Use refreshCache() to force immediate refresh without waiting

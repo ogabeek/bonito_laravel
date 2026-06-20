@@ -11,6 +11,7 @@
  * - /admin/*    → Admin dashboard & management
  */
 
+use App\Http\Controllers\Admin;
 use App\Http\Controllers\TeacherController;
 
 Route::get('/', function () {
@@ -51,37 +52,35 @@ Route::prefix('student')->name('student.')->group(function () {
 // * ADMIN ROUTES: /admin/...
 Route::prefix('admin')->name('admin.')->group(function () {
     // Public: login
-    Route::get('/login', [\App\Http\Controllers\AdminController::class, 'showLogin'])->name('login');
-    Route::post('/login', [\App\Http\Controllers\AdminController::class, 'login'])
+    Route::get('/login', [Admin\AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [Admin\AuthController::class, 'login'])
         ->middleware('throttle:5,1')
         ->name('login.submit');
-    Route::post('/logout', [\App\Http\Controllers\AdminController::class, 'logout'])->name('logout');
+    Route::post('/logout', [Admin\AuthController::class, 'logout'])->name('logout');
 
     // Protected: requires admin.auth middleware
     Route::middleware('admin.auth')->group(function () {
-        Route::get('/', [\App\Http\Controllers\AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/logs', [Admin\DashboardController::class, 'logs'])->name('logs');
 
         // Teachers CRUD
-        Route::post('/teachers', [\App\Http\Controllers\AdminController::class, 'createTeacher'])->name('teachers.create');
-        Route::get('/teachers/{teacher}/edit', [\App\Http\Controllers\AdminController::class, 'editTeacherForm'])->name('teachers.edit');
-        Route::put('/teachers/{teacher}', [\App\Http\Controllers\AdminController::class, 'updateTeacher'])->name('teachers.update');
-        Route::delete('/teachers/{teacher}', [\App\Http\Controllers\AdminController::class, 'deleteTeacher'])->name('teachers.delete');
-        Route::post('/teachers/{teacher}/restore', [\App\Http\Controllers\AdminController::class, 'restoreTeacher'])->name('teachers.restore');
+        Route::post('/teachers', [Admin\TeacherController::class, 'store'])->name('teachers.create');
+        Route::get('/teachers/{teacher}/edit', [Admin\TeacherController::class, 'edit'])->name('teachers.edit');
+        Route::put('/teachers/{teacher}', [Admin\TeacherController::class, 'update'])->name('teachers.update');
+        Route::delete('/teachers/{teacher}', [Admin\TeacherController::class, 'destroy'])->name('teachers.delete');
+        Route::post('/teachers/{teacher}/restore', [Admin\TeacherController::class, 'restore'])->name('teachers.restore');
 
         // Students CRUD
-        Route::post('/students', [\App\Http\Controllers\AdminController::class, 'createStudent'])->name('students.store');
-        Route::get('/students/{student}/edit', [\App\Http\Controllers\AdminController::class, 'editStudentForm'])->name('students.edit');
-        Route::put('/students/{student}', [\App\Http\Controllers\AdminController::class, 'updateStudent'])->name('students.update');
-        Route::post('/students/{student}/status', [\App\Http\Controllers\AdminController::class, 'updateStudentStatus'])->name('students.status.update');
-        Route::post('/students/{student}/assign-teacher', [\App\Http\Controllers\AdminController::class, 'assignTeacherToStudent'])->name('student.assign.teacher');
-        Route::delete('/students/{student}/teachers/{teacher}', [\App\Http\Controllers\AdminController::class, 'unassignStudent'])->name('teachers.students.unassign');
-
-        // Activity log
-        Route::get('/logs', [\App\Http\Controllers\AdminController::class, 'logs'])->name('logs');
+        Route::post('/students', [Admin\StudentController::class, 'store'])->name('students.store');
+        Route::get('/students/{student}/edit', [Admin\StudentController::class, 'edit'])->name('students.edit');
+        Route::put('/students/{student}', [Admin\StudentController::class, 'update'])->name('students.update');
+        Route::post('/students/{student}/status', [Admin\StudentController::class, 'updateStatus'])->name('students.status.update');
+        Route::post('/students/{student}/assign-teacher', [Admin\StudentController::class, 'assignTeacher'])->name('student.assign.teacher');
+        Route::delete('/students/{student}/teachers/{teacher}', [Admin\StudentController::class, 'unassign'])->name('teachers.students.unassign');
 
         // Billing & stats
-        Route::get('/billing', [\App\Http\Controllers\AdminController::class, 'billing'])->name('billing');
-        Route::post('/billing/export', [\App\Http\Controllers\AdminController::class, 'exportBilling'])->name('billing.export');
-        Route::post('/billing/refresh', [\App\Http\Controllers\AdminController::class, 'refreshBalance'])->name('billing.refresh');
+        Route::get('/billing', [Admin\BillingController::class, 'index'])->name('billing');
+        Route::post('/billing/export', [Admin\BillingController::class, 'export'])->name('billing.export');
+        Route::post('/billing/refresh', [Admin\BillingController::class, 'refresh'])->name('billing.refresh');
     });
 });

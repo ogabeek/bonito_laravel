@@ -5,6 +5,7 @@ use App\Models\Teacher;
 use App\Repositories\LessonRepository;
 use App\Services\BalanceService;
 use App\Services\LessonStatisticsService;
+use App\Services\StudentBalanceService;
 use App\Services\TeacherStatsService;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Lazy;
@@ -70,16 +71,7 @@ new class extends Component
         $students = Student::withFullDetails()->orderBy('name')->get();
         $usedCounts = app(LessonRepository::class)->getUsedCountsByStudent();
 
-        return $students->map(function ($student) use ($usedCounts) {
-            $paid = $this->balances[$student->uuid] ?? null;
-            $used = $usedCounts[$student->id] ?? 0;
-
-            $student->paid_classes = $paid !== null ? (int) $paid : null;
-            $student->used_classes = (int) $used;
-            $student->class_balance = $paid !== null ? ((int) $paid - (int) $used) : null;
-
-            return $student;
-        });
+        return app(StudentBalanceService::class)->mapBalances($students, $this->balances, $usedCounts);
     }
 
     #[Computed]

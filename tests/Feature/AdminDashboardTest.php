@@ -87,6 +87,47 @@ it('creates a new teacher', function () {
     $this->assertDatabaseHas('teachers', ['name' => 'New Teacher']);
 });
 
+it('updates a teacher and keeps the password when left blank', function () {
+    $teacher = Teacher::factory()->create(['password' => 'original-pin']);
+
+    $this->withSession(['admin_authenticated' => true])
+        ->put(route('admin.teachers.update', $teacher), [
+            'name' => 'Renamed Teacher',
+            'password' => '',
+            'zoom_link' => 'https://zoom.us/j/123',
+        ])
+        ->assertRedirect(route('admin.teachers.edit', $teacher))
+        ->assertSessionHas('success');
+
+    $this->assertDatabaseHas('teachers', [
+        'id' => $teacher->id,
+        'name' => 'Renamed Teacher',
+        'password' => 'original-pin', // unchanged
+        'zoom_link' => 'https://zoom.us/j/123',
+    ]);
+});
+
+it('updates a teacher password when provided', function () {
+    $teacher = Teacher::factory()->create(['password' => 'original-pin']);
+
+    $this->withSession(['admin_authenticated' => true])
+        ->put(route('admin.teachers.update', $teacher), [
+            'name' => $teacher->name,
+            'password' => 'new-pin',
+        ])
+        ->assertRedirect(route('admin.teachers.edit', $teacher));
+
+    $this->assertDatabaseHas('teachers', ['id' => $teacher->id, 'password' => 'new-pin']);
+});
+
+it('rejects a teacher update with a missing name', function () {
+    $teacher = Teacher::factory()->create();
+
+    $this->withSession(['admin_authenticated' => true])
+        ->put(route('admin.teachers.update', $teacher), ['name' => ''])
+        ->assertSessionHasErrors('name');
+});
+
 it('creates a new student', function () {
     $this->withSession(['admin_authenticated' => true])
         ->post(route('admin.students.store'), [

@@ -28,7 +28,7 @@ class TeacherStatsService
                     $student = $studentLessons->first()->student;
 
                     return [
-                        'name' => $student?->name ?? 'Unknown',
+                        'name' => $student->name ?? 'Unknown',
                         'stats' => $this->statsService->calculateStats($studentLessons),
                     ];
                 })
