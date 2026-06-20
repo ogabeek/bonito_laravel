@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\FeedbackSender;
+use App\Enums\FeedbackStatus;
 use App\Models\FeedbackMessage;
 use App\Models\FeedbackThread;
 use Livewire\Attributes\Computed;
@@ -20,6 +21,7 @@ new class extends Component
     public function threads()
     {
         return FeedbackThread::with(['messages', 'teacher'])
+            ->orderByRaw("CASE WHEN status = '".FeedbackStatus::OPEN->value."' THEN 0 ELSE 1 END")
             ->latest('updated_at')
             ->get();
     }
@@ -41,12 +43,35 @@ new class extends Component
             'body' => trim($this->reply[$threadId]),
         ]);
 
-        // Replying acknowledges the teacher's messages in this thread.
-        $thread->messages()->unreadFrom(FeedbackSender::TEACHER)->update(['read_at' => now()]);
-        $thread->touch();
+        $this->acknowledge($thread);
 
         $this->reply[$threadId] = '';
         unset($this->threads, $this->unreadCount);
+    }
+
+    public function resolve(int $threadId): void
+    {
+        $this->guard();
+        $thread = FeedbackThread::findOrFail($threadId);
+        $this->acknowledge($thread);
+        $thread->update(['status' => FeedbackStatus::RESOLVED]);
+
+        unset($this->threads, $this->unreadCount);
+    }
+
+    public function reopen(int $threadId): void
+    {
+        $this->guard();
+        FeedbackThread::findOrFail($threadId)->update(['status' => FeedbackStatus::OPEN]);
+
+        unset($this->threads);
+    }
+
+    /** Mark the teacher's messages in a thread as read (admin has seen them). */
+    private function acknowledge(FeedbackThread $thread): void
+    {
+        $thread->messages()->unreadFrom(FeedbackSender::TEACHER)->update(['read_at' => now()]);
+        $thread->touch();
     }
 }; ?>
 
@@ -61,16 +86,27 @@ new class extends Component
     <x-card>
         @forelse($this->threads as $thread)
             @php
+                $isResolved = $thread->status === \App\Enums\FeedbackStatus::RESOLVED;
                 $hasUnread = $thread->messages
                     ->where('sender', \App\Enums\FeedbackSender::TEACHER)
                     ->whereNull('read_at')
                     ->isNotEmpty();
             @endphp
-            <div class="border-b border-gray-100 py-3 last:border-b-0" wire:key="feedback-thread-{{ $thread->id }}">
-                <div class="mb-2 flex items-center gap-2 text-sm">
-                    <span class="font-semibold text-gray-800">{{ $thread->teacher?->name ?? 'Unknown teacher' }}</span>
-                    @if($hasUnread)
-                        <span class="h-2 w-2 rounded-full bg-red-500" title="New message"></span>
+            <div class="border-b border-gray-100 py-3 last:border-b-0 {{ $isResolved ? 'opacity-60' : '' }}" wire:key="feedback-thread-{{ $thread->id }}">
+                <div class="mb-2 flex items-center justify-between gap-2 text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold text-gray-800">{{ $thread->teacher?->name ?? 'Unknown teacher' }}</span>
+                        @if($hasUnread)
+                            <span class="h-2 w-2 rounded-full bg-red-500" title="New message"></span>
+                        @endif
+                        @if($isResolved)
+                            <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">Resolved</span>
+                        @endif
+                    </div>
+                    @if($isResolved)
+                        <button type="button" wire:click="reopen({{ $thread->id }})" class="text-xs text-gray-500 hover:text-gray-800">Reopen</button>
+                    @else
+                        <button type="button" wire:click="resolve({{ $thread->id }})" class="text-xs text-gray-500 hover:text-green-700">Mark resolved</button>
                     @endif
                 </div>
 

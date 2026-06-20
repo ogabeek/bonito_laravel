@@ -15,9 +15,11 @@ use Illuminate\Support\Str;
  * Uses UUID for public-facing URLs instead of sequential IDs.
  * Many-to-many with Teachers via student_teacher pivot table.
  *
+ * @property \Illuminate\Support\Carbon|null $vacation_starts_on
+ * @property \Illuminate\Support\Carbon|null $vacation_ends_on
+ *
  * Runtime-computed balance attributes (set by StudentBalanceService::mapBalances,
  * not persisted) — declared so static analysis recognizes them:
- *
  * @property array<int, int> $teacher_ids
  * @property int|null $paid_classes
  * @property int $used_classes

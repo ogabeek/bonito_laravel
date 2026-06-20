@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\FeedbackSender;
+use App\Enums\FeedbackStatus;
 use App\Models\FeedbackMessage;
 use App\Models\Teacher;
 use Livewire\Attributes\Computed;
@@ -62,7 +63,7 @@ new class extends Component
         $this->guard();
         $this->validate(['newBody' => 'required|string|max:2000']);
 
-        $thread = $this->teacher->feedbackThreads()->create(['status' => 'open']);
+        $thread = $this->teacher->feedbackThreads()->create(['status' => FeedbackStatus::OPEN]);
         $thread->messages()->create([
             'sender' => FeedbackSender::TEACHER,
             'body' => trim($this->newBody),
@@ -82,7 +83,8 @@ new class extends Component
             'sender' => FeedbackSender::TEACHER,
             'body' => trim($this->reply[$threadId]),
         ]);
-        $thread->touch();
+        // A new teacher message brings the thread back to the admin's attention.
+        $thread->update(['status' => FeedbackStatus::OPEN]);
 
         $this->reply[$threadId] = '';
         unset($this->threads);
@@ -92,6 +94,7 @@ new class extends Component
 <div>
     {{-- Trigger --}}
     <button type="button" wire:click="openPanel"
+            title="{{ $this->unreadCount > 0 ? $this->unreadCount.' new repl'.($this->unreadCount === 1 ? 'y' : 'ies').' from admin' : 'Feedback & reports' }}"
             class="relative inline-flex items-center gap-1 rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800">
         <span>💬 Feedback</span>
         @if($this->unreadCount > 0)
@@ -99,6 +102,7 @@ new class extends Component
                 <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
                 <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
             </span>
+            <span class="sr-only">{{ $this->unreadCount }} new replies</span>
         @endif
     </button>
 
@@ -125,6 +129,9 @@ new class extends Component
                     {{-- Existing threads --}}
                     @forelse($this->threads as $thread)
                         <div class="rounded-lg border border-gray-200">
+                            @if($thread->status === \App\Enums\FeedbackStatus::RESOLVED)
+                                <div class="border-b border-gray-100 px-3 py-1.5 text-[11px] font-medium text-gray-400">Resolved · reply to reopen</div>
+                            @endif
                             <div class="p-3">
                                 <x-feedback-thread :thread="$thread" viewer="teacher" />
                             </div>

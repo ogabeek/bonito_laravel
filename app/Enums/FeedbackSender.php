@@ -14,12 +14,4 @@ enum FeedbackSender: string
 
     case TEACHER = 'teacher';
     case ADMIN = 'admin';
-
-    public function label(): string
-    {
-        return match ($this) {
-            self::TEACHER => 'Teacher',
-            self::ADMIN => 'Admin',
-        };
-    }
 }

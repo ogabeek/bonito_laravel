@@ -100,6 +100,9 @@ new class extends Component
 
     public function createLesson(): void
     {
+        // Clear any lingering confirmation so a failed submit shows the error, not stale success.
+        $this->showSuccess = false;
+
         $this->validate([
             'student_id' => 'required|exists:students,id',
             'class_date' => 'required|date',
@@ -205,25 +208,6 @@ new class extends Component
         >
             <livewire:teacher-feedback :teacher="$this->teacher" />
         </x-page-header>
-
-        {{-- Validation Errors --}}
-        @if($errors->any())
-            <div class="mb-4 bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm px-3 py-2 rounded">
-                <ul class="list-disc pl-4">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        {{-- Success Message --}}
-        @if($this->showSuccess)
-            <div class="mb-4 bg-green-50 border border-green-200 text-green-700 text-xs sm:text-sm px-3 py-2 rounded flex justify-between items-center">
-                <span>{{ $this->successMessage }}</span>
-                <button wire:click="dismissSuccess" class="text-green-700 hover:text-green-900 font-bold">&times;</button>
-            </div>
-        @endif
 
         @if(config('banners.teacher_info.enabled'))
             <x-info-banner :type="config('banners.teacher_info.type')" id="teacher_info" class="mb-4">
@@ -398,8 +382,14 @@ new class extends Component
                     </div>
                 </div>
 
-                <div class="mt-4 sm:mt-6">
+                <div class="mt-4 sm:mt-6 flex flex-wrap items-center gap-3">
                     <button type="submit" class="btn-primary w-full sm:w-auto">+ Add Class</button>
+                    @if($this->showSuccess)
+                        <span wire:key="form-status-ok" x-data x-init="setTimeout(() => $wire.dismissSuccess(), 4000)"
+                              class="inline-flex items-center gap-1 text-sm font-medium text-green-700">✓ {{ $this->successMessage }}</span>
+                    @elseif($errors->any())
+                        <span class="text-sm font-medium text-red-600">{{ $errors->first() }}</span>
+                    @endif
                 </div>
             </form>
         </x-card>
