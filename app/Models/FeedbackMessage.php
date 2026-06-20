@@ -25,7 +25,7 @@ class FeedbackMessage extends Model
 
     public function thread(): BelongsTo
     {
-        return $this->belongsTo(FeedbackThread::class);
+        return $this->belongsTo(FeedbackThread::class, 'feedback_thread_id');
     }
 
     /**

@@ -200,7 +200,7 @@ new class extends Component
     <div class="p-3 sm:p-6 max-w-5xl mx-auto">
 
         <x-page-header
-            :title="$this->teacher->name . \"'s Dashboard\""
+            :title="$this->teacher->name . '\'s Dashboard'"
             :logoutRoute="route('teacher.logout')"
         >
             <livewire:teacher-feedback :teacher="$this->teacher" />
