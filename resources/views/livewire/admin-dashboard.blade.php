@@ -199,7 +199,7 @@ new class extends Component
     <x-error-list />
 
     <x-card>
-        <div class="p-6">
+        <div>
             {{-- Calendar Tab --}}
             @if($activeTab === 'calendar')
                 <div wire:loading.delay.class="opacity-50">
@@ -230,6 +230,31 @@ new class extends Component
                                     {{ config('billing.period_start_day') }}-{{ config('billing.period_end_day') }}
                                 </button>
                             </div>
+
+                            <select wire:model.live="teacherFilter" class="pl-3 pr-8 py-1.5 border rounded text-sm">
+                                <option value="">All Teachers</option>
+                                @foreach($this->teachers as $teacher)
+                                    <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                @foreach(\App\Enums\StudentStatus::cases() as $statusOption)
+                                    @php
+                                        $isHidden = in_array($statusOption->value, $hiddenStatuses, true);
+                                        $count = $this->statusCounts[$statusOption->value] ?? 0;
+                                    @endphp
+                                    <button type="button"
+                                            wire:click="toggleStatus('{{ $statusOption->value }}')"
+                                            aria-pressed="{{ $isHidden ? 'false' : 'true' }}"
+                                            aria-label="{{ $statusOption->label() }} ({{ $count }})"
+                                            title="{{ $statusOption->label() }} · {{ $count }} — click to {{ $isHidden ? 'show' : 'hide' }}"
+                                            class="flex items-center gap-1 pl-1.5 pr-2 py-1 rounded-full border text-xs transition {{ $isHidden ? 'opacity-40 bg-gray-50 text-gray-500' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
+                                        <x-student-status-dot :status="$statusOption" :size="10" />
+                                        <span>{{ $count }}</span>
+                                    </button>
+                                @endforeach
+                            </div>
+                            <span wire:loading class="text-sm text-gray-500">Loading...</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
@@ -285,35 +310,8 @@ new class extends Component
                         </div>
                     @endif
 
-                    {{-- Filters --}}
-                    <div class="mb-4 flex flex-wrap items-center gap-3">
-                        <select wire:model.live="teacherFilter" class="pl-3 pr-8 py-2 border rounded">
-                            <option value="">All Teachers</option>
-                            @foreach($this->teachers as $teacher)
-                                <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
-                            @endforeach
-                        </select>
-                        <div class="flex flex-wrap items-center gap-1.5">
-                            @foreach(\App\Enums\StudentStatus::cases() as $statusOption)
-                                @php
-                                    $isHidden = in_array($statusOption->value, $hiddenStatuses, true);
-                                    $count = $this->statusCounts[$statusOption->value] ?? 0;
-                                @endphp
-                                <button type="button"
-                                        wire:click="toggleStatus('{{ $statusOption->value }}')"
-                                        aria-pressed="{{ $isHidden ? 'false' : 'true' }}"
-                                        aria-label="{{ $statusOption->label() }} ({{ $count }})"
-                                        title="{{ $statusOption->label() }} · {{ $count }} — click to {{ $isHidden ? 'show' : 'hide' }}"
-                                        class="flex items-center justify-center w-7 h-7 rounded-full border transition {{ $isHidden ? 'opacity-40 bg-gray-50' : 'bg-white hover:bg-gray-50' }}">
-                                    <x-student-status-dot :status="$statusOption" :size="10" />
-                                </button>
-                            @endforeach
-                        </div>
-                        <span wire:loading class="text-sm text-gray-500 self-center">Loading...</span>
-                    </div>
-
                     <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
-                        <div class="xl:col-span-4 overflow-auto max-h-[70vh] border rounded">
+                        <div class="xl:col-span-4 overflow-auto max-h-[82vh] border rounded">
                             <table class="w-full text-sm cal-table"
                                    x-data="{ hoverCol: -1 }"
                                    @mouseleave="hoverCol = -1">
