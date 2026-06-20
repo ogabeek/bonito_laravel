@@ -98,8 +98,8 @@ it('lets a teacher open a report that the admin can answer', function () {
     session(['teacher_id' => $teacher->id]);
 
     Volt::test('teacher-feedback', ['teacher' => $teacher])
-        ->set('newBody', 'The calendar is slow')
-        ->call('submitNew')
+        ->set('body', 'The calendar is slow')
+        ->call('send')
         ->assertHasNoErrors();
 
     $thread = FeedbackThread::firstOrFail();
@@ -125,7 +125,7 @@ it('lets a teacher open a report that the admin can answer', function () {
     session()->forget('admin_authenticated');
     session(['teacher_id' => $teacher->id]);
 
-    Volt::test('teacher-feedback', ['teacher' => $teacher])->call('openPanel');
+    Volt::test('teacher-feedback', ['teacher' => $teacher])->call('togglePanel');
 
     expect(FeedbackMessage::unreadFrom(FeedbackSender::ADMIN)->count())->toBe(0);
 });
@@ -135,8 +135,8 @@ it('lets the admin resolve a thread and a teacher reply reopens it', function ()
     session(['teacher_id' => $teacher->id]);
 
     Volt::test('teacher-feedback', ['teacher' => $teacher])
-        ->set('newBody', 'Need help')
-        ->call('submitNew');
+        ->set('body', 'Need help')
+        ->call('send');
 
     $thread = FeedbackThread::firstOrFail();
 
@@ -154,10 +154,32 @@ it('lets the admin resolve a thread and a teacher reply reopens it', function ()
     session(['teacher_id' => $teacher->id]);
 
     Volt::test('teacher-feedback', ['teacher' => $teacher])
-        ->set("reply.{$thread->id}", 'Still broken')
-        ->call('submitReply', $thread->id);
+        ->set('body', 'Still broken')
+        ->call('send');
 
     expect($thread->fresh()->status)->toBe(FeedbackStatus::OPEN);
+});
+
+it('posts as admin when an admin uses the widget on a teacher dashboard', function () {
+    $teacher = Teacher::factory()->create();
+
+    // Teacher opens the conversation.
+    session(['teacher_id' => $teacher->id]);
+    Volt::test('teacher-feedback', ['teacher' => $teacher])->set('body', 'Help please')->call('send');
+
+    // Admin previews the same dashboard and replies from the widget.
+    session()->forget('teacher_id');
+    session(['admin_authenticated' => true]);
+    Volt::test('teacher-feedback', ['teacher' => $teacher])
+        ->call('togglePanel')
+        ->set('body', 'On it')
+        ->call('send')
+        ->assertHasNoErrors();
+
+    $thread = FeedbackThread::firstOrFail();
+    expect($thread->messages()->where('sender', FeedbackSender::ADMIN)->count())->toBe(1)
+        // Admin opening the widget acknowledged the teacher's message.
+        ->and(FeedbackMessage::unreadFrom(FeedbackSender::TEACHER)->count())->toBe(0);
 });
 
 it('rejects an empty feedback report', function () {
@@ -165,9 +187,9 @@ it('rejects an empty feedback report', function () {
     session(['teacher_id' => $teacher->id]);
 
     Volt::test('teacher-feedback', ['teacher' => $teacher])
-        ->set('newBody', '')
-        ->call('submitNew')
-        ->assertHasErrors('newBody');
+        ->set('body', '')
+        ->call('send')
+        ->assertHasErrors('body');
 
     expect(FeedbackThread::count())->toBe(0);
 });
