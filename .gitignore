@@ -58,3 +58,6 @@ project_description.md
 archive/
 *.png
 notes.md
+
+# From Forge migration (contains production secrets — keep local only)
+forge_env_and_links*
