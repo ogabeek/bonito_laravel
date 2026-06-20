@@ -20,7 +20,7 @@
         </span>
     </div>
 @else
-    <div class="flex gap-4 text-sm">
+    <div class="flex flex-col gap-2 text-sm">
         <div class="flex items-center gap-2">
             <div class="w-6 h-4 rounded" style="background: var(--color-status-completed-bg);"></div>
             <span>Completed</span>

@@ -203,8 +203,8 @@ new class extends Component
             {{-- Calendar Tab --}}
             @if($activeTab === 'calendar')
                 <div wire:loading.delay.class="opacity-50">
-                    <div class="flex justify-between items-start gap-4 mb-4">
-                        <div class="flex items-center gap-4">
+                    <div class="flex flex-wrap justify-between items-center gap-x-4 gap-y-3 mb-4">
+                        <div class="flex flex-wrap items-center gap-3">
                             <h2 class="text-xl font-semibold">{{ $this->currentMonth->format('F Y') }}</h2>
                             <div class="flex items-center gap-1">
                                 <button wire:click="navigateMonth({{ $this->prevMonth->year }}, {{ $this->prevMonth->month }})"
@@ -232,6 +232,20 @@ new class extends Component
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
+                            <div class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
+                                <button type="button" @click="open = !open"
+                                        class="flex items-center justify-center w-7 h-7 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                                        aria-label="Status colour legend">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="9" />
+                                        <path stroke-linecap="round" d="M12 16v-4M12 8h.01" />
+                                    </svg>
+                                </button>
+                                <div x-show="open" x-cloak x-transition.opacity
+                                     class="absolute left-0 top-full z-30 mt-2 w-max rounded-lg border bg-white p-3 shadow-lg">
+                                    <x-status-legend />
+                                </div>
+                            </div>
                             <div class="grid grid-cols-5 gap-3 text-xs text-gray-600 bg-gray-50 rounded px-3 py-2">
                                 <div class="text-center">
                                     <div class="font-semibold" style="color: var(--color-status-completed);">{{ $this->periodStats['completed'] }}</div>
@@ -279,17 +293,19 @@ new class extends Component
                                 <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
                             @endforeach
                         </select>
-                        <div class="flex flex-wrap items-center gap-2">
+                        <div class="flex flex-wrap items-center gap-1.5">
                             @foreach(\App\Enums\StudentStatus::cases() as $statusOption)
-                                @php $isHidden = in_array($statusOption->value, $hiddenStatuses, true); @endphp
+                                @php
+                                    $isHidden = in_array($statusOption->value, $hiddenStatuses, true);
+                                    $count = $this->statusCounts[$statusOption->value] ?? 0;
+                                @endphp
                                 <button type="button"
                                         wire:click="toggleStatus('{{ $statusOption->value }}')"
                                         aria-pressed="{{ $isHidden ? 'false' : 'true' }}"
-                                        title="{{ $isHidden ? 'Show' : 'Hide' }} {{ $statusOption->label() }}"
-                                        class="flex items-center gap-1.5 px-3 py-1 text-xs border rounded-full transition {{ $isHidden ? 'opacity-40 bg-gray-50 text-gray-500' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
-                                    <x-student-status-dot :status="$statusOption" :size="8" />
-                                    {{ $statusOption->label() }}
-                                    <span class="text-gray-400">{{ $this->statusCounts[$statusOption->value] ?? 0 }}</span>
+                                        aria-label="{{ $statusOption->label() }} ({{ $count }})"
+                                        title="{{ $statusOption->label() }} · {{ $count }} — click to {{ $isHidden ? 'show' : 'hide' }}"
+                                        class="flex items-center justify-center w-7 h-7 rounded-full border transition {{ $isHidden ? 'opacity-40 bg-gray-50' : 'bg-white hover:bg-gray-50' }}">
+                                    <x-student-status-dot :status="$statusOption" :size="10" />
                                 </button>
                             @endforeach
                         </div>
@@ -375,10 +391,6 @@ new class extends Component
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-
-                    <div class="mt-4">
-                        <x-status-legend />
                     </div>
                 </div>
             @endif
