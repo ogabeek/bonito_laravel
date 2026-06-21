@@ -11,8 +11,9 @@ use App\Enums\StudentStatus;
 use App\Concerns\LogsActivityActions;
 use App\Repositories\LessonRepository;
 use App\Services\LessonStatisticsService;
-use App\Services\CalendarService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Volt\Component;
 
@@ -132,6 +133,8 @@ new class extends Component
 
     public function createLesson(): void
     {
+        $this->guard();
+
         // Clear any lingering confirmation so a failed submit shows the error, not stale success.
         $this->showSuccess = false;
 
@@ -153,6 +156,8 @@ new class extends Component
             return;
         }
 
+        $isAbsent = $this->status === \App\Enums\LessonStatus::STUDENT_ABSENT->value;
+
         $lesson = Lesson::create([
             'teacher_id' => $this->teacher->id,
             'student_id' => $this->student_id,
@@ -161,9 +166,9 @@ new class extends Component
             'topic' => $this->status === 'completed' ? ($this->topic ?: '') : '',
             'homework' => $this->status === 'completed' ? $this->homework : null,
             'comments' => $this->comments ?: null,
-            'absence_reminder_sent' => $this->absence_reminder_sent,
-            'absence_chat_notified' => $this->absence_chat_notified,
-            'refund_requested' => $this->status === 'student_absent' ? $this->refund_requested : false,
+            'absence_reminder_sent' => $isAbsent && $this->absence_reminder_sent,
+            'absence_chat_notified' => $isAbsent && $this->absence_chat_notified,
+            'refund_requested' => $isAbsent && $this->refund_requested,
         ]);
 
         $lesson->load('student');
@@ -199,6 +204,8 @@ new class extends Component
 
     public function deleteLesson(int $lessonId): void
     {
+        $this->guard();
+
         $lesson = Lesson::find($lessonId);
 
         if (!$lesson || $lesson->teacher_id !== $this->teacher->id) {
@@ -235,43 +242,41 @@ new class extends Component
      */
     public function saveStudentStatus(int $studentId, string $status, ?string $start = null, ?string $end = null, ?string $note = null): void
     {
+        $this->guard();
+
         $student = $this->teacher->students()->find($studentId);
-        if (! $student || ! in_array($status, StudentStatus::values(), true)) {
+        if (! $student) {
             return;
         }
 
-        $status = StudentStatus::from($status);
-
-        // Vacation dates only apply to the holiday status.
-        $startDate = $endDate = null;
-        if ($status === StudentStatus::HOLIDAY) {
-            $startDate = $start ?: null;
-            $endDate = $end ?: $startDate;          // a single day is a one-day holiday
-            if ($startDate && $endDate && $endDate < $startDate) {
-                [$startDate, $endDate] = [$endDate, $startDate];
-            }
-        }
-
-        // A note is kept for any non-active status; switching to active clears it.
-        $statusNote = ($status === StudentStatus::ACTIVE || blank($note)) ? null : trim($note);
+        $validated = Validator::make(compact('status', 'start', 'end', 'note'), [
+            'status' => ['required', Rule::enum(StudentStatus::class)],
+            'start' => ['nullable', 'date_format:Y-m-d'],
+            'end' => ['nullable', 'date_format:Y-m-d'],
+            'note' => ['nullable', 'string', 'max:1000'],
+        ])->validate();
 
         $from = $student->status->value;
+        $status = StudentStatus::from($validated['status']);
 
-        $student->update([
-            'status' => $status,
-            'vacation_starts_on' => $startDate,
-            'vacation_ends_on' => $endDate,
-            'status_note' => $statusNote,
-        ]);
+        $student->changeStatus($status, $validated['start'], $validated['end'], $validated['note']);
 
         $this->logActivity(
             $student,
             'student_status_updated',
-            ['from' => $from, 'to' => $status->value, 'note' => $statusNote],
+            ['from' => $from, 'to' => $status->value, 'note' => $student->status_note],
             $this->teacher
         );
 
         unset($this->students, $this->studentNudges);
+    }
+
+    private function guard(): void
+    {
+        abort_unless(
+            session('admin_authenticated') || (int) session('teacher_id') === $this->teacher->id,
+            403
+        );
     }
 };
 ?>

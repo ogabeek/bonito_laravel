@@ -2,6 +2,7 @@
 
 use App\Enums\FeedbackSender;
 use App\Enums\FeedbackStatus;
+use App\Enums\StudentStatus;
 use App\Models\FeedbackMessage;
 use App\Models\FeedbackThread;
 use App\Models\Lesson;
@@ -95,14 +96,38 @@ it('shows concise lesson details and follow-up choices in the calendar tooltip',
         ->not->toContain('Refund requested');
 });
 
+it('uses neutral status cards in the teacher lesson history', function () {
+    $teacher = Teacher::factory()->create();
+    $student = Student::factory()->create();
+    $teacher->students()->attach($student);
+    Lesson::factory()->studentAbsent()->create([
+        'teacher_id' => $teacher->id,
+        'student_id' => $student->id,
+        'class_date' => now(),
+        'comments' => 'Student did not attend.',
+        'refund_requested' => true,
+    ]);
+    session(['teacher_id' => $teacher->id]);
+
+    $html = Volt::test('teacher-dashboard', ['teacher' => $teacher])->html();
+
+    expect($html)
+        ->toContain('--lesson-card-bg: #f9fafb')
+        ->toContain('border-red-200 bg-red-50 text-red-700')
+        ->toContain('Student did not attend.')
+        ->toContain('Needs recovery');
+});
+
 // ─── Vacation helpers ────────────────────────────────────────────────────────
 
 it('shows a vacation label only for active or upcoming periods', function () {
     $upcoming = Student::factory()->create([
+        'status' => StudentStatus::HOLIDAY,
         'vacation_starts_on' => now()->addDays(2),
         'vacation_ends_on' => now()->addDays(9),
     ]);
     $past = Student::factory()->create([
+        'status' => StudentStatus::HOLIDAY,
         'vacation_starts_on' => now()->subDays(20),
         'vacation_ends_on' => now()->subDays(13),
     ]);

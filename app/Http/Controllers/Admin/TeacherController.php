@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateTeacherRequest;
 use App\Http\Requests\UpdateTeacherRequest;
 use App\Models\Teacher;
+use Illuminate\Support\Arr;
 
 /**
  * Admin teacher management (CRUD + archive/restore).
@@ -29,8 +30,6 @@ class TeacherController extends Controller
 
     public function edit(Teacher $teacher)
     {
-        $teacher->makeVisible('password');
-
         return view('admin.teachers.edit', compact('teacher'));
     }
 
@@ -43,13 +42,13 @@ class TeacherController extends Controller
             unset($validated['password']);
         }
 
-        $original = $teacher->getOriginal();
+        $original = Arr::except($teacher->getOriginal(), ['password']);
         $teacher->update($validated);
 
         $this->logActivity(
             $teacher,
             'teacher_updated',
-            ['changes' => $teacher->getChanges(), 'original' => $original]
+            ['changes' => Arr::except($teacher->getChanges(), ['password']), 'original' => $original]
         );
 
         return redirect()->route('admin.teachers.edit', $teacher)->with('success', 'Teacher updated successfully!');

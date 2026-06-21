@@ -6,7 +6,9 @@
 @php
     $compactSectionGap = 'mb-6 sm:mb-7';
     $sectionGap = 'mb-7 sm:mb-9';
-    $canEditResources = session('teacher_id') || session('admin_authenticated');
+    $teacherId = session('teacher_id');
+    $canEditResources = (bool) session('admin_authenticated')
+        || ($teacherId && $student->isAssignedToTeacher((int) $teacherId));
     $hasTeacherResources = $canEditResources || filled($student->teacher_notes);
     $hasMaterials = filled($student->materials_url);
     $lessonsTopMargin = $hasMaterials ? 'mt-0' : 'mt-8 sm:mt-10';

@@ -78,7 +78,13 @@ new class extends Component
 
     public function canEdit(): bool
     {
-        return (bool) session('teacher_id') || (bool) session('admin_authenticated');
+        if (session('admin_authenticated')) {
+            return true;
+        }
+
+        $teacherId = session('teacher_id');
+
+        return $teacherId && $this->student->isAssignedToTeacher((int) $teacherId);
     }
 }; ?>
 

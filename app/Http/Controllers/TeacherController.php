@@ -8,11 +8,9 @@ use App\Http\Requests\TeacherLoginRequest;
 use App\Http\Requests\UpdateLessonRequest;
 use App\Models\Lesson;
 use App\Models\Teacher;
-use App\Repositories\LessonRepository;
 use App\Services\AuthenticationService;
-use App\Services\CalendarService;
-use App\Services\LessonStatisticsService;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 /**
  * TeacherController - Teacher portal
@@ -30,10 +28,7 @@ class TeacherController extends Controller
 
     public function login(TeacherLoginRequest $request, Teacher $teacher, AuthenticationService $auth)
     {
-        $match = $request->password === $teacher->password
-            || $auth->verifyPassword($request->password, $teacher->password);
-
-        if ($match) {
+        if ($auth->verifyPassword($request->password, $teacher->password)) {
             $request->session()->regenerate();
             session(['teacher_id' => $teacher->id]);
 
@@ -43,19 +38,9 @@ class TeacherController extends Controller
         return back()->withErrors(['password' => 'Incorrect PIN']);
     }
 
-    public function dashboard(Teacher $teacher, CalendarService $calendar, LessonRepository $lessonRepo, LessonStatisticsService $statsService)
+    public function dashboard(Teacher $teacher): View
     {
-        $calendarData = $calendar->getMonthData(request());
-        $date = $calendarData['currentMonth'];
-        $prevMonth = $calendarData['prevMonth'];
-        $nextMonth = $calendarData['nextMonth'];
-
-        $students = $teacher->students()->orderBy('name')->get();
-        $lessons = $lessonRepo->getForTeacher($teacher->id, $date);
-        $stats = $statsService->calculateStats($lessons);
-        $studentStats = $statsService->calculateStatsByStudent($lessons);
-
-        return view('teacher.dashboard', compact('teacher', 'lessons', 'date', 'stats', 'studentStats', 'students', 'prevMonth', 'nextMonth'));
+        return view('teacher.dashboard', compact('teacher'));
     }
 
     public function logout(Request $request)
@@ -75,12 +60,16 @@ class TeacherController extends Controller
     {
         $teacherActor = Teacher::find(session('teacher_id'));
         $original = $lesson->getOriginal();
+        $isAbsent = $request->status === \App\Enums\LessonStatus::STUDENT_ABSENT->value;
 
         $lesson->update([
             'status' => $request->status,
             'topic' => $request->topic ?? '',
             'homework' => $request->homework,
             'comments' => $request->comments,
+            'absence_reminder_sent' => $isAbsent && $request->boolean('absence_reminder_sent'),
+            'absence_chat_notified' => $isAbsent && $request->boolean('absence_chat_notified'),
+            'refund_requested' => $isAbsent && $request->boolean('refund_requested'),
         ]);
 
         // Load student for activity log
@@ -110,6 +99,8 @@ class TeacherController extends Controller
             return response()->json(['error' => 'Student not assigned to teacher'], 403);
         }
 
+        $isAbsent = $request->status === \App\Enums\LessonStatus::STUDENT_ABSENT->value;
+
         $lesson = Lesson::create([
             'teacher_id' => $teacherActor->id,
             'student_id' => $request->student_id,
@@ -118,9 +109,9 @@ class TeacherController extends Controller
             'topic' => $request->topic ?? '',
             'homework' => $request->homework,
             'comments' => $request->comments,
-            'absence_reminder_sent' => $request->boolean('absence_reminder_sent'),
-            'absence_chat_notified' => $request->boolean('absence_chat_notified'),
-            'refund_requested' => $request->boolean('refund_requested'),
+            'absence_reminder_sent' => $isAbsent && $request->boolean('absence_reminder_sent'),
+            'absence_chat_notified' => $isAbsent && $request->boolean('absence_chat_notified'),
+            'refund_requested' => $isAbsent && $request->boolean('refund_requested'),
         ]);
 
         // Load student for activity log

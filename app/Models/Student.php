@@ -68,7 +68,8 @@ class Student extends Model
      */
     public function hasPendingVacation(): bool
     {
-        return $this->vacation_ends_on !== null
+        return $this->status === StudentStatus::HOLIDAY
+            && $this->vacation_ends_on !== null
             && $this->vacation_ends_on->gte(now()->startOfDay());
     }
 
@@ -151,6 +152,37 @@ class Student extends Model
     public function teachers(): BelongsToMany
     {
         return $this->belongsToMany(Teacher::class);
+    }
+
+    public function isAssignedToTeacher(int $teacherId): bool
+    {
+        return $this->teachers()->whereKey($teacherId)->exists();
+    }
+
+    public function changeStatus(
+        StudentStatus $status,
+        ?string $vacationStartsOn = null,
+        ?string $vacationEndsOn = null,
+        ?string $note = null,
+    ): void {
+        $startDate = null;
+        $endDate = null;
+
+        if ($status === StudentStatus::HOLIDAY) {
+            $startDate = $vacationStartsOn;
+            $endDate = $vacationEndsOn ?: $startDate;
+
+            if ($startDate && $endDate && $endDate < $startDate) {
+                [$startDate, $endDate] = [$endDate, $startDate];
+            }
+        }
+
+        $this->update([
+            'status' => $status,
+            'vacation_starts_on' => $startDate,
+            'vacation_ends_on' => $endDate,
+            'status_note' => $status === StudentStatus::ACTIVE || blank($note) ? null : trim($note),
+        ]);
     }
 
     // Route model binding uses UUID, not ID

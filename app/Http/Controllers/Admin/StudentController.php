@@ -52,17 +52,18 @@ class StudentController extends Controller
 
     public function updateStatus(Request $request, Student $student)
     {
-        $request->validate([
+        $validated = $request->validate([
             'status' => ['required', Rule::in(StudentStatus::values())],
         ]);
 
-        $original = $student->status;
-        $student->update(['status' => $request->status]);
+        $original = $student->status->value;
+        $status = StudentStatus::from($validated['status']);
+        $student->changeStatus($status);
 
         $this->logActivity(
             $student,
             'student_status_updated',
-            ['from' => $original, 'to' => $request->status]
+            ['from' => $original, 'to' => $status->value]
         );
 
         return back()->with('success', 'Student status updated successfully!');

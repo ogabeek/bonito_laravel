@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\Teacher;
-use App\Models\Student;
 use App\Models\Lesson;
-use Illuminate\Database\Seeder;
+use App\Models\Student;
+use App\Models\Teacher;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,6 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        if (app()->isProduction()) {
+            throw new \LogicException('Demo data seeding is disabled in production.');
+        }
+
         $this->command->info('🌱 Starting comprehensive database seeding...');
 
         // Create 9 Teachers (3 main + 6 secondary)
@@ -75,7 +79,7 @@ class DatabaseSeeder extends Seeder
             $students[] = Student::create([
                 'name' => $studentData['name'],
                 'parent_name' => $studentData['parent'],
-                'email' => strtolower(str_replace(' ', '.', $studentData['name'])) . '@example.com',
+                'email' => strtolower(str_replace(' ', '.', $studentData['name'])).'@example.com',
                 'goal' => $studentData['goal'],
                 'description' => 'Motivated student',
             ]);
@@ -111,21 +115,21 @@ class DatabaseSeeder extends Seeder
             'Research assignment', 'Review notes', 'Online quiz completion',
         ];
 
-        $statuses = ['completed', 'completed', 'completed', 'completed', 'completed', 
-                      'student_cancelled', 'teacher_cancelled', 'student_absent'];
+        $statuses = ['completed', 'completed', 'completed', 'completed', 'completed',
+            'student_cancelled', 'teacher_cancelled', 'student_absent'];
 
         $lessonCount = 0;
         $year = 2025;
 
         $this->command->info('📅 Generating lessons for November & December 2025 only...');
-        
+
         // Generate ONLY for November and December 2025 (started November 10)
         foreach ([11, 12] as $month) {
             $daysInMonth = Carbon::create($year, $month, 1)->daysInMonth;
-            
+
             // November: 100-150 lessons, December: 150-200 lessons
             $monthlyLessons = ($month === 11) ? rand(100, 150) : rand(150, 200);
-            
+
             // For November, start from day 10
             $startDay = ($month === 11) ? 10 : 1;
 
@@ -134,9 +138,9 @@ class DatabaseSeeder extends Seeder
             // Distribution:
             // - Completed: majority of lessons
             // - Student Cancelled (SC): 15-25 per month
-            // - Teacher Cancelled (TC): 5-10 per month  
+            // - Teacher Cancelled (TC): 5-10 per month
             // - Student Absent (A): 2-3 per month (very rare)
-            
+
             $scCount = rand(15, 25);
             $tcCount = rand(5, 10);
             $aCount = rand(2, 3);
@@ -152,13 +156,15 @@ class DatabaseSeeder extends Seeder
 
             for ($i = 0; $i < $monthlyLessons; $i++) {
                 // Pick teacher (70% main teachers, 30% secondary)
-                $teacher = (rand(1, 100) <= 70) 
+                $teacher = (rand(1, 100) <= 70)
                     ? $mainTeachers[array_rand($mainTeachers)]
                     : $secondaryTeachers[array_rand($secondaryTeachers)];
 
                 // Get students assigned to this teacher
                 $teacherStudents = $teacher->students;
-                if ($teacherStudents->isEmpty()) continue;
+                if ($teacherStudents->isEmpty()) {
+                    continue;
+                }
 
                 // Pick random student from teacher's assigned students
                 $student = $teacherStudents->random();
@@ -173,8 +179,8 @@ class DatabaseSeeder extends Seeder
                 // Only add topic/homework for completed lessons
                 $topic = ($status === 'completed') ? $topics[array_rand($topics)] : null;
                 $homework = ($status === 'completed' && rand(1, 100) <= 70) ? $homeworks[array_rand($homeworks)] : null;
-                
-                $comments = match($status) {
+
+                $comments = match ($status) {
                     'student_cancelled' => 'Student cancelled with notice',
                     'teacher_cancelled' => rand(0, 1) ? 'Teacher unavailable' : 'Emergency cancellation',
                     'student_absent' => 'Student did not show up, no notice',
@@ -197,17 +203,17 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info("✅ Created {$lessonCount} lessons (Nov-Dec 2025 only)");
         $this->command->newLine();
-        
+
         // Show detailed breakdown
         $completed = Lesson::where('status', 'completed')->count();
         $sc = Lesson::where('status', 'student_cancelled')->count();
         $tc = Lesson::where('status', 'teacher_cancelled')->count();
         $a = Lesson::where('status', 'student_absent')->count();
-        
+
         $this->command->info('🎉 Database seeding completed successfully!');
-        $this->command->info("📊 Summary:");
-        $this->command->info("   - Teachers: 9 (3 main + 6 secondary)");
-        $this->command->info("   - Students: 30");
+        $this->command->info('📊 Summary:');
+        $this->command->info('   - Teachers: 9 (3 main + 6 secondary)');
+        $this->command->info('   - Students: 30');
         $this->command->info("   - Lessons: {$lessonCount} (Nov-Dec 2025)");
         $this->command->info("     • Completed: {$completed}");
         $this->command->info("     • Student Cancelled: {$sc}");

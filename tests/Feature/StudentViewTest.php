@@ -4,6 +4,7 @@ use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Teacher;
 use Carbon\Carbon;
+use Livewire\Volt\Volt;
 
 it('shows student dashboard via uuid', function () {
     $student = Student::factory()->create();
@@ -150,6 +151,23 @@ it('does not mount the editable teacher resources component for public visitors'
         ->assertDontSeeLivewire('student-teacher-resources')
         ->assertDontSee('wire:model="notes"', false)
         ->assertDontSee('wire:click="save"', false);
+});
+
+it('does not let an unassigned teacher edit student resources', function () {
+    $teacher = Teacher::factory()->create();
+    $student = Student::factory()->create(['teacher_notes' => 'Original note.']);
+    session(['teacher_id' => $teacher->id]);
+
+    $this->get(route('student.dashboard', $student))
+        ->assertSuccessful()
+        ->assertSee('Original note.')
+        ->assertDontSeeLivewire('student-teacher-resources');
+
+    Volt::test('student-teacher-resources', ['student' => $student])
+        ->call('save')
+        ->assertForbidden();
+
+    expect($student->refresh()->teacher_notes)->toBe('Original note.');
 });
 
 it('shows weekly class distribution for the selected year', function () {

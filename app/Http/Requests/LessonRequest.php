@@ -21,6 +21,8 @@ abstract class LessonRequest extends FormRequest
             'homework' => 'nullable|string',
             // * Comments required when teacher cancels OR student is absent
             'comments' => 'required_if:status,'.LessonStatus::TEACHER_CANCELLED->value.','.LessonStatus::STUDENT_ABSENT->value.'|nullable|string',
+            'absence_reminder_sent' => 'boolean',
+            'absence_chat_notified' => 'boolean',
             'refund_requested' => 'boolean',
         ];
     }

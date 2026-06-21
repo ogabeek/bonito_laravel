@@ -11,7 +11,7 @@ Simplified management system for online school with ~10 teachers, ~100 students,
 - **Sheets Integration:** Native Google API client in `BalanceService` (service account + sheet with `uuid`/`balance`)
 - **Monitoring:** Sentry error tracking
 - **Backups:** Automated daily backups (spatie/laravel-backup)
-- **CSS:** Tailwind and app.css file as design references
+- **CSS:** Tailwind CSS 4 bundled through Vite
 
 ### How to Setup
 
@@ -67,7 +67,7 @@ Simplified management system for online school with ~10 teachers, ~100 students,
 - Each teacher only sees their assigned students
 - Teachers: `id`, `name`, `password`
 - Students: `id`, `uuid`, `name`, `parent_name`, `email`, `goal`, `description`
-- Lessons: `teacher_id`, `student_id`, `class_date`, `status` (completed/student_absent/teacher_cancelled), `topic`, `homework`, `comments`
+- Lessons: `teacher_id`, `student_id`, `class_date`, `status` (completed/student_cancelled/student_absent/teacher_cancelled), `topic`, `homework`, `comments`
 
 ### Project Structure
 
@@ -76,8 +76,8 @@ Simplified management system for online school with ~10 teachers, ~100 students,
 - `app/Http/Requests/` - Form validation (CreateLessonRequest, UpdateLessonRequest)
 - `app/Models/` - Teacher, Student, Lesson (with relationships)
 - `resources/views/layouts/app.blade.php` - Base layout for all pages
-- `resources/views/components/` - Reusable UI (lesson-card, lesson-form, calendar-picker, info-banner)
-- `public/css/app.css` - Design system (CSS variables)
+- `resources/views/components/` - Reusable UI (lesson-card, status controls, info-banner)
+- `resources/css/app.css` - Tailwind source and design tokens
 
 **UI Components:**
 ```blade
@@ -104,4 +104,3 @@ Simplified management system for online school with ~10 teachers, ~100 students,
 Make a platform for Teachers to mark attendance, topic, HW  -> student see it -> admin have calculation of all classes
 
 <img src="docs/image-1.png" alt="Alt Text" width="200" >
-

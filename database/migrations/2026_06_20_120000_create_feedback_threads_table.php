@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('feedback_threads', function (Blueprint $table) {
             $table->id();
             $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
-            $table->string('status')->default('open'); // open | closed
+            $table->string('status')->default('open'); // open | resolved
             $table->timestamps();
         });
     }

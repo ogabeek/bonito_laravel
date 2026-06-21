@@ -4,8 +4,10 @@ use App\Enums\StudentStatus;
 use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Teacher;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Volt\Volt;
+use Spatie\Activitylog\Models\Activity;
 
 beforeEach(function () {
     config(['app.admin_password' => Hash::make('test-password')]);
@@ -19,7 +21,9 @@ it('redirects unauthenticated users to login', function () {
 it('shows login form', function () {
     $this->get(route('admin.login'))
         ->assertSuccessful()
-        ->assertSee('Admin');
+        ->assertSee('Admin')
+        ->assertDontSee('cdn.tailwindcss.com', false)
+        ->assertDontSee(asset('css/app.css'), false);
 });
 
 it('authenticates with valid password', function () {
@@ -103,11 +107,14 @@ it('creates a new teacher', function () {
         ->assertRedirect(route('admin.dashboard'))
         ->assertSessionHas('success');
 
-    $this->assertDatabaseHas('teachers', ['name' => 'New Teacher']);
+    $teacher = Teacher::where('name', 'New Teacher')->firstOrFail();
+
+    expect(Hash::check('secret', $teacher->password))->toBeTrue();
 });
 
 it('updates a teacher and keeps the password when left blank', function () {
     $teacher = Teacher::factory()->create(['password' => 'original-pin']);
+    $originalPassword = $teacher->getRawOriginal('password');
 
     $this->withSession(['admin_authenticated' => true])
         ->put(route('admin.teachers.update', $teacher), [
@@ -118,12 +125,11 @@ it('updates a teacher and keeps the password when left blank', function () {
         ->assertRedirect(route('admin.teachers.edit', $teacher))
         ->assertSessionHas('success');
 
-    $this->assertDatabaseHas('teachers', [
-        'id' => $teacher->id,
-        'name' => 'Renamed Teacher',
-        'password' => 'original-pin', // unchanged
-        'zoom_link' => 'https://zoom.us/j/123',
-    ]);
+    $teacher->refresh();
+
+    expect($teacher->name)->toBe('Renamed Teacher')
+        ->and($teacher->zoom_link)->toBe('https://zoom.us/j/123')
+        ->and($teacher->getRawOriginal('password'))->toBe($originalPassword);
 });
 
 it('updates a teacher password when provided', function () {
@@ -136,7 +142,57 @@ it('updates a teacher password when provided', function () {
         ])
         ->assertRedirect(route('admin.teachers.edit', $teacher));
 
-    $this->assertDatabaseHas('teachers', ['id' => $teacher->id, 'password' => 'new-pin']);
+    expect(Hash::check('new-pin', $teacher->refresh()->password))->toBeTrue()
+        ->and($teacher->password)->not->toBe('new-pin');
+});
+
+it('hashes legacy teacher pins and removes them from historical activity properties', function () {
+    $teacherId = DB::table('teachers')->insertGetId([
+        'name' => 'Legacy Teacher',
+        'password' => 'legacy-pin',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $teacher = Teacher::findOrFail($teacherId);
+
+    activity()
+        ->performedOn($teacher)
+        ->withProperties([
+            'changes' => ['password' => 'legacy-pin'],
+            'original' => ['password' => 'older-pin'],
+        ])
+        ->log('teacher_updated');
+
+    $migration = require database_path('migrations/2026_06_21_203710_hash_existing_teacher_passwords.php');
+    $migration->up();
+
+    $storedPassword = DB::table('teachers')->where('id', $teacherId)->value('password');
+    $properties = Activity::latest('id')->firstOrFail()->properties->toArray();
+
+    expect(Hash::check('legacy-pin', $storedPassword))->toBeTrue()
+        ->and(data_get($properties, 'changes.password'))->toBeNull()
+        ->and(data_get($properties, 'original.password'))->toBeNull();
+});
+
+it('clears vacation metadata when admin changes a student status', function () {
+    $student = Student::factory()->holiday()->create([
+        'vacation_starts_on' => '2026-07-10',
+        'vacation_ends_on' => '2026-07-20',
+        'status_note' => 'Family trip',
+    ]);
+
+    $this->withSession(['admin_authenticated' => true])
+        ->post(route('admin.students.status.update', $student), [
+            'status' => StudentStatus::FINISHED->value,
+        ])
+        ->assertRedirect();
+
+    $student->refresh();
+
+    expect($student->status)->toBe(StudentStatus::FINISHED)
+        ->and($student->vacation_starts_on)->toBeNull()
+        ->and($student->vacation_ends_on)->toBeNull()
+        ->and($student->status_note)->toBeNull();
 });
 
 it('rejects a teacher update with a missing name', function () {

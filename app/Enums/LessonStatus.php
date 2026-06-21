@@ -55,7 +55,7 @@ enum LessonStatus: string
         return match ($this) {
             self::COMPLETED => 'text-green-700',
             self::STUDENT_ABSENT => 'text-red-700',
-            self::STUDENT_CANCELLED => 'text-blue-700',
+            self::STUDENT_CANCELLED => 'text-gray-600',
             self::TEACHER_CANCELLED => 'text-orange-700',
         };
     }

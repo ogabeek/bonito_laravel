@@ -126,6 +126,9 @@ it('updates own lesson', function () {
             'topic' => 'Updated Topic',
             'homework' => 'Updated Homework',
             'comments' => 'Updated Comments',
+            'absence_reminder_sent' => true,
+            'absence_chat_notified' => true,
+            'refund_requested' => true,
         ])
         ->assertSuccessful()
         ->assertJson(['success' => true]);
@@ -134,6 +137,39 @@ it('updates own lesson', function () {
         'id' => $lesson->id,
         'topic' => 'Updated Topic',
         'status' => LessonStatus::STUDENT_ABSENT->value,
+        'absence_reminder_sent' => true,
+        'absence_chat_notified' => true,
+        'refund_requested' => true,
+    ]);
+});
+
+it('clears absence follow-up flags when a lesson is no longer absent', function () {
+    $teacher = Teacher::factory()->create();
+    $student = Student::factory()->create();
+    $teacher->students()->attach($student);
+    $lesson = Lesson::factory()->studentAbsent()->create([
+        'teacher_id' => $teacher->id,
+        'student_id' => $student->id,
+        'absence_reminder_sent' => true,
+        'absence_chat_notified' => true,
+        'refund_requested' => true,
+    ]);
+
+    $this->withSession(['teacher_id' => $teacher->id])
+        ->putJson(route('lesson.update', $lesson), [
+            'status' => LessonStatus::COMPLETED->value,
+            'topic' => 'Back to class',
+            'absence_reminder_sent' => true,
+            'absence_chat_notified' => true,
+            'refund_requested' => true,
+        ])
+        ->assertSuccessful();
+
+    $this->assertDatabaseHas('lessons', [
+        'id' => $lesson->id,
+        'absence_reminder_sent' => false,
+        'absence_chat_notified' => false,
+        'refund_requested' => false,
     ]);
 });
 

@@ -16,8 +16,6 @@
 
     {{-- * Vite bundles CSS and JS from resources/ --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
     @livewireStyles
     @stack('styles')
 </head>

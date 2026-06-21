@@ -29,6 +29,13 @@ class Teacher extends Model
         'zoom_passcode',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'password' => 'hashed',
+        ];
+    }
+
     public function lessons(): HasMany
     {
         return $this->hasMany(Lesson::class);

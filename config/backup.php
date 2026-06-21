@@ -1,5 +1,8 @@
 <?php
 
+$notificationEmail = env('BACKUP_NOTIFICATION_EMAIL') ?: env('MAIL_FROM_ADDRESS', 'hello@example.com');
+$failureNotificationChannels = env('BACKUP_NOTIFICATION_EMAIL') ? ['mail'] : [];
+
 return [
 
     'backup' => [
@@ -15,7 +18,7 @@ return [
                  * The list of directories and files that will be included in the backup.
                  */
                 'include' => [
-                    base_path(),
+                    storage_path('app/public'),
                 ],
 
                 /*
@@ -201,9 +204,9 @@ return [
      */
     'notifications' => [
         'notifications' => [
-            \Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification::class => [],
-            \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification::class => [],
-            \Spatie\Backup\Notifications\Notifications\CleanupHasFailedNotification::class => [],
+            \Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification::class => $failureNotificationChannels,
+            \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification::class => $failureNotificationChannels,
+            \Spatie\Backup\Notifications\Notifications\CleanupHasFailedNotification::class => $failureNotificationChannels,
             \Spatie\Backup\Notifications\Notifications\BackupWasSuccessfulNotification::class => [],
             \Spatie\Backup\Notifications\Notifications\HealthyBackupWasFoundNotification::class => [],
             \Spatie\Backup\Notifications\Notifications\CleanupWasSuccessfulNotification::class => [],
@@ -216,7 +219,7 @@ return [
         'notifiable' => \Spatie\Backup\Notifications\Notifiable::class,
 
         'mail' => [
-            'to' => 'your@example.com',
+            'to' => $notificationEmail,
 
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
