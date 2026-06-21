@@ -2,11 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\Teacher;
-use App\Models\Student;
 use App\Models\Lesson;
-use Illuminate\Database\Seeder;
+use App\Models\Student;
+use App\Models\Teacher;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * * DEMO SEEDER: Lightweight data for presentations
@@ -19,14 +20,16 @@ class DemoSeeder extends Seeder
         $this->command->info('🎬 Creating demo database...');
 
         // 4 Teachers (2 main + 2 secondary)
+        $hashedPassword = Hash::make('demo123');
+
         $mainTeachers = [
-            Teacher::create(['name' => 'Maria Garcia', 'password' => 'demo123']),
-            Teacher::create(['name' => 'John Smith', 'password' => 'demo123']),
+            Teacher::create(['name' => 'Maria Garcia', 'password' => $hashedPassword]),
+            Teacher::create(['name' => 'John Smith', 'password' => $hashedPassword]),
         ];
 
         $secondaryTeachers = [
-            Teacher::create(['name' => 'Anna Petrov', 'password' => 'demo123']),
-            Teacher::create(['name' => 'Carlos Rodriguez', 'password' => 'demo123']),
+            Teacher::create(['name' => 'Anna Petrov', 'password' => $hashedPassword]),
+            Teacher::create(['name' => 'Carlos Rodriguez', 'password' => $hashedPassword]),
         ];
 
         $allTeachers = array_merge($mainTeachers, $secondaryTeachers);
@@ -53,7 +56,7 @@ class DemoSeeder extends Seeder
             $students[] = Student::create([
                 'name' => $data['name'],
                 'parent_name' => $data['parent'],
-                'email' => strtolower(str_replace(' ', '.', $data['name'])) . '@demo.com',
+                'email' => strtolower(str_replace(' ', '.', $data['name'])).'@demo.com',
                 'goal' => $data['goal'],
                 'description' => 'Demo student',
             ]);
@@ -91,7 +94,7 @@ class DemoSeeder extends Seeder
 
         // Generate ~80 lessons for January
         $totalLessons = 80;
-        
+
         // Status distribution
         $completedCount = 60;
         $scCount = 12;
@@ -108,12 +111,14 @@ class DemoSeeder extends Seeder
 
         for ($i = 0; $i < $totalLessons; $i++) {
             // Pick teacher (70% main, 30% secondary)
-            $teacher = (rand(1, 100) <= 70) 
+            $teacher = (rand(1, 100) <= 70)
                 ? $mainTeachers[array_rand($mainTeachers)]
                 : $secondaryTeachers[array_rand($secondaryTeachers)];
 
             $teacherStudents = $teacher->students;
-            if ($teacherStudents->isEmpty()) continue;
+            if ($teacherStudents->isEmpty()) {
+                continue;
+            }
 
             $student = $teacherStudents->random();
             $day = rand(1, 30); // Up to Jan 30
@@ -122,8 +127,8 @@ class DemoSeeder extends Seeder
             $status = $statusPool[$i] ?? 'completed';
             $topic = ($status === 'completed') ? $topics[array_rand($topics)] : null;
             $homework = ($status === 'completed' && rand(1, 100) <= 70) ? $homeworks[array_rand($homeworks)] : null;
-            
-            $comments = match($status) {
+
+            $comments = match ($status) {
                 'student_cancelled' => 'Student cancelled with notice',
                 'teacher_cancelled' => 'Teacher unavailable',
                 'student_absent' => 'Student did not show up',
@@ -145,7 +150,7 @@ class DemoSeeder extends Seeder
 
         $this->command->info("✅ Created {$lessonCount} lessons for January 2026");
         $this->command->newLine();
-        
+
         $this->command->info('🎬 Demo database ready!');
         $this->command->info('   Teachers: 4');
         $this->command->info('   Students: 12');
