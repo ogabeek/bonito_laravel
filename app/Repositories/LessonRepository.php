@@ -99,6 +99,25 @@ class LessonRepository
     }
 
     /**
+     * * Returns [student_id => 'Y-m-d'] of each student's most recent lesson (any status).
+     * ? Used to nudge teachers when a student has gone quiet or has resumed classes.
+     *
+     * @param  array<int, int>  $studentIds
+     * @return Collection<int, string>
+     */
+    public function getLatestLessonDateByStudent(array $studentIds): Collection
+    {
+        if (empty($studentIds)) {
+            return collect();
+        }
+
+        return Lesson::whereIn('student_id', $studentIds)
+            ->selectRaw('student_id, MAX(class_date) as last_date')
+            ->groupBy('student_id')
+            ->pluck('last_date', 'student_id');
+    }
+
+    /**
      * * Returns [student_id => count] of chargeable classes
      * ! Chargeable = completed OR student_absent (not cancelled)
      */

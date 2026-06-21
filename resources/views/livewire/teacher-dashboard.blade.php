@@ -88,6 +88,37 @@ new class extends Component
         return app(LessonStatisticsService::class)->calculateStatsByStudent($this->lessons);
     }
 
+    /**
+     * Per-student status hint, independent of the viewed month:
+     *  - 'inactivity'  : an Active student with no lesson in the last 7 days.
+     *  - 'reactivation': a non-active student whose classes have resumed.
+     * Students needing no action are omitted.
+     *
+     * @return \Illuminate\Support\Collection<int, string>
+     */
+    #[Computed]
+    public function studentNudges(): \Illuminate\Support\Collection
+    {
+        $students = $this->students;
+        $latest = app(LessonRepository::class)->getLatestLessonDateByStudent($students->pluck('id')->all());
+        $threshold = now()->subDays(7)->startOfDay();
+
+        return $students->mapWithKeys(function ($student) use ($latest, $threshold) {
+            $last = isset($latest[$student->id]) ? Carbon::parse($latest[$student->id]) : null;
+            $recent = $last !== null && $last->gte($threshold);
+
+            if ($student->status === StudentStatus::ACTIVE) {
+                // Was attending (has history) but has now gone quiet for a week.
+                $nudge = ($last !== null && ! $recent) ? 'inactivity' : null;
+            } else {
+                // Any non-active student with classes again → suggest reactivating.
+                $nudge = $recent ? 'reactivation' : null;
+            }
+
+            return [$student->id => $nudge];
+        })->filter();
+    }
+
     public function goToMonth(string $direction): void
     {
         if ($direction === 'prev') {
@@ -240,7 +271,7 @@ new class extends Component
             $this->teacher
         );
 
-        unset($this->students);
+        unset($this->students, $this->studentNudges);
     }
 };
 ?>
@@ -280,7 +311,7 @@ new class extends Component
                 </div>
             </div>
             @if($this->students->count() > 0)
-                <x-student-stats-list :students="$this->students" :stats="$this->studentStats" :totalStats="$this->stats" :showBalance="false" :editable="true" />
+                <x-student-stats-list :students="$this->students" :stats="$this->studentStats" :totalStats="$this->stats" :showBalance="false" :editable="true" :nudges="$this->studentNudges" />
             @else
                 <x-empty-state message="No students assigned" />
             @endif
