@@ -346,6 +346,9 @@ new class extends Component
                                                 <td class="cal-cell cal-sticky border-r bg-white align-middle">
                                                     <div class="flex items-center gap-1 min-w-0">
                                                         <x-student-status-dot :status="$student->status" />
+                                                        @if($student->countryFlag())
+                                                            <span class="text-[12px] leading-none flex-shrink-0" title="{{ $student->originLabel() }}">{{ $student->countryFlag() }}</span>
+                                                        @endif
                                                         <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-[12px] text-gray-900 hover:text-blue-600 truncate">
                                                             {{ $student->name }}
                                                         </a>
@@ -379,11 +382,7 @@ new class extends Component
                                                         :class="hoverCol === {{ $loop->index }} && 'cal-col-hover'">
                                                         <div class="flex flex-wrap justify-center gap-0.5">
                                                             @foreach($dayLessons as $lesson)
-                                                                <span class="cal-lesson-chip {{ $lesson->refund_requested ? 'ring-1 ring-amber-500' : '' }}"
-                                                                     style="background: var(--color-status-{{ $lesson->status->cssClass() }}-bg); color: var(--color-status-{{ $lesson->status->cssClass() }});"
-                                                                     title="{{ $lesson->teacher->name }} - {{ $lesson->status->label() }}{{ $lesson->refund_requested ? ' · refund requested' : '' }}">
-                                                                    {{ substr($lesson->teacher->name, 0, 1) }}
-                                                                </span>
+                                                                <x-calendar-lesson-chip :lesson="$lesson" wire:key="lesson-chip-{{ $lesson->id }}" />
                                                             @endforeach
                                                         </div>
                                                     </td>

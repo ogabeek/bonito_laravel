@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Support\Countries;
+use App\Support\Languages;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 /**
  * * BASE REQUEST: Shared student validation (abstract)
@@ -21,6 +24,8 @@ abstract class StudentRequest extends FormRequest
             'name' => 'required|string|max:255',
             'parent_name' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
+            'country' => ['nullable', Rule::in(Countries::codes())],
+            'language' => ['nullable', Rule::in(Languages::codes())],
             'goal' => 'nullable|string',
             'description' => 'nullable|string',
         ];

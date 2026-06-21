@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\StudentStatus;
+use App\Support\Countries;
+use App\Support\Languages;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -34,6 +36,8 @@ class Student extends Model
         'name',
         'parent_name',
         'email',
+        'country',      // ISO 3166-1 alpha-2 (flag derived)
+        'language',     // ISO 639-1 spoken language
         'goal',
         'description',
         'status',       // active, inactive, holiday
@@ -77,6 +81,37 @@ class Student extends Model
         }
 
         return $this->vacation_starts_on->format('M j').' – '.$this->vacation_ends_on->format('M j');
+    }
+
+    /** Flag emoji for the student's country, or '' when unset/unknown. */
+    public function countryFlag(): string
+    {
+        return Countries::flag($this->country);
+    }
+
+    /** Human-readable country name, or null when unset. */
+    public function countryName(): ?string
+    {
+        return Countries::name($this->country);
+    }
+
+    /** Human-readable spoken-language name, or null when unset. */
+    public function languageName(): ?string
+    {
+        return Languages::name($this->language);
+    }
+
+    /**
+     * "🇪🇸 Spain · Spanish" style label for tooltips; null when nothing is set.
+     */
+    public function originLabel(): ?string
+    {
+        $parts = array_filter([
+            trim($this->countryFlag().' '.$this->countryName()),
+            $this->languageName(),
+        ]);
+
+        return $parts === [] ? null : implode(' · ', $parts);
     }
 
     // Auto-generate UUID on creation

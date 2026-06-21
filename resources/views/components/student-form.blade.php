@@ -50,6 +50,30 @@
                 placeholder="{{ $mode === 'create' ? 'Goal' : '' }}"
                 class="w-full px-3 py-2 border rounded">
         </div>
+
+        <div>
+            @if($mode === 'edit')
+                <label class="block text-sm font-medium mb-1">Country</label>
+            @endif
+            <select name="country" class="w-full px-3 py-2 border rounded">
+                <option value="">{{ $mode === 'create' ? 'Country' : '— None —' }}</option>
+                @foreach(\App\Support\Countries::options() as $code => $label)
+                    <option value="{{ $code }}" @selected(old('country', $student?->country) === $code)>{{ $label }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div>
+            @if($mode === 'edit')
+                <label class="block text-sm font-medium mb-1">Spoken Language</label>
+            @endif
+            <select name="language" class="w-full px-3 py-2 border rounded">
+                <option value="">{{ $mode === 'create' ? 'Spoken Language' : '— None —' }}</option>
+                @foreach(\App\Support\Languages::options() as $code => $label)
+                    <option value="{{ $code }}" @selected(old('language', $student?->language) === $code)>{{ $label }}</option>
+                @endforeach
+            </select>
+        </div>
     </div>
 
     <div>
