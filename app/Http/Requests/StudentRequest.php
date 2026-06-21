@@ -18,6 +18,17 @@ abstract class StudentRequest extends FormRequest
         return session()->has('admin_authenticated');
     }
 
+    /**
+     * A multi-select submits no key when nothing is chosen; default it to an
+     * empty array so de-selecting all languages clears them on update.
+     */
+    protected function prepareForValidation(): void
+    {
+        if (! $this->has('languages')) {
+            $this->merge(['languages' => []]);
+        }
+    }
+
     public function rules(): array
     {
         return [
@@ -25,7 +36,8 @@ abstract class StudentRequest extends FormRequest
             'parent_name' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'country' => ['nullable', Rule::in(Countries::codes())],
-            'language' => ['nullable', Rule::in(Languages::codes())],
+            'languages' => ['nullable', 'array'],
+            'languages.*' => ['string', Rule::in(Languages::codes())],
             'goal' => 'nullable|string',
             'description' => 'nullable|string',
         ];

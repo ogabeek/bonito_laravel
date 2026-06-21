@@ -58,10 +58,22 @@ class Languages
         'vi' => 'Vietnamese',
     ];
 
+    /**
+     * Codes our students most commonly speak — surfaced first in the picker.
+     * (~95% of students speak one of these.)
+     */
+    private const COMMON = ['ru', 'en', 'es'];
+
     /** @return array<string, string> */
     public static function all(): array
     {
         return self::NAMES;
+    }
+
+    /** @return list<string> */
+    public static function common(): array
+    {
+        return self::COMMON;
     }
 
     /** @return list<string> */
@@ -78,11 +90,5 @@ class Languages
     public static function name(?string $code): ?string
     {
         return $code === null ? null : (self::NAMES[strtolower($code)] ?? null);
-    }
-
-    /** Same shape as the map; provided for symmetry with Countries::options(). */
-    public static function options(): array
-    {
-        return self::NAMES;
     }
 }

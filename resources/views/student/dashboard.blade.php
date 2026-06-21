@@ -17,7 +17,14 @@
         <x-page-header
             :title="$student->name"
             :subtitle="$student->goal ? 'Goal: ' . $student->goal : null"
-        />
+        >
+            @if($student->countryFlag())
+                <x-slot:before>
+                    <span class="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gray-100 ring-1 ring-gray-200 text-xl leading-none flex-shrink-0"
+                          title="{{ $student->originLabel() }}">{{ $student->countryFlag() }}</span>
+                </x-slot:before>
+            @endif
+        </x-page-header>
     </div>
 
     @if(config('banners.student_welcome.enabled'))

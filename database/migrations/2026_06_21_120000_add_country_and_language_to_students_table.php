@@ -10,12 +10,12 @@ return new class extends Migration
     {
         Schema::table('students', function (Blueprint $table) {
             // Origin tracking for demographics: ISO 3166-1 alpha-2 country code
-            // (flag is derived from this) and ISO 639-1 spoken language code.
+            // (flag is derived from this) and the student's spoken languages as a
+            // JSON array of ISO 639-1 codes (students are often bilingual).
             $table->string('country', 2)->nullable()->after('email');
-            $table->string('language', 8)->nullable()->after('country');
+            $table->json('languages')->nullable()->after('country');
 
             $table->index('country');
-            $table->index('language');
         });
     }
 
@@ -23,8 +23,7 @@ return new class extends Migration
     {
         Schema::table('students', function (Blueprint $table) {
             $table->dropIndex(['country']);
-            $table->dropIndex(['language']);
-            $table->dropColumn(['country', 'language']);
+            $table->dropColumn(['country', 'languages']);
         });
     }
 };

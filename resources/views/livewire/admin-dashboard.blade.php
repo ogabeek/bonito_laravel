@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\FeedbackSender;
+use App\Models\FeedbackMessage;
 use App\Models\Teacher;
 use App\Services\DashboardDataService;
 use Livewire\Attributes\Computed;
@@ -106,6 +108,13 @@ new class extends Component
             ->toArray();
     }
 
+    /** Unread teacher feedback awaiting an admin reply (drives the Logs link dot). */
+    #[Computed]
+    public function feedbackUnread(): int
+    {
+        return FeedbackMessage::unreadFrom(FeedbackSender::TEACHER)->count();
+    }
+
     #[Computed]
     public function teachers(): \Illuminate\Support\Collection
     {
@@ -192,7 +201,16 @@ new class extends Component
             </div>
             <span class="w-px h-5 bg-gray-200"></span>
             <a href="{{ route('admin.billing') }}" class="text-sm text-blue-600 hover:underline">Billing / Stats</a>
-            <a href="{{ route('admin.logs') }}" class="text-sm text-blue-600 hover:underline">Activity Logs</a>
+            <a href="{{ route('admin.logs') }}" class="relative text-sm text-blue-600 hover:underline"
+               title="{{ $this->feedbackUnread > 0 ? $this->feedbackUnread.' new feedback message'.($this->feedbackUnread === 1 ? '' : 's') : 'Activity Logs' }}">
+                Activity Logs
+                @if($this->feedbackUnread > 0)
+                    <span class="absolute -right-2.5 -top-1.5 flex h-2.5 w-2.5">
+                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+                        <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                    </span>
+                @endif
+            </a>
         </div>
     </x-page-header>
 

@@ -37,7 +37,7 @@ class Student extends Model
         'parent_name',
         'email',
         'country',      // ISO 3166-1 alpha-2 (flag derived)
-        'language',     // ISO 639-1 spoken language
+        'languages',    // array of ISO 639-1 spoken-language codes
         'goal',
         'description',
         'status',       // active, inactive, holiday
@@ -58,6 +58,7 @@ class Student extends Model
             'status' => StudentStatus::class,
             'vacation_starts_on' => 'date',
             'vacation_ends_on' => 'date',
+            'languages' => 'array',
         ];
     }
 
@@ -95,20 +96,35 @@ class Student extends Model
         return Countries::name($this->country);
     }
 
-    /** Human-readable spoken-language name, or null when unset. */
-    public function languageName(): ?string
+    /**
+     * Display names of the student's spoken languages.
+     *
+     * @return list<string>
+     */
+    public function languageNames(): array
     {
-        return Languages::name($this->language);
+        return array_values(array_filter(array_map(
+            fn ($code) => Languages::name($code),
+            $this->languages ?? []
+        )));
+    }
+
+    /** Comma-separated spoken languages (e.g. "Spanish, English"), or null. */
+    public function languagesLabel(): ?string
+    {
+        $names = $this->languageNames();
+
+        return $names === [] ? null : implode(', ', $names);
     }
 
     /**
-     * "🇪🇸 Spain · Spanish" style label for tooltips; null when nothing is set.
+     * "🇪🇸 Spain · Spanish, English" style label for tooltips; null when nothing is set.
      */
     public function originLabel(): ?string
     {
         $parts = array_filter([
             trim($this->countryFlag().' '.$this->countryName()),
-            $this->languageName(),
+            $this->languagesLabel(),
         ]);
 
         return $parts === [] ? null : implode(' · ', $parts);
