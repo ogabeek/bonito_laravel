@@ -5,6 +5,7 @@ use App\Models\Teacher;
 use App\Repositories\LessonRepository;
 use App\Services\BalanceService;
 use App\Services\LessonStatisticsService;
+use App\Services\PaymentsService;
 use App\Services\StudentBalanceService;
 use App\Services\TeacherStatsService;
 use Livewire\Attributes\Computed;
@@ -42,6 +43,7 @@ new class extends Component
     public function refreshBalances(): void
     {
         app(BalanceService::class)->refreshCache();
+        app(PaymentsService::class)->refreshCache();
         $this->balances = app(BalanceService::class)->getBalances();
         $this->balancesLoaded = true;
         session()->flash('success', 'Balance data refreshed from Google Sheets');

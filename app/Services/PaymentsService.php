@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Student;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -156,14 +157,38 @@ class PaymentsService
 
     protected function parseDate(mixed $value): ?string
     {
-        $ts = strtotime((string) $value);
+        $value = trim((string) $value);
 
-        return $ts === false ? null : date('Y-m-d', $ts);
+        if ($value === '') {
+            return null;
+        }
+
+        foreach (['Y-m-d', 'j/n/y', 'j/n/Y', 'j.n.y', 'j.n.Y', 'j-n-y', 'j-n-Y'] as $format) {
+            try {
+                return Carbon::createFromFormat('!'.$format, $value)->toDateString();
+            } catch (\Throwable) {
+                // Try the next known Sheets date format.
+            }
+        }
+
+        $timestamp = strtotime($value);
+
+        return $timestamp === false ? null : date('Y-m-d', $timestamp);
     }
 
     protected function parseNumber(mixed $value): ?float
     {
-        $clean = str_replace([',', ' ', "\u{00A0}"], '', (string) $value);
+        $clean = str_replace([' ', "\u{00A0}"], '', trim((string) $value));
+        $lastComma = strrpos($clean, ',');
+        $lastDot = strrpos($clean, '.');
+
+        if ($lastComma !== false && $lastDot !== false) {
+            $clean = $lastComma > $lastDot
+                ? str_replace(',', '.', str_replace('.', '', $clean))
+                : str_replace(',', '', $clean);
+        } elseif ($lastComma !== false) {
+            $clean = str_replace(',', '.', $clean);
+        }
 
         return is_numeric($clean) ? (float) $clean : null;
     }

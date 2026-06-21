@@ -15,8 +15,8 @@ use Illuminate\Support\Collection;
  * from the journal start, beginning at an opening balance derived so the ledger
  * always ends at the student's real balance (Paid classes - used):
  *
- *   opening = paid - payments_since_cutoff
- *           = current_balance + chargeable_since_cutoff - payments_since_cutoff
+ *   current_balance = paid - all_chargeable_lessons
+ *   opening = current_balance + chargeable_since_cutoff - payments_since_cutoff
  *
  * Everything before the cutoff is absorbed into the opening, so the old
  * messy/undated payment history is never read. A weird opening (e.g. negative)
@@ -35,7 +35,7 @@ class BalanceLedgerService
 
     /**
      * @return array{
-     *   student: Student, cutoff: string, paid: ?float, used: int,
+     *   student: Student, cutoff: string, paid: ?float, used: int, used_since_cutoff: int,
      *   payments_total: float, opening: ?float,
      *   current_balance: ?float, computed_end: ?float, has_balance_data: bool,
      *   entries: Collection<int, mixed>
@@ -49,9 +49,16 @@ class BalanceLedgerService
         $paid = $this->paidClasses($student);
         $payments = $this->paymentsService->forStudent($student);
 
-        // Lessons within [cutoff, today], oldest first.
-        /** @var Collection<int, Lesson> $lessons */
-        $lessons = $this->lessonRepository->getForStudent($student->id, ['teacher'])
+        /** @var Collection<int, Lesson> $allLessons */
+        $allLessons = $this->lessonRepository->getForStudent($student->id, ['teacher']);
+
+        $totalUsed = $allLessons
+            ->filter(fn (Lesson $lesson) => $lesson->class_date->toDateString() <= $today)
+            ->filter(fn (Lesson $lesson) => in_array($lesson->status, $this->chargeable, true))
+            ->count();
+
+        // Journal entries within [cutoff, today], oldest first.
+        $lessons = $allLessons
             ->filter(function (Lesson $lesson) use ($cutoff, $today) {
                 $date = $lesson->class_date->toDateString();
 
@@ -62,8 +69,10 @@ class BalanceLedgerService
         $usedSinceCutoff = $lessons->filter(fn ($l) => in_array($l->status, $this->chargeable, true))->count();
         $paymentsTotal = (float) $payments->sum('hours');
 
-        $currentBalance = $paid !== null ? $paid - $usedSinceCutoff : null;
-        $opening = $paid !== null ? $paid - $paymentsTotal : null;
+        $currentBalance = $paid !== null ? $paid - $totalUsed : null;
+        $opening = $currentBalance !== null
+            ? $currentBalance + $usedSinceCutoff - $paymentsTotal
+            : null;
 
         $entries = $this->applyRunningBalance($this->mergeEntries($lessons, $payments), $opening);
 
@@ -74,7 +83,8 @@ class BalanceLedgerService
             'student' => $student,
             'cutoff' => $cutoff,
             'paid' => $paid,
-            'used' => $usedSinceCutoff,
+            'used' => $totalUsed,
+            'used_since_cutoff' => $usedSinceCutoff,
             'payments_total' => $paymentsTotal,
             'opening' => $opening,
             'current_balance' => $currentBalance,

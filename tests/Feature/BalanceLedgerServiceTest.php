@@ -42,6 +42,7 @@ it('ends at paid minus used and reconciles', function () {
 
     expect($data['paid'])->toBe(10.0)
         ->and($data['used'])->toBe(4)              // 3 completed + 1 absent (cancelled excluded)
+        ->and($data['used_since_cutoff'])->toBe(4)
         ->and($data['payments_total'])->toBe(4.0)
         ->and($data['opening'])->toBe(6.0)         // 10 paid - 4 payments
         ->and($data['current_balance'])->toBe(6.0) // 10 paid - 4 used
@@ -75,9 +76,12 @@ it('absorbs lessons before the cutoff and ignores future lessons', function () {
 
     $data = ledgerFor($student, paid: 5);
 
-    expect($data['used'])->toBe(1)
+    expect($data['used'])->toBe(2)
+        ->and($data['used_since_cutoff'])->toBe(1)
         ->and($data['entries'])->toHaveCount(1)
-        ->and($data['computed_end'])->toBe(4.0);
+        ->and($data['opening'])->toBe(4.0)
+        ->and($data['current_balance'])->toBe(3.0)
+        ->and($data['computed_end'])->toBe(3.0);
 });
 
 it('produces a negative opening when journal payments exceed paid', function () {
