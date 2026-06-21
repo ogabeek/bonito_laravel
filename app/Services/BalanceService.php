@@ -26,42 +26,61 @@ class BalanceService
      */
     public function getBalances(): array
     {
+        $cached = Cache::get('balances.sheet');
+
+        if (is_array($cached)) {
+            return $cached;
+        }
+
+        $balances = $this->fetchBalances();
+
+        // ! Never cache an empty result: a transient Sheets timeout would otherwise
+        // ! hide every student's balance for the whole TTL.
+        if ($balances !== []) {
+            Cache::put('balances.sheet', $balances, config('services.sheets.cache_ttl', 300));
+        }
+
+        return $balances;
+    }
+
+    /**
+     * * Reads [uuid => paid_classes] straight from the sheet (uncached).
+     */
+    protected function fetchBalances(): array
+    {
         $tab = config('services.sheets.balance_sheet_tab', 'balances');
-        $cacheTtl = config('services.sheets.cache_ttl', 300);
 
-        return Cache::remember('balances.sheet', $cacheTtl, function () use ($tab) {
-            if (! $this->sheetsClient->initialize(readonly: true)) {
-                return [];
+        if (! $this->sheetsClient->initialize(readonly: true)) {
+            return [];
+        }
+
+        $rows = $this->sheetsClient->read($tab);
+
+        if ($rows->isEmpty()) {
+            return [];
+        }
+
+        // * pull(0) removes and returns first row (headers)
+        $headers = array_map('strtolower', $rows->pull(0));
+
+        $uuidIndex = array_search('uuid', $headers);
+        $balanceIndex = array_search('paid classes', $headers);
+
+        if ($uuidIndex === false || $balanceIndex === false) {
+            return [];
+        }
+
+        $balances = [];
+        foreach ($rows as $row) {
+            $uuid = $row[$uuidIndex] ?? null;
+            $balance = $row[$balanceIndex] ?? null;
+
+            if ($uuid !== null && $balance !== null) {
+                $balances[$uuid] = is_numeric($balance) ? (int) $balance : $balance;
             }
+        }
 
-            $rows = $this->sheetsClient->read($tab);
-
-            if ($rows->isEmpty()) {
-                return [];
-            }
-
-            // * pull(0) removes and returns first row (headers)
-            $headers = array_map('strtolower', $rows->pull(0));
-
-            $uuidIndex = array_search('uuid', $headers);
-            $balanceIndex = array_search('paid classes', $headers);
-
-            if ($uuidIndex === false || $balanceIndex === false) {
-                return [];
-            }
-
-            $balances = [];
-            foreach ($rows as $row) {
-                $uuid = $row[$uuidIndex] ?? null;
-                $balance = $row[$balanceIndex] ?? null;
-
-                if ($uuid !== null && $balance !== null) {
-                    $balances[$uuid] = is_numeric($balance) ? (int) $balance : $balance;
-                }
-            }
-
-            return $balances;
-        });
+        return $balances;
     }
 
     /**

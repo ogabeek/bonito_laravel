@@ -61,3 +61,6 @@ notes.md
 
 # From Forge migration (contains production secrets — keep local only)
 forge_env_and_links*
+
+# Local database dumps/snapshots (contain real student & payment data — keep local only)
+*.sql

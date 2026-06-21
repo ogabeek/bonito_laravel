@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
  * Uses UUID for public-facing URLs instead of sequential IDs.
  * Many-to-many with Teachers via student_teacher pivot table.
  *
+ * @property StudentStatus $status
  * @property \Illuminate\Support\Carbon|null $vacation_starts_on
  * @property \Illuminate\Support\Carbon|null $vacation_ends_on
  *

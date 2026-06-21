@@ -12,6 +12,8 @@
 
     <x-session-alert />
 
+    <x-student-ledger :ledger="$ledger" />
+
     <x-card class="mb-6">
         <form method="POST" action="{{ route('admin.students.update', $student) }}">
             @csrf
@@ -45,15 +47,6 @@
                 @endforeach
             </select>
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Assign</button>
-        </form>
-    </x-card>
-
-    <x-card title="Status" class="mb-6">
-        <form method="POST" action="{{ route('admin.students.status.update', $student) }}" class="flex gap-2 items-center">
-            @csrf
-            <x-student-status-dot :status="$student->status" :size="10" class="flex-shrink-0" />
-            <x-student-status-select :selected="$student->status" name="status" required class="flex-1 text-sm" />
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Update</button>
         </form>
     </x-card>
 </div>

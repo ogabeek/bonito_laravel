@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\BalanceService;
 use App\Services\BillingDataService;
+use App\Services\PaymentsService;
 use App\Services\StatsExportService;
 use Illuminate\Http\Request;
 
@@ -32,9 +33,10 @@ class BillingController extends Controller
             ->with($exported ? 'success' : 'error', $exported ? 'Stats exported to sheet' : 'Failed to export stats');
     }
 
-    public function refresh(Request $request, BalanceService $balanceService)
+    public function refresh(Request $request, BalanceService $balanceService, PaymentsService $paymentsService)
     {
         $balanceService->refreshCache();
+        $paymentsService->refreshCache();
 
         return redirect()
             ->route('admin.billing', [

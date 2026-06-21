@@ -12,6 +12,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Lesson - Core entity representing a tutoring session
+ *
+ * @property int $id
+ * @property int $teacher_id
+ * @property int $student_id
+ * @property \Illuminate\Support\Carbon $class_date
+ * @property LessonStatus $status
+ * @property string|null $topic
+ * @property string|null $homework
+ * @property string|null $comments
+ * @property bool $absence_reminder_sent
+ * @property bool $absence_chat_notified
+ * @property bool $refund_requested
+ * @property-read Teacher|null $teacher
+ * @property-read Student|null $student
  */
 class Lesson extends Model
 {

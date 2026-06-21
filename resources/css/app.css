@@ -46,6 +46,19 @@
     --color-status-cancelled-border: #fdba74;
 }
 
+/* Tailwind v4 changed the default `border`/`divide` color from gray-200 (v3) to
+   `currentColor`, so every bare `border` utility renders dark — most visibly as
+   black gridlines across the calendar. Restore the conventional gray default. */
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+}
+
 :root {
     --color-primary: #2563eb;
     --color-primary-hover: #1d4ed8;

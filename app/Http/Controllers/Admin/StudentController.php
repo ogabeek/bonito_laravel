@@ -9,6 +9,7 @@ use App\Http\Requests\CreateStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
 use App\Models\Student;
 use App\Models\Teacher;
+use App\Services\BalanceLedgerService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -27,13 +28,17 @@ class StudentController extends Controller
         return redirect()->route('admin.dashboard')->with('success', 'Student created successfully!');
     }
 
-    public function edit(Student $student)
+    public function edit(Student $student, BalanceLedgerService $ledger)
     {
         $student->load('teachers');
         $assignedTeacherIds = $student->teachers->pluck('id')->toArray();
         $availableTeachers = Teacher::whereNotIn('id', $assignedTeacherIds)->get();
 
-        return view('admin.students.edit', compact('student', 'availableTeachers'));
+        return view('admin.students.edit', [
+            'student' => $student,
+            'availableTeachers' => $availableTeachers,
+            'ledger' => $ledger->forStudent($student),
+        ]);
     }
 
     public function update(UpdateStudentRequest $request, Student $student)
