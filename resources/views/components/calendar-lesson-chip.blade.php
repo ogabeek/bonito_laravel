@@ -3,13 +3,13 @@
 @php
     $status = $lesson->status;
     $css = $status->cssClass();
-    $refund = $lesson->refund_requested;
+    $needsRecovery = $lesson->refund_requested;
 @endphp
 
 {{-- Calendar day chip with a logs-style hover card (teleported to <body> so it
      is not clipped by the scrollable calendar). --}}
 <span {{ $attributes }}
-      class="cal-lesson-chip {{ $refund ? 'ring-1 ring-amber-500' : '' }}"
+      class="cal-lesson-chip {{ $needsRecovery ? 'ring-1 ring-amber-500' : '' }}"
       style="background: var(--color-status-{{ $css }}-bg); color: var(--color-status-{{ $css }});"
       x-data="{ show: false, x: 0, y: 0 }"
       @mouseenter="show = true"
@@ -21,11 +21,7 @@
         <div x-show="show" x-cloak
              :style="`top: ${y + 16}px; left: ${Math.min(x + 16, window.innerWidth - 272)}px`"
              class="fixed z-50 w-64 rounded-lg border bg-white p-3 shadow-lg text-xs text-gray-600 space-y-0.5 pointer-events-none">
-            <div class="flex items-center justify-between gap-2 mb-1">
-                <span class="font-semibold text-gray-900 truncate">{{ $lesson->teacher->name }}</span>
-                <span class="flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold {{ $status->badgeClass() }}">{{ $status->label() }}</span>
-            </div>
-            <div><span class="font-medium text-gray-700">Date:</span> {{ $lesson->class_date->format('M d, Y') }}</div>
+            <div class="mb-1 truncate font-semibold text-gray-900">{{ $lesson->teacher->name }}</div>
             @if(filled($lesson->topic))
                 <div><span class="font-medium text-gray-700">Topic:</span> {{ $lesson->topic }}</div>
             @endif
@@ -33,10 +29,10 @@
                 <div><span class="font-medium text-gray-700">Homework:</span> {{ $lesson->homework }}</div>
             @endif
             @if(filled($lesson->comments))
-                <div><span class="font-medium text-gray-700">Comments:</span> {{ $lesson->comments }}</div>
+                <div><span class="font-medium text-gray-700">Notes:</span> {{ $lesson->comments }}</div>
             @endif
-            @if($refund)
-                <div class="font-medium text-amber-600">Refund requested</div>
+            @if($status === \App\Enums\LessonStatus::STUDENT_ABSENT)
+                <x-absence-follow-up :flags="$lesson->absenceFollowUp()" class="pt-2" />
             @endif
         </div>
     </template>

@@ -72,14 +72,14 @@
             <div class="flex flex-col gap-2">
                 <label class="flex items-center gap-2 text-sm cursor-pointer">
                     <input type="checkbox" name="absence_reminder_sent" value="1" class="form-checkbox">
-                    <span>Reminder was sent before class</span>
+                    <span>Reminder sent before class</span>
                 </label>
                 <label class="flex items-center gap-2 text-sm cursor-pointer">
                     <input type="checkbox" name="absence_chat_notified" value="1" class="form-checkbox">
-                    <span>Texted to chat about waiting, no response</span>
+                    <span>No response after waiting message</span>
                 </label>
             </div>
-            <p class="text-xs text-gray-500 italic">If both steps were completed, the school recovers 50% of the lesson payment.</p>
+            <p class="text-xs text-gray-500 italic">If both follow-up steps were completed, the school can recover 50% of the lesson payment.</p>
         </div>
 
         <!-- Shared notes/reason field -->

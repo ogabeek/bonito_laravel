@@ -425,16 +425,16 @@ new class extends Component
                             <div class="flex flex-col gap-2">
                                 <label class="flex items-center gap-2 text-sm cursor-pointer">
                                     <input type="checkbox" wire:model="absence_reminder_sent" class="form-checkbox">
-                                    <span>Reminder was sent before class</span>
+                                    <span>Reminder sent before class</span>
                                 </label>
                                 <label class="flex items-center gap-2 text-sm cursor-pointer">
                                     <input type="checkbox" wire:model="absence_chat_notified" class="form-checkbox">
-                                    <span>Texted to chat about waiting, no response</span>
+                                    <span>No response after waiting message</span>
                                 </label>
-                                <p class="text-xs text-gray-500 italic">If both steps were completed, the school recovers 50% of the lesson payment.</p>
+                                <p class="text-xs text-gray-500 italic">If both follow-up steps were completed, the school can recover 50% of the lesson payment.</p>
                                 <label class="flex items-center gap-2 text-sm cursor-pointer mt-1 pt-2 border-t border-gray-100">
                                     <input type="checkbox" wire:model="refund_requested" class="form-checkbox">
-                                    <span>Request refund for this class</span>
+                                    <span>Needs recovery</span>
                                 </label>
                             </div>
                         @endif

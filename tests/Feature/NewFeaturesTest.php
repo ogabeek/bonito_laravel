@@ -4,9 +4,12 @@ use App\Enums\FeedbackSender;
 use App\Enums\FeedbackStatus;
 use App\Models\FeedbackMessage;
 use App\Models\FeedbackThread;
+use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Teacher;
+use Illuminate\Support\Facades\Blade;
 use Livewire\Volt\Volt;
+use Spatie\Activitylog\Models\Activity;
 
 // ─── Absent notes + refund request ───────────────────────────────────────────
 
@@ -25,26 +28,71 @@ it('requires a note when marking a student absent', function () {
         ->assertJsonValidationErrors(['comments']);
 });
 
-it('stores a refund request on an absent lesson', function () {
+it('stores and logs the follow-up choices for an absent lesson', function () {
     $teacher = Teacher::factory()->create();
     $student = Student::factory()->create();
     $teacher->students()->attach($student);
 
-    $this->withSession(['teacher_id' => $teacher->id])
-        ->postJson(route('teacher.lesson.create'), [
-            'student_id' => $student->id,
-            'class_date' => now()->format('Y-m-d'),
-            'status' => 'student_absent',
-            'comments' => 'No show, reminded twice',
-            'refund_requested' => true,
-        ])
-        ->assertSuccessful();
+    session(['teacher_id' => $teacher->id]);
+
+    Volt::test('teacher-dashboard', ['teacher' => $teacher])
+        ->set('student_id', (string) $student->id)
+        ->set('class_date', now()->format('Y-m-d'))
+        ->set('status', 'student_absent')
+        ->set('comments', 'No show, reminded twice')
+        ->set('absence_reminder_sent', true)
+        ->set('absence_chat_notified', true)
+        ->set('refund_requested', true)
+        ->call('createLesson')
+        ->assertHasNoErrors();
 
     $this->assertDatabaseHas('lessons', [
         'student_id' => $student->id,
         'status' => 'student_absent',
+        'absence_reminder_sent' => true,
+        'absence_chat_notified' => true,
         'refund_requested' => true,
     ]);
+
+    $activity = Activity::query()->where('description', 'lesson_created')->latest()->firstOrFail();
+
+    expect($activity->properties->get('needs_recovery'))->toBeTrue()
+        ->and($activity->properties->get('reminder_sent'))->toBeTrue()
+        ->and($activity->properties->get('no_response'))->toBeTrue();
+
+    $this->withSession(['admin_authenticated' => true])
+        ->get(route('admin.logs'))
+        ->assertSuccessful()
+        ->assertSee('Student absent')
+        ->assertSee('Needs recovery')
+        ->assertSee('Reminder sent')
+        ->assertSee('No response');
+});
+
+it('shows concise lesson details and follow-up choices in the calendar tooltip', function () {
+    $teacher = Teacher::factory()->create(['name' => 'Maria Teacher']);
+    $student = Student::factory()->create();
+    $lesson = Lesson::factory()->studentAbsent()->create([
+        'teacher_id' => $teacher->id,
+        'student_id' => $student->id,
+        'comments' => 'Student did not join the call.',
+        'absence_reminder_sent' => true,
+        'absence_chat_notified' => false,
+        'refund_requested' => true,
+    ])->load('teacher');
+
+    $html = Blade::render('<x-calendar-lesson-chip :lesson="$lesson" />', ['lesson' => $lesson]);
+
+    expect($html)
+        ->toContain('Maria Teacher')
+        ->toContain('Notes:')
+        ->toContain('Student did not join the call.')
+        ->toContain('Needs recovery')
+        ->toContain('Reminder sent')
+        ->toContain('No response')
+        ->not->toContain('Date:')
+        ->not->toContain('Student Absent')
+        ->not->toContain('Refund requested');
 });
 
 // ─── Vacation helpers ────────────────────────────────────────────────────────

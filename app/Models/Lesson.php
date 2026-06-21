@@ -41,6 +41,18 @@ class Lesson extends Model
         ];
     }
 
+    /**
+     * @return array{needs_recovery: bool, reminder_sent: bool, no_response: bool}
+     */
+    public function absenceFollowUp(): array
+    {
+        return [
+            'needs_recovery' => (bool) $this->refund_requested,
+            'reminder_sent' => (bool) $this->absence_reminder_sent,
+            'no_response' => (bool) $this->absence_chat_notified,
+        ];
+    }
+
     // withTrashed() - show teacher name even if archived
     public function teacher(): BelongsTo
     {

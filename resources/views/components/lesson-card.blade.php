@@ -67,10 +67,8 @@
                 @if($lesson->comments)
                     <div class="text-gray-500 text-xs leading-snug mt-1 [&_a]:break-words">{!! Str::linkify($lesson->comments) !!}</div>
                 @endif
-                @if($lesson->refund_requested)
-                    <div class="mt-1">
-                        <span class="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">↩ Refund requested</span>
-                    </div>
+                @if($lesson->status === \App\Enums\LessonStatus::STUDENT_ABSENT)
+                    <x-absence-follow-up :flags="$lesson->absenceFollowUp()" class="mt-2 justify-end" />
                 @endif
             @endif
         @endif

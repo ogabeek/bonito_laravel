@@ -2,6 +2,7 @@
 
 namespace App\Concerns;
 
+use App\Enums\LessonStatus;
 use App\Models\Lesson;
 use Illuminate\Database\Eloquent\Model;
 
@@ -31,6 +32,10 @@ trait LogsActivityActions
         // * Lessons carry a student; include its name (already-loaded) for log matching
         if ($subject instanceof Lesson && $subject->relationLoaded('student') && $subject->student) {
             $properties['student_name'] = $subject->student->getAttribute('name');
+        }
+
+        if ($subject instanceof Lesson && $subject->status === LessonStatus::STUDENT_ABSENT) {
+            $properties = array_merge($properties, $subject->absenceFollowUp());
         }
 
         $logger = activity($logName);
