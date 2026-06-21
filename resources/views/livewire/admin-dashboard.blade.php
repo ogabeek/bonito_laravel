@@ -186,7 +186,43 @@ new class extends Component
 };
 ?>
 
-<div class="p-6 w-full mx-auto">
+<div
+    class="p-6 w-full mx-auto"
+    x-data="{
+        storageKey: 'admin_hidden_student_statuses',
+        validStatuses: @js(\App\Enums\StudentStatus::values()),
+        hiddenStatuses: $wire.entangle('hiddenStatuses').live,
+        init() {
+            const stored = this.loadStoredStatuses();
+
+            if (this.hiddenStatuses.length === 0 && stored.length > 0) {
+                this.hiddenStatuses = stored;
+            } else {
+                this.persistStatuses(this.hiddenStatuses);
+            }
+
+            this.$watch('hiddenStatuses', (statuses) => this.persistStatuses(statuses));
+        },
+        loadStoredStatuses() {
+            try {
+                const statuses = JSON.parse(localStorage.getItem(this.storageKey) ?? '[]');
+
+                return Array.isArray(statuses)
+                    ? statuses.filter((status) => this.validStatuses.includes(status))
+                    : [];
+            } catch {
+                return [];
+            }
+        },
+        persistStatuses(statuses) {
+            try {
+                localStorage.setItem(this.storageKey, JSON.stringify(statuses));
+            } catch {
+                // The URL-backed filter still works when storage is unavailable.
+            }
+        }
+    }"
+>
     <x-page-header title="Admin Dashboard" :logoutRoute="route('admin.logout')">
         <div class="flex items-center gap-4">
             <div class="flex items-center gap-1">
@@ -376,7 +412,7 @@ new class extends Component
                                                         <div class="text-xs text-gray-500 ml-3.5">{{ $student->teachers->pluck('name')->join(', ') }}</div>
                                                     @endif
                                                     @if($student->hasPendingVacation())
-                                                        <div class="ml-3.5 mt-0.5 flex items-center gap-1 text-[11px] font-medium text-blue-600" title="On vacation">
+                                                        <div class="ml-3.5 mt-0.5 flex items-center gap-1 text-[11px] font-medium text-violet-600" title="On vacation">
                                                             🏖 {{ $student->vacationLabel() }}
                                                         </div>
                                                     @endif

@@ -64,27 +64,57 @@
                             <x-student-status-dot :status="$student->status" />
                         </button>
 
-                        <div x-show="open" x-cloak x-transition class="absolute left-0 top-7 z-30 w-72 space-y-3 rounded-lg border border-gray-200 bg-white p-4 text-left shadow-lg">
+                        <div x-show="open" x-cloak x-transition class="absolute left-0 top-7 z-30 w-80 space-y-4 rounded-lg border border-gray-200 bg-white p-4 text-left shadow-lg">
                             <div>
-                                <label class="mb-1 block text-xs font-medium text-gray-500">Status</label>
-                                <select x-model="status" class="{{ $fieldClass }}">
-                                    @foreach(\App\Enums\StudentStatus::cases() as $opt)
-                                        <option value="{{ $opt->value }}">{{ $opt->label() }}</option>
-                                    @endforeach
-                                </select>
+                                <div class="text-sm font-semibold text-gray-900">Change status</div>
+                                <div class="mt-1 text-xs text-gray-500">Choose the student’s current status.</div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                @foreach(\App\Enums\StudentStatus::cases() as $opt)
+                                    <button
+                                        type="button"
+                                        @click="status = '{{ $opt->value }}'"
+                                        :aria-pressed="status === '{{ $opt->value }}'"
+                                        :class="status === '{{ $opt->value }}'
+                                            ? '{{ $opt->badgeClass() }} border-transparent ring-1 ring-gray-300'
+                                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50'"
+                                        class="flex items-center gap-2 rounded-md border px-3 py-2 text-left text-xs font-medium transition"
+                                    >
+                                        <x-student-status-dot :status="$opt" :size="7" />
+                                        <span class="flex-1">{{ $opt->label() }}</span>
+                                        <svg x-show="status === '{{ $opt->value }}'" x-cloak class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.051l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.816a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                @endforeach
                             </div>
 
                             {{-- Holiday → vacation dates (stacked, full-width so each date reads clearly) --}}
-                            <div x-show="status === '{{ $holidayValue }}'" x-cloak class="space-y-2">
+                            <div x-show="status === '{{ $holidayValue }}'" x-cloak class="space-y-2.5">
                                 <div class="text-xs font-medium text-gray-500">Vacation dates</div>
-                                <div class="flex items-center gap-2">
-                                    <span class="w-9 shrink-0 text-xs text-gray-400">From</span>
-                                    <input type="date" x-model="start" class="{{ $fieldClass }}">
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="w-9 shrink-0 text-xs text-gray-400">To</span>
-                                    <input type="date" x-model="end" class="{{ $fieldClass }}">
-                                </div>
+
+                                @foreach([
+                                    ['label' => 'Start', 'model' => 'start', 'ref' => 'holidayStart'],
+                                    ['label' => 'End', 'model' => 'end', 'ref' => 'holidayEnd'],
+                                ] as $dateField)
+                                    <div
+                                        class="flex cursor-pointer items-center gap-3 rounded-md border border-gray-200 bg-white px-3 py-2 transition hover:border-gray-300 hover:bg-gray-50 focus-within:border-gray-400 focus-within:ring-1 focus-within:ring-gray-300"
+                                        @click="$refs.{{ $dateField['ref'] }}.focus(); $refs.{{ $dateField['ref'] }}.showPicker?.()"
+                                    >
+                                        <label for="student-{{ $student->id }}-holiday-{{ $dateField['model'] }}" class="w-10 shrink-0 cursor-pointer text-xs font-medium text-gray-500">
+                                            {{ $dateField['label'] }}
+                                        </label>
+                                        <input
+                                            id="student-{{ $student->id }}-holiday-{{ $dateField['model'] }}"
+                                            x-ref="{{ $dateField['ref'] }}"
+                                            type="date"
+                                            x-model="{{ $dateField['model'] }}"
+                                            @click.stop="$el.showPicker?.()"
+                                            class="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-sm text-gray-700 focus:ring-0"
+                                        >
+                                    </div>
+                                @endforeach
                             </div>
 
                             {{-- Any non-active status → an optional note --}}

@@ -76,6 +76,7 @@ it('hides and shows students by status via the calendar toggle', function () {
     Student::factory()->create(['name' => 'Dropped Dan', 'status' => StudentStatus::DROPPED]);
 
     Volt::test('admin-dashboard')
+        ->assertSee('admin_hidden_student_statuses')
         ->assertSee('Active Annie')
         ->assertSee('Dropped Dan')
         ->call('toggleStatus', StudentStatus::DROPPED->value)

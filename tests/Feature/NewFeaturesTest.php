@@ -114,6 +114,47 @@ it('shows a vacation label only for active or upcoming periods', function () {
         ->and($none->vacationLabel())->toBeNull();
 });
 
+it('keeps the student list compact and shows status choices inside the editor', function () {
+    $teacher = Teacher::factory()->create();
+    $student = Student::factory()->create(['name' => 'Quiet Student']);
+    $teacher->students()->attach($student);
+    Lesson::factory()->create([
+        'teacher_id' => $teacher->id,
+        'student_id' => $student->id,
+        'class_date' => now()->subDays(8),
+    ]);
+    session(['teacher_id' => $teacher->id]);
+
+    Volt::test('teacher-dashboard', ['teacher' => $teacher])
+        ->assertSee('Change status')
+        ->assertSee('Active')
+        ->assertSee('Inactive')
+        ->assertSee('On Holiday')
+        ->assertSee('Finished')
+        ->assertSee('Dropped')
+        ->assertSee('no class in 7 days — still active?')
+        ->assertDontSee('Review status')
+        ->assertDontSee('Student statuses are editable');
+});
+
+it('lets a teacher change an assigned student status', function () {
+    $teacher = Teacher::factory()->create();
+    $student = Student::factory()->create();
+    $teacher->students()->attach($student);
+    session(['teacher_id' => $teacher->id]);
+
+    Volt::test('teacher-dashboard', ['teacher' => $teacher])
+        ->call('saveStudentStatus', $student->id, 'holiday', '2026-07-10', '2026-07-20', 'Family trip')
+        ->assertHasNoErrors();
+
+    $student->refresh();
+
+    expect($student->status->value)->toBe('holiday')
+        ->and($student->vacation_starts_on->toDateString())->toBe('2026-07-10')
+        ->and($student->vacation_ends_on->toDateString())->toBe('2026-07-20')
+        ->and($student->status_note)->toBe('Family trip');
+});
+
 it('clears a stale success message when a later submit fails validation', function () {
     $teacher = Teacher::factory()->create();
     $student = Student::factory()->create();

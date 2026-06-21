@@ -140,7 +140,7 @@
                                                     @endphp
                                                     
                                                     @if($statusEnum)
-                                                        <span class="font-semibold {{ str_replace(['bg-', '100'], ['text-', '700'], $statusEnum->badgeClass()) }}">
+                                                        <span class="font-semibold {{ $statusEnum->textClass() }}">
                                                             {{ $statusEnum->label() }}
                                                         </span>
                                                     @else

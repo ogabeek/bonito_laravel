@@ -2,6 +2,7 @@
 @plugin '@tailwindcss/forms';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../app/**/*.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
@@ -20,12 +21,12 @@
     --cal-day-width: 38px;
     --cal-day-height: 46px;
 
-    /* Student Status Colors - Light color schema for status dots */
-    --color-student-active: #86efac;        /* green-300 - light green */
-    --color-student-inactive: #d1d5db;      /* gray-300 - light gray */
-    --color-student-holiday: #93c5fd;       /* blue-300 - light blue */
-    --color-student-finished: #d8b4fe;      /* purple-300 - light purple */
-    --color-student-dropped: #fca5a5;       /* red-300 - light red */
+    /* Student lifecycle colors stay distinct from lesson status colors. */
+    --color-student-active: #86efac;          /* green-300 */
+    --color-student-inactive: #d1d5db;        /* gray-300 */
+    --color-student-holiday: #a78bfa;         /* violet-400 */
+    --color-student-finished: #64748b;        /* slate-500 */
+    --color-student-dropped: #fca5a5;         /* red-300 */
 
     /* Lesson status colors — text stays saturated for readability, bg/border muted */
     --color-status-completed: #16a34a;

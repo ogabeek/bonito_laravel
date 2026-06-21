@@ -5,6 +5,7 @@
     'showDelete' => false,
     'dateFormat' => 'D, M d',
     'neutralNonCompleted' => false,
+    'showAbsenceFollowUp' => false,
 ])
 
 @php
@@ -15,18 +16,8 @@
     $cardBackground = $useNeutralStatus ? '#f9fafb' : "var(--color-status-{$statusClass}-bg)";
     $cardBorder = $useNeutralStatus ? '#d1d5db' : "var(--color-status-{$statusClass}-border)";
     $cardColor = $useNeutralStatus ? '#6b7280' : "var(--color-status-{$statusClass})";
-    $badgeClass = match ($lesson->status->value) {
-        'student_absent' => 'text-red-700 bg-red-50 border-red-200',
-        'student_cancelled' => 'text-gray-600 bg-gray-100 border-gray-200',
-        'teacher_cancelled' => 'text-orange-700 bg-orange-50 border-orange-200',
-        default => 'text-gray-600 bg-gray-100 border-gray-200',
-    };
-    $statusLabel = match ($lesson->status->value) {
-        'student_absent' => 'Absent',
-        'student_cancelled' => 'Canceled by student',
-        'teacher_cancelled' => 'Canceled by teacher',
-        default => $lesson->status->label(),
-    };
+    $badgeClass = $lesson->status->badgeClass();
+    $statusLabel = $lesson->status->displayLabel();
 @endphp
 
 <div {{ $attributes->merge(['class' => $classes]) }}
@@ -54,6 +45,9 @@
                         {{ $statusLabel }}
                     </span>
                 </div>
+                @if($showAbsenceFollowUp && $lesson->status === \App\Enums\LessonStatus::STUDENT_ABSENT)
+                    <x-absence-follow-up :flags="$lesson->absenceFollowUp()" class="mt-2 justify-end" />
+                @endif
             @else
                 <div class="lesson-status-text font-medium sm:font-normal" style="color: var(--lesson-card-color);">
                     @if($lesson->status->value === 'student_absent')

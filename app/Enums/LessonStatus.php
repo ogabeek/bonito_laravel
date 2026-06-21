@@ -33,10 +33,30 @@ enum LessonStatus: string
     public function badgeClass(): string
     {
         return match ($this) {
-            self::COMPLETED => 'bg-green-100 text-green-800',
-            self::STUDENT_ABSENT => 'bg-yellow-100 text-yellow-800',
-            self::STUDENT_CANCELLED => 'bg-blue-100 text-blue-800',
-            self::TEACHER_CANCELLED => 'bg-red-100 text-red-800',
+            self::COMPLETED => 'border-green-200 bg-green-100 text-green-800',
+            self::STUDENT_ABSENT => 'border-red-200 bg-red-50 text-red-700',
+            self::STUDENT_CANCELLED => 'border-gray-200 bg-gray-100 text-gray-600',
+            self::TEACHER_CANCELLED => 'border-orange-200 bg-orange-50 text-orange-700',
+        };
+    }
+
+    public function displayLabel(): string
+    {
+        return match ($this) {
+            self::COMPLETED => 'Done',
+            self::STUDENT_ABSENT => 'Absent',
+            self::STUDENT_CANCELLED => 'Canceled by student',
+            self::TEACHER_CANCELLED => 'Canceled by teacher',
+        };
+    }
+
+    public function textClass(): string
+    {
+        return match ($this) {
+            self::COMPLETED => 'text-green-700',
+            self::STUDENT_ABSENT => 'text-red-700',
+            self::STUDENT_CANCELLED => 'text-blue-700',
+            self::TEACHER_CANCELLED => 'text-orange-700',
         };
     }
 

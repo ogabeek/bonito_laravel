@@ -43,10 +43,21 @@ enum StudentStatus: string
     {
         return match ($this) {
             self::ACTIVE => 'bg-green-100 text-green-800',
-            self::INACTIVE => 'bg-gray-100 text-gray-800',
-            self::HOLIDAY => 'bg-blue-100 text-blue-800',
-            self::FINISHED => 'bg-purple-100 text-purple-800',
+            self::INACTIVE => 'bg-gray-100 text-gray-700',
+            self::HOLIDAY => 'bg-violet-100 text-violet-800',
+            self::FINISHED => 'bg-slate-200 text-slate-800',
             self::DROPPED => 'bg-red-100 text-red-800',
+        };
+    }
+
+    public function textClass(): string
+    {
+        return match ($this) {
+            self::ACTIVE => 'text-green-700',
+            self::INACTIVE => 'text-gray-600',
+            self::HOLIDAY => 'text-violet-700',
+            self::FINISHED => 'text-slate-700',
+            self::DROPPED => 'text-red-700',
         };
     }
 

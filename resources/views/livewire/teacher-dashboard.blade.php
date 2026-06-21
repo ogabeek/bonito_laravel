@@ -387,22 +387,17 @@ new class extends Component
                         <div>
                             <label class="form-label">Status</label>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
-                                <label class="flex items-center justify-center border rounded cursor-pointer transition px-3 py-2 text-sm font-medium {{ $status === 'completed' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-white border-gray-300 hover:bg-gray-50' }}" title="Lesson completed successfully">
-                                    <input type="radio" wire:model.live="status" value="completed" class="hidden">
-                                    <span>✓ Done</span>
-                                </label>
-                                <label class="flex items-center justify-center border rounded cursor-pointer transition px-3 py-2 text-sm font-medium {{ $status === 'student_cancelled' ? 'bg-yellow-100 border-yellow-400 text-yellow-700' : 'bg-white border-gray-300 hover:bg-gray-50' }}" title="Cancelled by student/parent">
-                                    <input type="radio" wire:model.live="status" value="student_cancelled" class="hidden">
-                                    <span>C</span>
-                                </label>
-                                <label class="flex items-center justify-center border rounded cursor-pointer transition px-3 py-2 text-sm font-medium {{ $status === 'teacher_cancelled' ? 'bg-orange-100 border-orange-400 text-orange-700' : 'bg-white border-gray-300 hover:bg-gray-50' }}" title="Cancelled by teacher">
-                                    <input type="radio" wire:model.live="status" value="teacher_cancelled" class="hidden">
-                                    <span>CT</span>
-                                </label>
-                                <label class="flex items-center justify-center border rounded cursor-pointer transition px-3 py-2 text-sm font-medium {{ $status === 'student_absent' ? 'bg-red-100 border-red-400 text-red-700' : 'bg-white border-gray-300 hover:bg-gray-50' }}" title="Student was absent">
-                                    <input type="radio" wire:model.live="status" value="student_absent" class="hidden">
-                                    <span>A</span>
-                                </label>
+                                @foreach([
+                                    [\App\Enums\LessonStatus::COMPLETED, 'Done', 'Lesson completed successfully'],
+                                    [\App\Enums\LessonStatus::STUDENT_CANCELLED, 'C', 'Cancelled by student/parent'],
+                                    [\App\Enums\LessonStatus::TEACHER_CANCELLED, 'CT', 'Cancelled by teacher'],
+                                    [\App\Enums\LessonStatus::STUDENT_ABSENT, 'A', 'Student was absent'],
+                                ] as [$statusOption, $statusCode, $statusTitle])
+                                    <label class="flex cursor-pointer items-center justify-center rounded border px-3 py-2 text-sm font-medium transition {{ $status === $statusOption->value ? $statusOption->badgeClass() : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50' }}" title="{{ $statusTitle }}">
+                                        <input type="radio" wire:model.live="status" value="{{ $statusOption->value }}" class="hidden">
+                                        <span>{{ $statusCode }}</span>
+                                    </label>
+                                @endforeach
                             </div>
                         </div>
 
@@ -477,7 +472,7 @@ new class extends Component
                 <div class="space-y-2">
                     @foreach($this->lessons as $lesson)
                         <div class="group relative">
-                            <x-lesson-card :lesson="$lesson" :showStudent="true" :showDelete="false" />
+                            <x-lesson-card :lesson="$lesson" :showStudent="true" :showDelete="false" :neutralNonCompleted="true" :showAbsenceFollowUp="true" />
                             <button
                                 wire:click="deleteLesson({{ $lesson->id }})"
                                 wire:confirm="Are you sure you want to delete this lesson? This cannot be undone."
