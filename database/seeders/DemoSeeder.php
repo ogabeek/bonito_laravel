@@ -6,6 +6,7 @@ use App\Models\Teacher;
 use App\Models\Student;
 use App\Models\Lesson;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 /**
@@ -19,14 +20,16 @@ class DemoSeeder extends Seeder
         $this->command->info('🎬 Creating demo database...');
 
         // 4 Teachers (2 main + 2 secondary)
+        $hashedPassword = Hash::make('demo123');
+
         $mainTeachers = [
-            Teacher::create(['name' => 'Maria Garcia', 'password' => 'demo123']),
-            Teacher::create(['name' => 'John Smith', 'password' => 'demo123']),
+            Teacher::create(['name' => 'Maria Garcia', 'password' => $hashedPassword]),
+            Teacher::create(['name' => 'John Smith', 'password' => $hashedPassword]),
         ];
 
         $secondaryTeachers = [
-            Teacher::create(['name' => 'Anna Petrov', 'password' => 'demo123']),
-            Teacher::create(['name' => 'Carlos Rodriguez', 'password' => 'demo123']),
+            Teacher::create(['name' => 'Anna Petrov', 'password' => $hashedPassword]),
+            Teacher::create(['name' => 'Carlos Rodriguez', 'password' => $hashedPassword]),
         ];
 
         $allTeachers = array_merge($mainTeachers, $secondaryTeachers);
