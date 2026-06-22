@@ -26,9 +26,6 @@
              :style="`top: ${y + 16}px; left: ${Math.min(x + 16, window.innerWidth - 272)}px`"
              class="fixed z-50 w-64 rounded-lg border bg-white p-3 shadow-lg text-xs text-gray-600 space-y-0.5 pointer-events-none">
             <div class="mb-1 truncate font-semibold text-gray-900">{{ $lesson->teacher->name }}</div>
-            @if($balanceLabel !== null)
-                <div><span class="font-medium text-gray-700">Balance after:</span> {{ $balanceLabel }}</div>
-            @endif
             @if(filled($lesson->topic))
                 <div><span class="font-medium text-gray-700">Topic:</span> {{ $lesson->topic }}</div>
             @endif

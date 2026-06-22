@@ -3,8 +3,11 @@
 use App\Enums\FeedbackSender;
 use App\Models\FeedbackMessage;
 use App\Models\Teacher;
+use App\Repositories\LessonRepository;
 use App\Services\BalanceLedgerService;
+use App\Services\BalanceService;
 use App\Services\DashboardDataService;
+use App\Services\StudentBalanceService;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Volt\Component;
@@ -77,7 +80,11 @@ new class extends Component
     #[Computed]
     public function students(): \Illuminate\Support\Collection
     {
-        return app(DashboardDataService::class)->getStudents();
+        $students = app(DashboardDataService::class)->getStudents();
+        $balances = app(BalanceService::class)->getBalances();
+        $usedCounts = app(LessonRepository::class)->getUsedCountsByStudent();
+
+        return app(StudentBalanceService::class)->mapBalances($students, $balances, $usedCounts);
     }
 
     /**
@@ -408,29 +415,39 @@ new class extends Component
                                     @forelse($this->visibleStudents as $student)
                                             <tr class="border-t" wire:key="student-{{ $student->id }}">
                                                 <td class="cal-cell cal-sticky border-r bg-white align-middle">
-                                                    <div class="flex items-center gap-1 min-w-0">
-                                                        <x-student-status-dot :status="$student->status" />
-                                                        @if($student->countryFlag())
-                                                            <span class="text-[12px] leading-none flex-shrink-0" title="{{ $student->originLabel() }}">{{ $student->countryFlag() }}</span>
-                                                        @endif
-                                                        <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-[12px] text-gray-900 hover:text-blue-600 truncate">
-                                                            {{ $student->name }}
-                                                        </a>
-                                                        <x-student-stats-compact :stats="($this->studentStats[$student->id] ?? null)" class="w-16 ml-auto text-gray-500" />
+                                                    <div class="flex items-start justify-between gap-2 min-w-0">
+                                                        <div class="min-w-0">
+                                                            <div class="flex items-center gap-1 min-w-0">
+                                                                <x-student-status-dot :status="$student->status" />
+                                                                @if($student->countryFlag())
+                                                                    <span class="text-[12px] leading-none flex-shrink-0" title="{{ $student->originLabel() }}">{{ $student->countryFlag() }}</span>
+                                                                @endif
+                                                                <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-[12px] text-gray-900 hover:text-blue-600 truncate">
+                                                                    {{ $student->name }}
+                                                                </a>
+                                                            </div>
+                                                            @if($student->teachers->count() > 0)
+                                                                <div class="text-xs text-gray-500 ml-3.5">{{ $student->teachers->pluck('name')->join(', ') }}</div>
+                                                            @endif
+                                                            @if($student->hasPendingVacation())
+                                                                <div class="ml-3.5 mt-0.5 flex items-center gap-1 text-[11px] font-medium text-violet-600" title="On vacation">
+                                                                    🏖 {{ $student->vacationLabel() }}
+                                                                </div>
+                                                            @endif
+                                                            @if($student->status_note)
+                                                                <div class="ml-3.5 mt-0.5 text-[11px] italic text-gray-500 truncate" title="{{ $student->status_note }}">
+                                                                    {{ $student->status_note }}
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                        <div class="flex flex-shrink-0 flex-col items-end gap-0.5">
+                                                            @if(! is_null($student->class_balance))
+                                                                <span class="text-[12px] font-semibold leading-none tabular-nums {{ $student->class_balance < 0 ? 'text-red-500' : 'text-gray-600' }}"
+                                                                      title="Class balance — {{ $student->paid_classes }} paid − {{ $student->used_classes }} used">{{ $student->class_balance }}</span>
+                                                            @endif
+                                                            <x-student-stats-compact :stats="($this->studentStats[$student->id] ?? null)" class="w-16 text-gray-500" />
+                                                        </div>
                                                     </div>
-                                                    @if($student->teachers->count() > 0)
-                                                        <div class="text-xs text-gray-500 ml-3.5">{{ $student->teachers->pluck('name')->join(', ') }}</div>
-                                                    @endif
-                                                    @if($student->hasPendingVacation())
-                                                        <div class="ml-3.5 mt-0.5 flex items-center gap-1 text-[11px] font-medium text-violet-600" title="On vacation">
-                                                            🏖 {{ $student->vacationLabel() }}
-                                                        </div>
-                                                    @endif
-                                                    @if($student->status_note)
-                                                        <div class="ml-3.5 mt-0.5 text-[11px] italic text-gray-500 truncate" title="{{ $student->status_note }}">
-                                                            {{ $student->status_note }}
-                                                        </div>
-                                                    @endif
                                                 </td>
                                                 @foreach($this->calendarDays as $date)
                                                     @php
