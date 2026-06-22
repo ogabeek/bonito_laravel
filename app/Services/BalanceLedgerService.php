@@ -43,14 +43,75 @@ class BalanceLedgerService
      */
     public function forStudent(Student $student): array
     {
+        return $this->build(
+            $student,
+            $this->paidClasses($student),
+            $this->paymentsService->forStudent($student),
+            $this->lessonRepository->getForStudent($student->id, ['teacher']),
+        );
+    }
+
+    /**
+     * Running balance after each chargeable lesson for many students at once,
+     * sharing one balances read + one payments read + one lessons query so the
+     * calendar grid stays cheap.
+     *
+     * @param  Collection<int, Student>  $students
+     * @return array<int, float> [lesson_id => running balance]
+     */
+    public function lessonBalances(Collection $students): array
+    {
+        $balances = $this->balanceService->getBalances();
+        $paymentsByName = $this->paymentsService->journalPaymentsByName();
+        $lessonsByStudent = $this->lessonRepository
+            ->getForStudents($students->pluck('id')->all(), ['teacher'])
+            ->groupBy('student_id');
+
+        $map = [];
+        foreach ($students as $student) {
+            $raw = $balances[$student->uuid] ?? null;
+            if (! is_numeric($raw)) {
+                continue;
+            }
+
+            $payments = $paymentsByName->get(PaymentsService::normalize($student->name));
+            $data = $this->build(
+                $student,
+                (float) $raw,
+                $payments instanceof Collection ? $payments : collect(),
+                $lessonsByStudent->get($student->id, collect()),
+            );
+
+            foreach ($data['entries'] as $entry) {
+                // Only chargeable lessons (delta != 0) carry a meaningful new balance.
+                if (is_array($entry)
+                    && ($entry['type'] ?? null) === 'lesson'
+                    && isset($entry['lesson_id'])
+                    && $entry['balance'] !== null
+                    && (float) $entry['delta'] !== 0.0) {
+                    $map[(int) $entry['lesson_id']] = (float) $entry['balance'];
+                }
+            }
+        }
+
+        return $map;
+    }
+
+    /**
+     * Core ledger computation shared by forStudent() and lessonBalances().
+     *
+     * @param  Collection<int, Lesson>  $allLessons
+     * @return array{
+     *   student: Student, cutoff: string, paid: ?float, used: int, used_since_cutoff: int,
+     *   payments_total: float, opening: ?float,
+     *   current_balance: ?float, computed_end: ?float, has_balance_data: bool,
+     *   entries: Collection<int, mixed>
+     * }
+     */
+    protected function build(Student $student, ?float $paid, Collection $payments, Collection $allLessons): array
+    {
         $cutoff = config('billing.journal_start', '2025-12-01');
         $today = now()->toDateString();
-
-        $paid = $this->paidClasses($student);
-        $payments = $this->paymentsService->forStudent($student);
-
-        /** @var Collection<int, Lesson> $allLessons */
-        $allLessons = $this->lessonRepository->getForStudent($student->id, ['teacher']);
 
         $totalUsed = $allLessons
             ->filter(fn (Lesson $lesson) => $lesson->class_date->toDateString() <= $today)
@@ -134,6 +195,7 @@ class BalanceLedgerService
                 'date' => $lesson->class_date->toDateString(),
                 'order' => 1,
                 'type' => 'lesson',
+                'lesson_id' => $lesson->id,
                 'label' => $lesson->status->label(),
                 'detail' => $lesson->teacher?->name,
                 'delta' => $charge ? -1.0 : 0.0,

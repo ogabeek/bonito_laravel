@@ -1,9 +1,10 @@
-@props(['lesson'])
+@props(['lesson', 'balance' => null])
 
 @php
     $status = $lesson->status;
     $css = $status->cssClass();
     $needsRecovery = $lesson->refund_requested;
+    $balanceLabel = $balance === null ? null : rtrim(rtrim(number_format((float) $balance, 1, '.', ''), '0'), '.');
 @endphp
 
 {{-- Calendar day chip with a logs-style hover card (teleported to <body> so it
@@ -15,13 +16,19 @@
       @mouseenter="show = true"
       @mousemove="x = $event.clientX; y = $event.clientY"
       @mouseleave="show = false">
-    {{ substr($lesson->teacher->name, 0, 1) }}
+    <span>{{ substr($lesson->teacher->name, 0, 1) }}</span>
+    @if($balanceLabel !== null)
+        <span class="cal-chip-balance" @if($balance < 0) style="color: var(--color-status-absent);" @endif>{{ $balanceLabel }}</span>
+    @endif
 
     <template x-teleport="body">
         <div x-show="show" x-cloak
              :style="`top: ${y + 16}px; left: ${Math.min(x + 16, window.innerWidth - 272)}px`"
              class="fixed z-50 w-64 rounded-lg border bg-white p-3 shadow-lg text-xs text-gray-600 space-y-0.5 pointer-events-none">
             <div class="mb-1 truncate font-semibold text-gray-900">{{ $lesson->teacher->name }}</div>
+            @if($balanceLabel !== null)
+                <div><span class="font-medium text-gray-700">Balance after:</span> {{ $balanceLabel }}</div>
+            @endif
             @if(filled($lesson->topic))
                 <div><span class="font-medium text-gray-700">Topic:</span> {{ $lesson->topic }}</div>
             @endif

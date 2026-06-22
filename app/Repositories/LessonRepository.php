@@ -53,6 +53,26 @@ class LessonRepository
     }
 
     /**
+     * * All lessons for several students in one query (for the calendar balance map).
+     *
+     * @param  array<int, int>  $studentIds
+     * @param  array<int, string>  $with
+     * @return Collection<int, Lesson>
+     */
+    public function getForStudents(array $studentIds, array $with = ['teacher']): Collection
+    {
+        if (empty($studentIds)) {
+            return collect();
+        }
+
+        return $this->baseQuery($with)
+            ->whereIn('student_id', $studentIds)
+            ->orderBy('class_date')
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
      * * Uses Lesson::scopePast() - only lessons before today
      */
     public function getPastForStudent(int $studentId, array $with = ['teacher']): Collection
@@ -88,6 +108,8 @@ class LessonRepository
     {
         return $this->baseQuery($with)
             ->whereBetween('class_date', [$start->startOfDay(), $end->endOfDay()])
+            ->orderBy('class_date')
+            ->orderBy('id')
             ->get();
     }
 

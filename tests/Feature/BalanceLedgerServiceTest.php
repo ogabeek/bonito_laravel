@@ -121,3 +121,21 @@ it('renders the balance ledger on the admin student edit page', function () {
         ->assertSee('Balance ledger')
         ->assertSee('Balance now');
 });
+
+it('maps a running balance onto each chargeable lesson for the calendar', function () {
+    $student = Student::factory()->create();
+    $teacher = Teacher::factory()->create();
+    $completed = Lesson::factory()->for($student)->for($teacher)->completed()->create(['class_date' => '2026-01-10']);
+    $cancelled = Lesson::factory()->for($student)->for($teacher)->studentCancelled()->create(['class_date' => '2026-01-12']);
+    $absent = Lesson::factory()->for($student)->for($teacher)->studentAbsent()->create(['class_date' => '2026-01-15']);
+
+    test()->mock(BalanceService::class, fn ($m) => $m->shouldReceive('getBalances')->andReturn([$student->uuid => 5]));
+    test()->mock(PaymentsService::class, fn ($m) => $m->shouldReceive('journalPaymentsByName')->andReturn(collect()));
+
+    $map = app(BalanceLedgerService::class)->lessonBalances(collect([$student]));
+
+    // opening = 5 paid; completed -> 4, absent -> 3. The cancelled class carries no balance.
+    expect($map[$completed->id])->toBe(4.0)
+        ->and($map[$absent->id])->toBe(3.0)
+        ->and($map)->not->toHaveKey($cancelled->id);
+});

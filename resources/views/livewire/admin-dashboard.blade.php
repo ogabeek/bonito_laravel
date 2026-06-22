@@ -3,6 +3,7 @@
 use App\Enums\FeedbackSender;
 use App\Models\FeedbackMessage;
 use App\Models\Teacher;
+use App\Services\BalanceLedgerService;
 use App\Services\DashboardDataService;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
@@ -137,6 +138,15 @@ new class extends Component
     public function lessonsThisMonth(): \Illuminate\Support\Collection
     {
         return app(DashboardDataService::class)->getLessonsForMonth($this->currentMonth);
+    }
+
+    /**
+     * @return array<int, float> Running balance after each chargeable lesson, keyed by lesson id.
+     */
+    #[Computed]
+    public function lessonBalances(): array
+    {
+        return app(BalanceLedgerService::class)->lessonBalances($this->visibleStudents);
     }
 
     #[Computed]
@@ -436,7 +446,7 @@ new class extends Component
                                                         :class="hoverCol === {{ $loop->index }} && 'cal-col-hover'">
                                                         <div class="flex flex-wrap justify-center gap-0.5">
                                                             @foreach($dayLessons as $lesson)
-                                                                <x-calendar-lesson-chip :lesson="$lesson" wire:key="lesson-chip-{{ $lesson->id }}" />
+                                                                <x-calendar-lesson-chip :lesson="$lesson" :balance="$this->lessonBalances[$lesson->id] ?? null" wire:key="lesson-chip-{{ $lesson->id }}" />
                                                             @endforeach
                                                         </div>
                                                     </td>
