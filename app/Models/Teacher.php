@@ -29,11 +29,14 @@ class Teacher extends Model
         'zoom_passcode',
     ];
 
-    protected function casts(): array
+    public function hasHiddenPin(): bool
     {
-        return [
-            'password' => 'hashed',
-        ];
+        return password_get_info((string) $this->password)['algoName'] !== 'unknown';
+    }
+
+    public function visiblePin(): string
+    {
+        return $this->hasHiddenPin() ? '' : (string) $this->password;
     }
 
     public function lessons(): HasMany

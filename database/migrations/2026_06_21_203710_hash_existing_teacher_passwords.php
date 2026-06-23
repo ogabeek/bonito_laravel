@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,21 +11,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::table('teachers')
-            ->select(['id', 'password'])
-            ->orderBy('id')
-            ->chunkById(100, function ($teachers): void {
-                foreach ($teachers as $teacher) {
-                    if (password_get_info($teacher->password)['algoName'] !== 'unknown') {
-                        continue;
-                    }
-
-                    DB::table('teachers')
-                        ->where('id', $teacher->id)
-                        ->update(['password' => Hash::make($teacher->password)]);
-                }
-            });
-
         $activityConnection = config('activitylog.database_connection');
         $activityTable = config('activitylog.table_name', 'activity_log');
 
@@ -62,6 +46,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Password hashes are intentionally irreversible.
+        //
     }
 };

@@ -33,16 +33,24 @@
                 @enderror
             </div>
         @else
+            @php
+                $pinIsHidden = $teacher?->hasHiddenPin() ?? false;
+            @endphp
             <div>
                 <label class="block text-sm font-medium mb-1">PIN</label>
                 <input
                     type="text"
                     name="password"
-                    value="{{ old('password') }}"
-                    placeholder="Leave blank to keep the current PIN"
-                    autocomplete="new-password"
+                    value="{{ old('password', $teacher?->visiblePin()) }}"
+                    placeholder="{{ $pinIsHidden ? 'Enter a new PIN to replace the hidden old hash' : 'PIN' }}"
+                    autocomplete="off"
                     class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
                 >
+                @if($pinIsHidden)
+                    <p class="mt-1 text-xs text-amber-700">
+                        This teacher still has an old hidden hash. Enter a PIN here to make it plain and visible again.
+                    </p>
+                @endif
                 @error('password')
                     <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                 @enderror

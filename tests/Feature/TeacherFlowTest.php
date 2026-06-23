@@ -4,6 +4,7 @@ use App\Enums\LessonStatus;
 use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Teacher;
+use Illuminate\Support\Facades\DB;
 
 it('shows teacher login form', function () {
     $teacher = Teacher::factory()->create();
@@ -15,7 +16,7 @@ it('shows teacher login form', function () {
 
 it('authenticates teacher with valid password', function () {
     $teacher = Teacher::factory()->create([
-        'password' => bcrypt('teacher-password'),
+        'password' => 'teacher-password',
     ]);
 
     $this->post(route('teacher.login.submit', $teacher), ['password' => 'teacher-password'])
@@ -24,9 +25,24 @@ it('authenticates teacher with valid password', function () {
     $this->assertEquals($teacher->id, session('teacher_id'));
 });
 
+it('authenticates teacher with old hashed pin', function () {
+    $teacherId = DB::table('teachers')->insertGetId([
+        'name' => 'Legacy Teacher',
+        'password' => bcrypt('legacy-pin'),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+    $teacher = Teacher::findOrFail($teacherId);
+
+    $this->post(route('teacher.login.submit', $teacher), ['password' => 'legacy-pin'])
+        ->assertRedirect(route('teacher.dashboard', $teacher));
+
+    $this->assertEquals($teacher->id, session('teacher_id'));
+});
+
 it('rejects teacher with invalid password', function () {
     $teacher = Teacher::factory()->create([
-        'password' => bcrypt('correct-password'),
+        'password' => 'correct-password',
     ]);
 
     $this->post(route('teacher.login.submit', $teacher), ['password' => 'wrong-password'])

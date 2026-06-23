@@ -18,7 +18,7 @@ class TeacherFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'password' => bcrypt('password'),
+            'password' => 'password',
         ];
     }
 }

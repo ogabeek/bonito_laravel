@@ -109,7 +109,7 @@ it('creates a new teacher', function () {
 
     $teacher = Teacher::where('name', 'New Teacher')->firstOrFail();
 
-    expect(Hash::check('secret', $teacher->password))->toBeTrue();
+    expect($teacher->password)->toBe('secret');
 });
 
 it('updates a teacher and keeps the password when left blank', function () {
@@ -142,11 +142,30 @@ it('updates a teacher password when provided', function () {
         ])
         ->assertRedirect(route('admin.teachers.edit', $teacher));
 
-    expect(Hash::check('new-pin', $teacher->refresh()->password))->toBeTrue()
-        ->and($teacher->password)->not->toBe('new-pin');
+    expect($teacher->refresh()->password)->toBe('new-pin');
 });
 
-it('hashes legacy teacher pins and removes them from historical activity properties', function () {
+it('shows a plain teacher pin on the edit form', function () {
+    $teacher = Teacher::factory()->create(['password' => 'visible-pin']);
+
+    $this->withSession(['admin_authenticated' => true])
+        ->get(route('admin.teachers.edit', $teacher))
+        ->assertSuccessful()
+        ->assertSee('value="visible-pin"', false);
+});
+
+it('does not render old hashed teacher pins on the edit form', function () {
+    $teacher = Teacher::factory()->create(['password' => bcrypt('hidden-pin')]);
+    $storedHash = $teacher->password;
+
+    $this->withSession(['admin_authenticated' => true])
+        ->get(route('admin.teachers.edit', $teacher))
+        ->assertSuccessful()
+        ->assertSee('old hidden hash')
+        ->assertDontSee($storedHash, false);
+});
+
+it('keeps legacy teacher pins plain and removes them from historical activity properties', function () {
     $teacherId = DB::table('teachers')->insertGetId([
         'name' => 'Legacy Teacher',
         'password' => 'legacy-pin',
@@ -169,7 +188,7 @@ it('hashes legacy teacher pins and removes them from historical activity propert
     $storedPassword = DB::table('teachers')->where('id', $teacherId)->value('password');
     $properties = Activity::latest('id')->firstOrFail()->properties->toArray();
 
-    expect(Hash::check('legacy-pin', $storedPassword))->toBeTrue()
+    expect($storedPassword)->toBe('legacy-pin')
         ->and(data_get($properties, 'changes.password'))->toBeNull()
         ->and(data_get($properties, 'original.password'))->toBeNull();
 });
