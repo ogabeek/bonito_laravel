@@ -18,6 +18,6 @@
     }
 @endphp
 
-<span {{ $attributes->merge(['class' => "inline-block px-0.5 py-0.25 text-[9px] font-semibold text-center $classes"]) }}>
+<span {{ $attributes->merge(['class' => "inline-block px-0.5 py-0.25 font-semibold text-center $classes"]) }}>
     {{ $value ?? '—' }}
 </span>

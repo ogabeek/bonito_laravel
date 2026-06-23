@@ -116,7 +116,9 @@ it('uses neutral status cards in the teacher lesson history', function () {
         ->toContain('--lesson-card-bg: #f9fafb')
         ->toContain('border-red-200 bg-red-50 text-red-700')
         ->toContain('Student did not attend.')
-        ->toContain('Needs recovery');
+        ->toContain('Needs recovery')
+        ->toContain('Lessons (1)')
+        ->not->toContain('📚 Lessons');
 });
 
 // ─── Vacation helpers ────────────────────────────────────────────────────────
@@ -156,6 +158,7 @@ it('marks vacation days on the admin calendar', function () {
             ->toContain($student->name)
             ->toContain('bg-violet-50/70')
             ->not->toContain('ring-violet-200')
+            ->not->toContain('🏖')
             ->and(substr_count($html, 'title="On vacation: Jul 10 – Jul 12"'))->toBe(3);
     } finally {
         Carbon::setTestNow();
@@ -229,6 +232,20 @@ it('clears a stale success message when a later submit fails validation', functi
 });
 
 // ─── Feedback threaded chat ──────────────────────────────────────────────────
+
+it('invites teachers to share platform feedback without emoji copy', function () {
+    $teacher = Teacher::factory()->create();
+    session(['teacher_id' => $teacher->id]);
+
+    $component = Volt::test('teacher-feedback', ['teacher' => $teacher]);
+
+    $component->assertSee('Help improve this space')
+        ->assertDontSee('💬 Feedback')
+        ->call('togglePanel')
+        ->assertSee('Share your experience')
+        ->assertSee('This platform is under development')
+        ->assertSee('we read every message');
+});
 
 it('lets a teacher open a report that the admin can answer', function () {
     $teacher = Teacher::factory()->create();

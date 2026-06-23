@@ -333,6 +333,9 @@ new class extends Component
                             </div>
                             <span wire:loading class="text-sm text-gray-500">Loading...</span>
                         </div>
+                        @php
+                            $archivedStudents = $this->archivedStudents;
+                        @endphp
                         <div class="flex items-center gap-3">
                             <div class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
                                 <button type="button" @click="open = !open"
@@ -348,6 +351,37 @@ new class extends Component
                                     <x-status-legend />
                                 </div>
                             </div>
+                            @if($archivedStudents->isNotEmpty())
+                                <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                                    <button type="button"
+                                            @click="open = !open"
+                                            class="flex h-7 w-7 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                                            aria-label="Archived students"
+                                            title="Archived students"
+                                            x-bind:aria-expanded="open">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M6 7l1 12h10l1-12M8 7V5h8v2M9 11h6" />
+                                        </svg>
+                                    </button>
+                                    <div x-show="open" x-cloak x-transition.opacity
+                                         class="absolute right-0 top-full z-30 mt-2 w-72 max-w-[80vw] rounded-lg border bg-white p-2 text-sm shadow-lg">
+                                        <div class="mb-1 px-2 text-xs font-medium text-gray-500">Archived students</div>
+                                        <div class="max-h-60 overflow-auto">
+                                            @foreach($archivedStudents as $student)
+                                                <div class="flex items-center justify-between gap-3 rounded px-2 py-1.5 hover:bg-gray-50" wire:key="archived-student-{{ $student->id }}">
+                                                    <span class="min-w-0 truncate text-gray-700">{{ $student->name }}</span>
+                                                    <form method="POST" action="{{ route('admin.students.restore', $student->id) }}">
+                                                        @csrf
+                                                        <button type="submit" class="text-xs font-medium text-green-700 hover:text-green-800">
+                                                            Restore
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                             <div class="grid grid-cols-5 gap-3 text-xs text-gray-600 bg-gray-50 rounded px-3 py-2">
                                 <div class="text-center">
                                     <div class="font-semibold" style="color: var(--color-status-completed);">{{ $this->periodStats['completed'] }}</div>
@@ -421,24 +455,29 @@ new class extends Component
                                     @forelse($this->visibleStudents as $student)
                                             <tr class="border-t" wire:key="student-{{ $student->id }}">
                                                 <td class="cal-cell cal-sticky border-r bg-white align-middle">
-                                                    <div class="flex min-w-0 items-start justify-between gap-2">
+                                                    <div class="flex min-w-0 items-stretch justify-between gap-2">
                                                         <div class="min-w-0">
                                                             <div class="flex min-w-0 items-center gap-1">
-                                                                <x-student-status-dot :status="$student->status" />
+                                                                <a href="{{ route('admin.students.edit', $student) }}"
+                                                                   class="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded hover:bg-gray-100"
+                                                                   title="Edit profile and balance"
+                                                                   aria-label="Edit {{ $student->name }}">
+                                                                    <x-student-status-dot :status="$student->status" title="Edit profile and balance" />
+                                                                </a>
                                                                 @if($student->countryFlag())
                                                                     <span class="shrink-0 text-[12px] leading-none" title="{{ $student->originLabel() }}">{{ $student->countryFlag() }}</span>
                                                                 @endif
-                                                                <a href="{{ route('admin.students.edit', $student) }}" class="truncate text-[12px] font-medium leading-tight text-gray-900 hover:text-blue-600">
+                                                                <a href="{{ route('student.dashboard', $student) }}" class="truncate text-[12px] font-medium leading-tight text-gray-900 hover:text-blue-600" title="Open student view">
                                                                     {{ $student->name }}
                                                                 </a>
+                                                                @if($student->hasPendingVacation())
+                                                                    <span class="shrink-0 text-[10px] font-medium leading-tight text-violet-500" title="On vacation">
+                                                                        {{ $student->vacationLabel() }}
+                                                                    </span>
+                                                                @endif
                                                             </div>
                                                             @if($student->teachers->count() > 0)
                                                                 <div class="ml-3.5 truncate text-xs text-gray-500">{{ $student->teachers->pluck('name')->join(', ') }}</div>
-                                                            @endif
-                                                            @if($student->hasPendingVacation())
-                                                                <div class="ml-3.5 mt-0.5 flex items-center gap-1 text-[11px] font-medium text-violet-600" title="On vacation">
-                                                                    🏖 {{ $student->vacationLabel() }}
-                                                                </div>
                                                             @endif
                                                             @if($student->status_note)
                                                                 <div class="ml-3.5 mt-0.5 truncate text-[11px] italic text-gray-500" title="{{ $student->status_note }}">
@@ -446,15 +485,15 @@ new class extends Component
                                                                 </div>
                                                             @endif
                                                         </div>
-                                                        <div class="flex shrink-0 flex-col items-end gap-0.5">
+                                                        <div class="flex shrink-0 flex-col items-end justify-end gap-0.5 pt-0.5">
+                                                            <x-student-stats-compact :stats="($this->studentStats[$student->id] ?? null)" class="w-16 text-gray-500" />
                                                             @if(! is_null($student->class_balance))
                                                                 <x-balance-badge
                                                                     :value="$student->class_balance"
-                                                                    class="cal-balance !text-[12px] leading-none tabular-nums"
+                                                                    class="cal-balance text-[11px] leading-none tabular-nums"
                                                                     title="Class balance: {{ $student->paid_classes }} paid - {{ $student->used_classes }} used"
                                                                 />
                                                             @endif
-                                                            <x-student-stats-compact :stats="($this->studentStats[$student->id] ?? null)" class="w-16 text-gray-500" />
                                                         </div>
                                                     </div>
                                                 </td>
@@ -499,24 +538,6 @@ new class extends Component
                         </div>
                     </div>
 
-                    @if($this->archivedStudents->count() > 0)
-                        <div class="mt-6 rounded border bg-gray-50 p-4">
-                            <h3 class="mb-3 text-sm font-semibold text-gray-700">Archived Students</h3>
-                            <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                                @foreach($this->archivedStudents as $student)
-                                    <div class="flex items-center justify-between gap-3 rounded bg-white px-3 py-2 text-sm" wire:key="archived-student-{{ $student->id }}">
-                                        <span class="min-w-0 truncate text-gray-600">{{ $student->name }}</span>
-                                        <form method="POST" action="{{ route('admin.students.restore', $student->id) }}">
-                                            @csrf
-                                            <button type="submit" class="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700">
-                                                Restore
-                                            </button>
-                                        </form>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
                 </div>
             @endif
 
@@ -548,7 +569,9 @@ new class extends Component
                         <tbody>
                             @foreach($this->teachers as $teacher)
                                 <tr class="border-t hover:bg-gray-50" wire:key="teacher-{{ $teacher->id }}">
-                                    <td class="px-4 py-2">{{ $teacher->name }}</td>
+                                    <td class="px-4 py-2">
+                                        <a href="{{ route('teacher.dashboard', $teacher) }}" class="text-blue-600 hover:underline">{{ $teacher->name }}</a>
+                                    </td>
                                     <td class="px-4 py-2">{{ $teacher->students_count }}</td>
                                     <td class="px-4 py-2">{{ $teacher->lessons_count }}</td>
                                     @php

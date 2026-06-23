@@ -141,7 +141,7 @@
                     @endif
 
                     @if($showBalance && $student->class_balance !== null)
-                        <x-balance-badge :value="$student->class_balance" class="ml-1" />
+                        <x-balance-badge :value="$student->class_balance" class="ml-1 text-sm" />
                     @endif
                 </div>
                 <x-student-stats-compact :stats="$s" class="w-40 flex-shrink-0" />
@@ -153,7 +153,7 @@
                         <x-student-status-dot :status="$student->status" />
                         <div class="font-medium text-sm text-gray-900 truncate">{{ $student->name }}</div>
                         @if($showBalance && $student->class_balance !== null)
-                            <x-balance-badge :value="$student->class_balance" class="ml-1" />
+                            <x-balance-badge :value="$student->class_balance" class="ml-1 text-sm" />
                         @endif
                     </div>
                     <x-student-stats-compact :stats="$s" class="w-40" />

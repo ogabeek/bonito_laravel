@@ -59,6 +59,28 @@ it('loads dashboard with lessons data', function () {
         ->assertSee($student->name);
 });
 
+it('links teachers in the admin teachers tab to their teacher dashboard', function () {
+    $teacher = Teacher::factory()->create(['name' => 'Linked Teacher']);
+    session(['admin_authenticated' => true]);
+
+    Volt::test('admin-dashboard')
+        ->call('setTab', 'teachers')
+        ->assertSee('Linked Teacher')
+        ->assertSeeHtml('href="'.route('teacher.dashboard', $teacher).'"');
+});
+
+it('links calendar student names to the student view and keeps an edit profile link', function () {
+    $student = Student::factory()->create(['name' => 'Linked Student']);
+    session(['admin_authenticated' => true]);
+
+    Volt::test('admin-dashboard')
+        ->assertSee('Linked Student')
+        ->assertSeeHtml('href="'.route('student.dashboard', $student).'"')
+        ->assertSeeHtml('href="'.route('admin.students.edit', $student).'"')
+        ->assertSee('aria-label="Edit Linked Student"', false)
+        ->assertDontSee('>Edit<', false);
+});
+
 it('loads billing page with stats', function () {
     $teacher = Teacher::factory()->create();
     $student = Student::factory()->create();
@@ -287,7 +309,9 @@ it('lists archived students for restore and restores them', function () {
     $this->withSession(['admin_authenticated' => true])
         ->get(route('admin.dashboard'))
         ->assertSuccessful()
-        ->assertSee('Archived Students')
+        ->assertSee('aria-label="Archived students"', false)
+        ->assertDontSee('Archived 1')
+        ->assertDontSee('Archived Students')
         ->assertSee('Restorable Student')
         ->assertSee('Restore');
 

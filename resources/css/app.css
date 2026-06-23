@@ -72,6 +72,25 @@
     --calendar-font-size: 10px;
 }
 
+input:where([type='text']),
+input:where(:not([type])),
+input:where([type='email']),
+input:where([type='url']),
+input:where([type='password']),
+input:where([type='number']),
+input:where([type='date']),
+input:where([type='datetime-local']),
+input:where([type='month']),
+input:where([type='search']),
+input:where([type='tel']),
+input:where([type='time']),
+input:where([type='week']),
+select:where([multiple]),
+textarea,
+select {
+    border-color: var(--color-border);
+}
+
 /* Custom status buttons (checked styling) */
 .status-btn-completed:has(input:checked),
 .status-btn-absent:has(input:checked),
@@ -218,7 +237,7 @@
 .form-input {
     padding: 0.5rem;
     font-size: 0.875rem;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--color-border);
     border-radius: 0.375rem;
 }
 .form-input:focus {

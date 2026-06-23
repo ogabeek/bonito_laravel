@@ -1,4 +1,4 @@
-@props(['status', 'size' => 6])
+@props(['status', 'size' => 6, 'title' => null])
 
 @php
     // Size in pixels, not Tailwind classes (to avoid dynamic class limitations)
@@ -8,5 +8,5 @@
 <span
     {{ $attributes->merge(['class' => 'inline-block rounded-full']) }}
     style="width: {{ $sizeStyle }}; height: {{ $sizeStyle }}; background-color: {{ $status->dotColor() }}"
-    title="{{ $status->label() }}"
+    title="{{ $title ?? $status->label() }}"
 ></span>

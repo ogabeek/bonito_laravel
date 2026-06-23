@@ -35,7 +35,7 @@ class StudentBalanceService
      * ! Balance can be negative (student owes classes); null paid = no payment data.
      *
      * @param  Collection<int, Student>  $students
-     * @param  array<string, int|string>  $balances  [uuid => paid_classes]
+     * @param  array<string, mixed>  $balances  [uuid => paid_classes]
      * @param  Collection<int, int>  $usedCounts  [student_id => used]
      * @return Collection<int, Student>
      */
@@ -44,13 +44,14 @@ class StudentBalanceService
         return $students->map(function (Student $student) use ($balances, $usedCounts) {
             $student->teacher_ids = $student->teachers->pluck('id')->toArray();
 
-            $paid = $balances[$student->uuid] ?? null;
+            $rawPaid = $balances[$student->uuid] ?? null;
+            $paid = is_numeric($rawPaid) ? (int) $rawPaid : null;
             $used = (int) ($usedCounts[$student->id] ?? 0);
 
             // Runtime-only attributes (see Student model @property docblock).
-            $student->paid_classes = $paid !== null ? (int) $paid : null;
+            $student->paid_classes = $paid;
             $student->used_classes = $used;
-            $student->class_balance = $paid !== null ? ((int) $paid - $used) : null;
+            $student->class_balance = $paid !== null ? ($paid - $used) : null;
 
             return $student;
         });

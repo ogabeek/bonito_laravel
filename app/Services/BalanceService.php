@@ -23,13 +23,15 @@ class BalanceService
     /**
      * * Returns [uuid => paid_classes_count] from Google Sheets
      * ! Cached for 5 minutes to avoid API rate limits
+     *
+     * @return array<string, int>
      */
     public function getBalances(): array
     {
         $cached = Cache::get('balances.sheet');
 
         if (is_array($cached)) {
-            return $cached;
+            return $this->normalizeBalances($cached);
         }
 
         $balances = $this->fetchBalances();
@@ -45,6 +47,8 @@ class BalanceService
 
     /**
      * * Reads [uuid => paid_classes] straight from the sheet (uncached).
+     *
+     * @return array<string, int>
      */
     protected function fetchBalances(): array
     {
@@ -74,9 +78,10 @@ class BalanceService
         foreach ($rows as $row) {
             $uuid = $row[$uuidIndex] ?? null;
             $balance = $row[$balanceIndex] ?? null;
+            $paidClasses = $this->normalizeBalance($balance);
 
-            if ($uuid !== null && $balance !== null) {
-                $balances[$uuid] = is_numeric($balance) ? (int) $balance : $balance;
+            if ($uuid !== null && $paidClasses !== null) {
+                $balances[(string) $uuid] = $paidClasses;
             }
         }
 
@@ -94,7 +99,35 @@ class BalanceService
 
         $balances = $this->getBalances();
 
-        return $balances[$uuid] ?? null;
+        return $this->normalizeBalance($balances[$uuid] ?? null);
+    }
+
+    /**
+     * @param  array<string, mixed>  $balances
+     * @return array<string, int>
+     */
+    protected function normalizeBalances(array $balances): array
+    {
+        $normalized = [];
+
+        foreach ($balances as $uuid => $balance) {
+            $paidClasses = $this->normalizeBalance($balance);
+
+            if ($paidClasses !== null) {
+                $normalized[(string) $uuid] = $paidClasses;
+            }
+        }
+
+        return $normalized;
+    }
+
+    protected function normalizeBalance(mixed $balance): ?int
+    {
+        if ($balance === null || $balance === '') {
+            return null;
+        }
+
+        return is_numeric($balance) ? (int) $balance : null;
     }
 
     /**

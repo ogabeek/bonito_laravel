@@ -35,6 +35,18 @@ it('leaves paid and balance null when there is no payment data', function () {
         ->and($enriched->class_balance)->toBeNull();
 });
 
+it('leaves paid and balance null when payment data is not numeric', function () {
+    $student = Student::factory()->create();
+
+    $enriched = $this->service
+        ->mapBalances(Student::withFullDetails()->get(), [$student->uuid => 'check manually'], collect([$student->id => 2]))
+        ->firstWhere('id', $student->id);
+
+    expect($enriched->paid_classes)->toBeNull()
+        ->and($enriched->used_classes)->toBe(2)
+        ->and($enriched->class_balance)->toBeNull();
+});
+
 it('allows a negative balance when used exceeds paid', function () {
     $student = Student::factory()->create();
 

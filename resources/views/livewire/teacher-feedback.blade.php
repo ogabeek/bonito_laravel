@@ -97,9 +97,9 @@ new class extends Component
 <div class="relative">
     {{-- Trigger --}}
     <button type="button" wire:click="togglePanel"
-            title="{{ $this->unreadCount > 0 ? $this->unreadCount.' new message'.($this->unreadCount === 1 ? '' : 's') : 'Feedback chat' }}"
+            title="{{ $this->unreadCount > 0 ? $this->unreadCount.' new message'.($this->unreadCount === 1 ? '' : 's') : 'Help improve this teacher space' }}"
             class="relative inline-flex items-center gap-1 rounded-md border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800">
-        <span>💬 Feedback</span>
+        <span>Help improve this space</span>
         @if($this->unreadCount > 0)
             <span class="absolute -right-1 -top-1 flex h-2.5 w-2.5">
                 <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
@@ -115,10 +115,16 @@ new class extends Component
              x-data x-on:keydown.escape.window="$wire.set('open', false)">
             <div class="flex items-center justify-between border-b border-gray-100 px-3 py-2">
                 <span class="text-sm font-semibold text-gray-800">
-                    {{ $this->viewer === 'teacher' ? 'Message admin' : 'Reply to '.$this->teacher->name }}
+                    {{ $this->viewer === 'teacher' ? 'Share your experience' : 'Reply to '.$this->teacher->name }}
                 </span>
                 <button type="button" wire:click="$set('open', false)" class="text-gray-400 hover:text-gray-600">✕</button>
             </div>
+
+            @if($this->viewer === 'teacher')
+                <div class="border-b border-gray-100 bg-gray-50 px-3 py-2 text-xs leading-snug text-gray-600">
+                    This platform is under development. Your feedback helps us improve this teacher space. Leave a comment here; we read every message.
+                </div>
+            @endif
 
             <div class="max-h-72 space-y-2 overflow-y-auto p-3" x-init="$el.scrollTop = $el.scrollHeight">
                 @if($this->thread)
