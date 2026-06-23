@@ -136,6 +136,12 @@ new class extends Component
     }
 
     #[Computed]
+    public function archivedStudents(): \Illuminate\Support\Collection
+    {
+        return app(DashboardDataService::class)->getArchivedStudents();
+    }
+
+    #[Computed]
     public function lessons(): \Illuminate\Support\Collection
     {
         return app(DashboardDataService::class)->getLessonsCollection($this->currentMonth, $this->billing);
@@ -415,19 +421,19 @@ new class extends Component
                                     @forelse($this->visibleStudents as $student)
                                             <tr class="border-t" wire:key="student-{{ $student->id }}">
                                                 <td class="cal-cell cal-sticky border-r bg-white align-middle">
-                                                    <div class="flex items-start justify-between gap-2 min-w-0">
+                                                    <div class="flex min-w-0 items-start justify-between gap-2">
                                                         <div class="min-w-0">
-                                                            <div class="flex items-center gap-1 min-w-0">
+                                                            <div class="flex min-w-0 items-center gap-1">
                                                                 <x-student-status-dot :status="$student->status" />
                                                                 @if($student->countryFlag())
-                                                                    <span class="text-[12px] leading-none flex-shrink-0" title="{{ $student->originLabel() }}">{{ $student->countryFlag() }}</span>
+                                                                    <span class="shrink-0 text-[12px] leading-none" title="{{ $student->originLabel() }}">{{ $student->countryFlag() }}</span>
                                                                 @endif
-                                                                <a href="{{ route('admin.students.edit', $student) }}" class="font-medium text-[12px] text-gray-900 hover:text-blue-600 truncate">
+                                                                <a href="{{ route('admin.students.edit', $student) }}" class="truncate text-[12px] font-medium leading-tight text-gray-900 hover:text-blue-600">
                                                                     {{ $student->name }}
                                                                 </a>
                                                             </div>
                                                             @if($student->teachers->count() > 0)
-                                                                <div class="text-xs text-gray-500 ml-3.5">{{ $student->teachers->pluck('name')->join(', ') }}</div>
+                                                                <div class="ml-3.5 truncate text-xs text-gray-500">{{ $student->teachers->pluck('name')->join(', ') }}</div>
                                                             @endif
                                                             @if($student->hasPendingVacation())
                                                                 <div class="ml-3.5 mt-0.5 flex items-center gap-1 text-[11px] font-medium text-violet-600" title="On vacation">
@@ -435,15 +441,18 @@ new class extends Component
                                                                 </div>
                                                             @endif
                                                             @if($student->status_note)
-                                                                <div class="ml-3.5 mt-0.5 text-[11px] italic text-gray-500 truncate" title="{{ $student->status_note }}">
+                                                                <div class="ml-3.5 mt-0.5 truncate text-[11px] italic text-gray-500" title="{{ $student->status_note }}">
                                                                     {{ $student->status_note }}
                                                                 </div>
                                                             @endif
                                                         </div>
-                                                        <div class="flex flex-shrink-0 flex-col items-end gap-0.5">
+                                                        <div class="flex shrink-0 flex-col items-end gap-0.5">
                                                             @if(! is_null($student->class_balance))
-                                                                <span class="text-[12px] font-semibold leading-none tabular-nums {{ $student->class_balance < 0 ? 'text-red-500' : 'text-gray-600' }}"
-                                                                      title="Class balance — {{ $student->paid_classes }} paid − {{ $student->used_classes }} used">{{ $student->class_balance }}</span>
+                                                                <x-balance-badge
+                                                                    :value="$student->class_balance"
+                                                                    class="cal-balance !text-[12px] leading-none tabular-nums"
+                                                                    title="Class balance: {{ $student->paid_classes }} paid - {{ $student->used_classes }} used"
+                                                                />
                                                             @endif
                                                             <x-student-stats-compact :stats="($this->studentStats[$student->id] ?? null)" class="w-16 text-gray-500" />
                                                         </div>
@@ -457,8 +466,17 @@ new class extends Component
                                                         $isWeekend = $date->isWeekend();
                                                         $isToday = $date->isToday();
                                                         $isPeriodStart = $date->day === (int) config('billing.period_start_day');
+                                                        $isVacationDay = $student->isOnVacationDate($date);
+                                                        $cellBg = match (true) {
+                                                            $isVacationDay => 'bg-violet-50/70',
+                                                            $isPrevMonth => 'bg-gray-100',
+                                                            $isToday => 'bg-blue-50',
+                                                            $isWeekend => 'bg-gray-50',
+                                                            default => '',
+                                                        };
                                                     @endphp
-                                                    <td class="cal-cell cal-day cal-daycell border-l {{ $isPeriodStart ? 'cal-period-start' : '' }} {{ $isPrevMonth ? 'bg-gray-100' : '' }} {{ $isWeekend && !$isPrevMonth ? 'bg-gray-50' : '' }} {{ $isToday ? 'bg-blue-50' : '' }}"
+                                                    <td class="cal-cell cal-day cal-daycell border-l {{ $isPeriodStart ? 'cal-period-start' : '' }} {{ $cellBg }}"
+                                                        @if($isVacationDay) title="On vacation: {{ $student->vacationLabel() }}" @endif
                                                         @mouseenter="hoverCol = {{ $loop->index }}"
                                                         :class="hoverCol === {{ $loop->index }} && 'cal-col-hover'">
                                                         <div class="flex flex-wrap justify-center gap-0.5">
@@ -480,6 +498,25 @@ new class extends Component
                             </table>
                         </div>
                     </div>
+
+                    @if($this->archivedStudents->count() > 0)
+                        <div class="mt-6 rounded border bg-gray-50 p-4">
+                            <h3 class="mb-3 text-sm font-semibold text-gray-700">Archived Students</h3>
+                            <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                                @foreach($this->archivedStudents as $student)
+                                    <div class="flex items-center justify-between gap-3 rounded bg-white px-3 py-2 text-sm" wire:key="archived-student-{{ $student->id }}">
+                                        <span class="min-w-0 truncate text-gray-600">{{ $student->name }}</span>
+                                        <form method="POST" action="{{ route('admin.students.restore', $student->id) }}">
+                                            @csrf
+                                            <button type="submit" class="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700">
+                                                Restore
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
             @endif
 

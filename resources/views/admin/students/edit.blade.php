@@ -49,5 +49,25 @@
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Assign</button>
         </form>
     </x-card>
+
+    <x-card title="Archive Student">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-sm text-gray-600">
+                Archive hides this student from active calendars, teacher lists, and the public student page. Lessons and history stay preserved.
+            </p>
+            <form method="POST" action="{{ route('admin.students.delete', $student) }}"
+                  x-data="{ armed: false }"
+                  @submit.prevent="if (armed) $el.submit(); else armed = true"
+                  @click.outside="armed = false">
+                @csrf
+                @method('DELETE')
+                <button type="submit"
+                        class="rounded px-4 py-2 text-sm font-medium"
+                        :class="armed ? 'bg-orange-600 text-white' : 'bg-orange-50 text-orange-700 hover:bg-orange-100'"
+                        x-text="armed ? 'Confirm archive' : 'Archive student'">
+                </button>
+            </form>
+        </div>
+    </x-card>
 </div>
 @endsection

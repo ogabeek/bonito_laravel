@@ -20,7 +20,7 @@ class CreateLessonRequest extends LessonRequest
         return array_merge(parent::rules(), [
             'student_id' => [
                 'required',
-                'exists:students,id',
+                Rule::exists('students', 'id')->whereNull('deleted_at'),
                 // * Checks student_teacher pivot for this relationship
                 Rule::exists('student_teacher', 'student_id')
                     ->where('teacher_id', session('teacher_id')),

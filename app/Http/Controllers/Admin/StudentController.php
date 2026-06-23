@@ -55,6 +55,24 @@ class StudentController extends Controller
         return redirect()->route('admin.students.edit', $student)->with('success', 'Student updated successfully!');
     }
 
+    public function destroy(Student $student)
+    {
+        $student->delete();
+        $this->logActivity($student, 'student_archived');
+
+        return redirect()->route('admin.dashboard')->with('success', 'Student archived successfully!');
+    }
+
+    // Int param because soft-deleted models aren't found by default route model binding.
+    public function restore(int $student)
+    {
+        $studentModel = Student::withTrashed()->findOrFail($student);
+        $studentModel->restore();
+        $this->logActivity($studentModel, 'student_restored');
+
+        return redirect()->route('admin.dashboard')->with('success', 'Student restored successfully!');
+    }
+
     public function updateStatus(Request $request, Student $student)
     {
         $validated = $request->validate([

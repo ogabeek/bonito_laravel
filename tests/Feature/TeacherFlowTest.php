@@ -126,6 +126,23 @@ it('prevents creating lesson for unassigned student', function () {
         ->assertJsonValidationErrors(['student_id']);
 });
 
+it('prevents creating lesson for archived student', function () {
+    $teacher = Teacher::factory()->create();
+    $student = Student::factory()->create();
+    $teacher->students()->attach($student);
+    $student->delete();
+
+    $this->withSession(['teacher_id' => $teacher->id])
+        ->postJson(route('teacher.lesson.create'), [
+            'student_id' => $student->id,
+            'class_date' => now()->format('Y-m-d'),
+            'status' => LessonStatus::COMPLETED->value,
+            'topic' => 'Test Topic',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['student_id']);
+});
+
 it('updates own lesson', function () {
     $teacher = Teacher::factory()->create();
     $student = Student::factory()->create();

@@ -235,6 +235,70 @@ it('creates a new student', function () {
     $this->assertDatabaseHas('students', ['name' => 'New Student']);
 });
 
+it('shows the archive action on the student edit page', function () {
+    $student = Student::factory()->create();
+
+    $this->withSession(['admin_authenticated' => true])
+        ->get(route('admin.students.edit', $student))
+        ->assertSuccessful()
+        ->assertSee('Archive Student')
+        ->assertSee('Archive student');
+});
+
+it('archives a student without deleting lessons or teacher assignments', function () {
+    $teacher = Teacher::factory()->create();
+    $student = Student::factory()->create(['name' => 'Archived Student']);
+    $teacher->students()->attach($student);
+    $lesson = Lesson::factory()->create([
+        'teacher_id' => $teacher->id,
+        'student_id' => $student->id,
+        'class_date' => now(),
+        'topic' => 'Preserved lesson',
+    ]);
+
+    $this->withSession(['admin_authenticated' => true])
+        ->delete(route('admin.students.delete', $student))
+        ->assertRedirect(route('admin.dashboard'))
+        ->assertSessionHas('success');
+
+    $this->assertSoftDeleted('students', ['id' => $student->id]);
+    $this->assertDatabaseHas('student_teacher', [
+        'student_id' => $student->id,
+        'teacher_id' => $teacher->id,
+    ]);
+    $this->assertDatabaseHas('lessons', [
+        'id' => $lesson->id,
+        'student_id' => $student->id,
+    ]);
+
+    $this->get(route('student.dashboard', $student))->assertNotFound();
+
+    $this->withSession(['teacher_id' => $teacher->id])
+        ->get(route('teacher.dashboard', $teacher))
+        ->assertSuccessful()
+        ->assertDontSee('Archived Student')
+        ->assertDontSee('Preserved lesson');
+});
+
+it('lists archived students for restore and restores them', function () {
+    $student = Student::factory()->create(['name' => 'Restorable Student']);
+    $student->delete();
+
+    $this->withSession(['admin_authenticated' => true])
+        ->get(route('admin.dashboard'))
+        ->assertSuccessful()
+        ->assertSee('Archived Students')
+        ->assertSee('Restorable Student')
+        ->assertSee('Restore');
+
+    $this->withSession(['admin_authenticated' => true])
+        ->post(route('admin.students.restore', $student->id))
+        ->assertRedirect(route('admin.dashboard'))
+        ->assertSessionHas('success');
+
+    expect(Student::withTrashed()->findOrFail($student->id)->trashed())->toBeFalse();
+});
+
 it('archives (soft deletes) a teacher', function () {
     $teacher = Teacher::factory()->create();
 

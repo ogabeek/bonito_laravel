@@ -8,6 +8,7 @@ use App\Models\FeedbackThread;
 use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Teacher;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Blade;
 use Livewire\Volt\Volt;
 use Spatie\Activitylog\Models\Activity;
@@ -137,6 +138,28 @@ it('shows a vacation label only for active or upcoming periods', function () {
         ->and($upcoming->vacationLabel())->not->toBeNull()
         ->and($past->hasPendingVacation())->toBeFalse()
         ->and($none->vacationLabel())->toBeNull();
+});
+
+it('marks vacation days on the admin calendar', function () {
+    Carbon::setTestNow(Carbon::parse('2026-07-01'));
+
+    try {
+        $student = Student::factory()->holiday()->create([
+            'name' => 'Vacation Student',
+            'vacation_starts_on' => '2026-07-10',
+            'vacation_ends_on' => '2026-07-12',
+        ]);
+
+        $html = Volt::test('admin-dashboard')->html();
+
+        expect($html)
+            ->toContain($student->name)
+            ->toContain('bg-violet-50/70')
+            ->not->toContain('ring-violet-200')
+            ->and(substr_count($html, 'title="On vacation: Jul 10 – Jul 12"'))->toBe(3);
+    } finally {
+        Carbon::setTestNow();
+    }
 });
 
 it('keeps the student list compact and shows status choices inside the editor', function () {

@@ -5,10 +5,12 @@ namespace App\Models;
 use App\Enums\StudentStatus;
 use App\Support\Countries;
 use App\Support\Languages;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 /**
@@ -30,7 +32,7 @@ use Illuminate\Support\Str;
  */
 class Student extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'uuid',
@@ -84,6 +86,15 @@ class Student extends Model
         }
 
         return $this->vacation_starts_on->format('M j').' – '.$this->vacation_ends_on->format('M j');
+    }
+
+    public function isOnVacationDate(CarbonInterface $date): bool
+    {
+        return $this->status === StudentStatus::HOLIDAY
+            && $this->vacation_starts_on !== null
+            && $this->vacation_ends_on !== null
+            && $date->toDateString() >= $this->vacation_starts_on->toDateString()
+            && $date->toDateString() <= $this->vacation_ends_on->toDateString();
     }
 
     /** Flag emoji for the student's country, or '' when unset/unknown. */

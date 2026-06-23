@@ -35,6 +35,16 @@ class DashboardDataService
     }
 
     /**
+     * * Load archived students for restore functionality
+     */
+    public function getArchivedStudents(): Collection
+    {
+        return Student::onlyTrashed()
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
      * * Load active teachers with counts
      */
     public function getTeachers(): Collection

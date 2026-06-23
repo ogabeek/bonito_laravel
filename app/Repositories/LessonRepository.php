@@ -39,6 +39,7 @@ class LessonRepository
     {
         return $this->baseQuery($with)
             ->where('teacher_id', $teacherId)
+            ->whereHas('student', fn (Builder $query) => $query->whereNull('students.deleted_at'))
             ->forMonth($month)
             ->orderBy('class_date', 'desc')
             ->get();
