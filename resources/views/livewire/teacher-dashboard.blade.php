@@ -472,7 +472,7 @@ new class extends Component
         </x-card>
 
         {{-- Lessons List --}}
-        <x-card :title="'Lessons (' . $this->stats['total'] . ')'">
+        <x-card title="Lessons">
             @if($this->lessons->count() > 0)
                 <div class="space-y-2">
                     @foreach($this->lessons as $lesson)

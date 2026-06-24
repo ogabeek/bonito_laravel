@@ -26,7 +26,7 @@
     {{-- Left: Date & Person --}}
     <div class="min-w-0">
         <div class="font-semibold text-xs sm:text-sm text-gray-800">{{ $lesson->class_date->format($dateFormat) }}</div>
-        @if($showStudent)<div class="text-xs text-gray-500 truncate">{{ $lesson->student->name }}</div>@endif
+        @if($showStudent)<div class="text-xs text-gray-500 truncate">{{ $lesson->student?->name }}</div>@endif
         @if($showTeacher)<div class="text-xs text-gray-500 truncate">{{ $lesson->teacher->name }}</div>@endif
     </div>
     

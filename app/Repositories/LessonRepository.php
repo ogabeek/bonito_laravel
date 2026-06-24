@@ -108,6 +108,8 @@ class LessonRepository
     public function getForDateRange(Carbon $start, Carbon $end, array $with = []): Collection
     {
         return $this->baseQuery($with)
+            // Match getForTeacher(): archived students' lessons stay out of admin views.
+            ->whereHas('student', fn (Builder $query) => $query->whereNull('students.deleted_at'))
             ->whereBetween('class_date', [$start->startOfDay(), $end->endOfDay()])
             ->orderBy('class_date')
             ->orderBy('id')

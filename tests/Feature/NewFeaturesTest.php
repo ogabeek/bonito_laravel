@@ -117,7 +117,7 @@ it('uses neutral status cards in the teacher lesson history', function () {
         ->toContain('border-red-200 bg-red-50 text-red-700')
         ->toContain('Student did not attend.')
         ->toContain('Needs recovery')
-        ->toContain('Lessons (1)')
+        ->toContain('Lessons')
         ->not->toContain('📚 Lessons');
 });
 

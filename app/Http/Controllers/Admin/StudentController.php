@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\ArchivesRecords;
 use App\Concerns\LogsActivityActions;
 use App\Enums\StudentStatus;
 use App\Http\Controllers\Controller;
@@ -18,7 +19,7 @@ use Illuminate\Validation\Rule;
  */
 class StudentController extends Controller
 {
-    use LogsActivityActions;
+    use ArchivesRecords, LogsActivityActions;
 
     public function store(CreateStudentRequest $request)
     {
@@ -57,20 +58,16 @@ class StudentController extends Controller
 
     public function destroy(Student $student)
     {
-        $student->delete();
-        $this->logActivity($student, 'student_archived');
-
-        return redirect()->route('admin.dashboard')->with('success', 'Student archived successfully!');
+        return $this->archiveRecord($student, 'Student');
     }
 
     // Int param because soft-deleted models aren't found by default route model binding.
     public function restore(int $student)
     {
-        $studentModel = Student::withTrashed()->findOrFail($student);
-        $studentModel->restore();
-        $this->logActivity($studentModel, 'student_restored');
+        $model = Student::withTrashed()->findOrFail($student);
+        $model->restore();
 
-        return redirect()->route('admin.dashboard')->with('success', 'Student restored successfully!');
+        return $this->restoredRecord($model, 'Student');
     }
 
     public function updateStatus(Request $request, Student $student)

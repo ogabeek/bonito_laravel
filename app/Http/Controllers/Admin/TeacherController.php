@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Concerns\ArchivesRecords;
 use App\Concerns\LogsActivityActions;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateTeacherRequest;
@@ -14,7 +15,7 @@ use Illuminate\Support\Arr;
  */
 class TeacherController extends Controller
 {
-    use LogsActivityActions;
+    use ArchivesRecords, LogsActivityActions;
 
     public function store(CreateTeacherRequest $request)
     {
@@ -56,19 +57,15 @@ class TeacherController extends Controller
 
     public function destroy(Teacher $teacher)
     {
-        $teacher->delete();
-        $this->logActivity($teacher, 'teacher_archived');
-
-        return redirect()->route('admin.dashboard')->with('success', 'Teacher archived successfully!');
+        return $this->archiveRecord($teacher, 'Teacher');
     }
 
     // Int param because soft-deleted models aren't found by default route model binding
     public function restore(int $teacher)
     {
-        $teacherModel = Teacher::withTrashed()->findOrFail($teacher);
-        $teacherModel->restore();
-        $this->logActivity($teacherModel, 'teacher_restored');
+        $model = Teacher::withTrashed()->findOrFail($teacher);
+        $model->restore();
 
-        return redirect()->route('admin.dashboard')->with('success', 'Teacher restored successfully!');
+        return $this->restoredRecord($model, 'Teacher');
     }
 }

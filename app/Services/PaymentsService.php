@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Concerns\CachesNonEmpty;
 use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\Cache;
  */
 class PaymentsService
 {
+    use CachesNonEmpty;
+
     protected const CACHE_KEY = 'payments.journal';
 
     public function __construct(
@@ -33,19 +36,13 @@ class PaymentsService
      */
     public function journalPaymentsByName(): Collection
     {
-        $events = Cache::get(self::CACHE_KEY);
-
-        if (! is_array($events)) {
-            $events = $this->fetch();
-
-            // ! Never cache an empty result (see BalanceService) — a transient
-            // ! Sheets timeout would hide every payment for the whole TTL.
-            if ($events !== []) {
-                Cache::put(self::CACHE_KEY, $events, config('services.sheets.cache_ttl', 300));
-            }
-        }
-
         /** @var array<int, array{key: string, name: string, date: string, hours: float}> $events */
+        $events = $this->rememberNonEmpty(
+            self::CACHE_KEY,
+            config('services.sheets.cache_ttl', 300),
+            fn (): array => $this->fetch(),
+        );
+
         $grouped = [];
         foreach ($events as $event) {
             $grouped[$event['key']] ??= collect();

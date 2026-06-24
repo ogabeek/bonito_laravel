@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Concerns\CachesNonEmpty;
 use Illuminate\Support\Facades\Cache;
 
 /**
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\Cache;
  */
 class BalanceService
 {
+    use CachesNonEmpty;
+
     public function __construct(
         protected GoogleSheetsClient $sheetsClient
     ) {}
@@ -28,21 +31,15 @@ class BalanceService
      */
     public function getBalances(): array
     {
-        $cached = Cache::get('balances.sheet');
+        /** @var array<string, mixed> $balances */
+        $balances = $this->rememberNonEmpty(
+            'balances.sheet',
+            config('services.sheets.cache_ttl', 300),
+            fn (): array => $this->fetchBalances(),
+        );
 
-        if (is_array($cached)) {
-            return $this->normalizeBalances($cached);
-        }
-
-        $balances = $this->fetchBalances();
-
-        // ! Never cache an empty result: a transient Sheets timeout would otherwise
-        // ! hide every student's balance for the whole TTL.
-        if ($balances !== []) {
-            Cache::put('balances.sheet', $balances, config('services.sheets.cache_ttl', 300));
-        }
-
-        return $balances;
+        // Normalize on the way out too, so a stale/unnormalized cache entry is cleaned.
+        return $this->normalizeBalances($balances);
     }
 
     /**

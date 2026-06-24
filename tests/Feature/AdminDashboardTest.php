@@ -302,6 +302,26 @@ it('archives a student without deleting lessons or teacher assignments', functio
         ->assertDontSee('Preserved lesson');
 });
 
+it('keeps archived students lessons out of the admin calendar query', function () {
+    $teacher = Teacher::factory()->create();
+    $active = Student::factory()->create();
+    $archived = Student::factory()->create();
+    $teacher->students()->attach([$active->id, $archived->id]);
+
+    Lesson::factory()->create(['teacher_id' => $teacher->id, 'student_id' => $active->id, 'class_date' => now()]);
+    Lesson::factory()->create(['teacher_id' => $teacher->id, 'student_id' => $archived->id, 'class_date' => now()]);
+
+    $archived->delete();
+
+    $studentIds = app(\App\Services\DashboardDataService::class)
+        ->getLessonsForMonth(now())
+        ->flatten(1)
+        ->pluck('student_id');
+
+    expect($studentIds)->toContain($active->id)
+        ->not->toContain($archived->id);
+});
+
 it('lists archived students for restore and restores them', function () {
     $student = Student::factory()->create(['name' => 'Restorable Student']);
     $student->delete();
