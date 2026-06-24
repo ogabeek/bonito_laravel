@@ -4,6 +4,7 @@ use App\Enums\StudentStatus;
 use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Teacher;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Volt\Volt;
@@ -67,6 +68,17 @@ it('links teachers in the admin teachers tab to their teacher dashboard', functi
         ->call('setTab', 'teachers')
         ->assertSee('Linked Teacher')
         ->assertSeeHtml('href="'.route('teacher.dashboard', $teacher).'"');
+});
+
+it('lets the admin refresh balances from the dashboard', function () {
+    session(['admin_authenticated' => true]);
+    Cache::put('balances.sheet', ['some-uuid' => 5]);
+    Cache::put('payments.journal', [['key' => 'x', 'name' => 'X', 'date' => '2026-01-01', 'hours' => 1.0]]);
+
+    Volt::test('admin-dashboard')->call('refreshBalances');
+
+    expect(Cache::get('balances.sheet'))->toBeNull()
+        ->and(Cache::get('payments.journal'))->toBeNull();
 });
 
 it('links calendar student names to the student view and keeps an edit profile link', function () {

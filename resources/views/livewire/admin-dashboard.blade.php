@@ -7,6 +7,7 @@ use App\Repositories\LessonRepository;
 use App\Services\BalanceLedgerService;
 use App\Services\BalanceService;
 use App\Services\DashboardDataService;
+use App\Services\PaymentsService;
 use App\Services\StudentBalanceService;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
@@ -75,6 +76,14 @@ new class extends Component
         }
 
         return $days;
+    }
+
+    /** Force a fresh pull of balances + payments from Google Sheets (manual button). */
+    public function refreshBalances(): void
+    {
+        app(BalanceService::class)->refreshCache();
+        app(PaymentsService::class)->refreshCache();
+        unset($this->students, $this->visibleStudents, $this->lessonBalances);
     }
 
     #[Computed]
@@ -351,6 +360,14 @@ new class extends Component
                                     <x-status-legend />
                                 </div>
                             </div>
+                            <button type="button" wire:click="refreshBalances" wire:target="refreshBalances" wire:loading.attr="disabled"
+                                    class="flex h-7 w-7 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
+                                    aria-label="Refresh balances" title="Refresh balances from Google Sheets">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" wire:target="refreshBalances" wire:loading.class="animate-spin"
+                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
                             @if($archivedStudents->isNotEmpty())
                                 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
                                     <button type="button"
