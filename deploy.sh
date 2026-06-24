@@ -21,7 +21,7 @@ BACKUP_DIR="/home/forge/backups"
 cd "$SITE_DIR"
 
 CNF=""
-cleanup() { [ -n "$CNF" ] && rm -f "$CNF"; }   # never leave the DB password temp file behind
+cleanup() { [ -n "$CNF" ] && rm -f "$CNF"; return 0; }   # rm the DB-password temp file; return 0 so the EXIT trap never fails a successful deploy
 trap cleanup EXIT
 
 on_error() {
