@@ -10,7 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "google/apiclient": "*",
+        "google/apiclient": "^2.19",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "league/flysystem-aws-s3-v3": "^3.0",
@@ -24,7 +24,7 @@
         "barryvdh/laravel-debugbar": "^3.16",
         "fakerphp/faker": "^1.23",
         "larastan/larastan": "^3.0",
-        "laravel/boost": "^1.8",
+        "laravel/boost": "^2.4",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.24",
         "laravel/sail": "^1.41",
@@ -66,6 +66,14 @@
         ],
         "analyse": [
             "vendor/bin/phpstan analyse --memory-limit=512M"
+        ],
+        "pint": [
+            "vendor/bin/pint app tests"
+        ],
+        "check": [
+            "vendor/bin/pint --test app tests",
+            "@analyse",
+            "@test"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
