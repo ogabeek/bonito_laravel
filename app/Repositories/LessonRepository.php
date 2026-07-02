@@ -74,7 +74,8 @@ class LessonRepository
     }
 
     /**
-     * * Billing period: 26th prev month → 25th current month
+     * * Billing period: `period_start_day` prev month → `period_end_day` current month
+     *   (currently 24th → 23rd, see config/billing.php)
      * ? Why? Admin bills per this cycle, not calendar month
      */
     public function getForPeriod(Carbon $month, bool $isBilling = false, array $with = []): Collection

@@ -22,7 +22,7 @@ class BillingDataService
 
     /**
      * * Main entry point - builds all data for admin billing view
-     * ? $billing mode: true = 26th-25th period, false = calendar month
+     * ? $billing mode: true = period cycle (24th→23rd, see config/billing.php), false = calendar month
      */
     public function build(Request $request): array
     {
