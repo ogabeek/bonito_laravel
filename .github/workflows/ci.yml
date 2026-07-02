@@ -39,6 +39,9 @@ jobs:
           php artisan key:generate
 
       # Cheap checks first — fail fast before building assets.
+      - name: Security audit (Composer)
+        run: composer audit
+
       - name: Check code style (Pint)
         run: vendor/bin/pint --test app tests
 

@@ -17,7 +17,7 @@ across all classes.**
 - **Framework:** Laravel 12 (PHP 8.4)
 - **UI:** Livewire 4 / Volt single-file components + Blade, Tailwind CSS 4 via Vite
 - **Local Development:** Laravel Herd
-- **Database:** SQLite (dev & tests) → MySQL (production)
+- **Database:** MySQL (dev, seeded from a prod snapshot, and production); SQLite `:memory:` for tests
 - **Auth:** UUID direct links (students, no password); PIN/password (teachers & admin)
 - **Sheets Integration:** native Google API client (`GoogleSheetsClient`) reading a
   service-account spreadsheet for paid-class balances and per-payment history
