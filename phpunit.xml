@@ -25,6 +25,9 @@
         <env name="CACHE_STORE" value="array"/>
         <env name="DB_CONNECTION" value="sqlite"/>
         <env name="DB_DATABASE" value=":memory:"/>
+        <!-- Tests must never reach the real Google Sheets API, even on machines with live credentials -->
+        <env name="GOOGLE_APPLICATION_CREDENTIALS" value=""/>
+        <env name="GOOGLE_SHEETS_BALANCE_SHEET_ID" value=""/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
