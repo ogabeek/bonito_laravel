@@ -110,7 +110,7 @@
                     <template x-for="code in selected" :key="code">
                         <span class="inline-flex items-center gap-1 rounded bg-blue-50 text-blue-700 text-sm pl-2 pr-1 py-0.5">
                             <span x-text="options[code]"></span>
-                            <button type="button" class="leading-none text-blue-400 hover:text-blue-700" @click.stop="remove(code)">&times;</button>
+                            <button type="button" class="leading-none text-blue-400 hover:text-blue-700" @click.stop="remove(code)" aria-label="Remove language">&times;</button>
                         </span>
                     </template>
                     <input x-ref="search" type="text" x-model="search" autocomplete="off"

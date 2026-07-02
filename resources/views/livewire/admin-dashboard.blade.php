@@ -64,7 +64,7 @@ new class extends Component
     #[Computed]
     public function calendarDays(): array
     {
-        $tailDay = config('billing.period_end_day', 25);
+        $tailDay = config('billing.period_end_day');
         $start = $this->currentMonth->copy()->subMonthNoOverflow()->day($tailDay);
         $end = $this->currentMonth->copy()->endOfMonth();
 
@@ -421,9 +421,9 @@ new class extends Component
                                     <div>Total</div>
                                 </div>
                             </div>
-                            <button wire:click="$toggle('showAddStudent')" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            <x-button wire:click="$toggle('showAddStudent')">
                                 {{ $showAddStudent ? 'Cancel' : '+ Add Student' }}
-                            </button>
+                            </x-button>
                         </div>
                     </div>
 
@@ -433,7 +433,7 @@ new class extends Component
                             <form method="POST" action="{{ route('admin.students.store') }}">
                                 @csrf
                                 <x-student-form mode="create" />
-                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-3">Create Student</button>
+                                <x-button type="submit" class="mt-3">Create Student</x-button>
                             </form>
                         </div>
                     @endif
@@ -567,7 +567,7 @@ new class extends Component
                             <form method="POST" action="{{ route('admin.teachers.create') }}" class="flex gap-4 items-end">
                                 @csrf
                                 <x-teacher-form mode="create" />
-                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Create</button>
+                                <x-button type="submit">Create</x-button>
                             </form>
                         </div>
                     @endif
@@ -620,9 +620,9 @@ new class extends Component
                     </table>
 
                     <div class="flex justify-end items-center mt-4">
-                        <button wire:click="$toggle('showAddTeacher')" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        <x-button wire:click="$toggle('showAddTeacher')">
                             {{ $showAddTeacher ? 'Cancel' : '+ Add Teacher' }}
-                        </button>
+                        </x-button>
                     </div>
 
                     {{-- Archived Teachers Section --}}
@@ -635,9 +635,7 @@ new class extends Component
                                         <span class="text-gray-600">{{ $teacher->name }}</span>
                                         <form method="POST" action="{{ route('admin.teachers.restore', $teacher->id) }}">
                                             @csrf
-                                            <button type="submit" class="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700">
-                                                Restore
-                                            </button>
+                                            <x-button type="submit" variant="success" size="sm">Restore</x-button>
                                         </form>
                                     </div>
                                 @endforeach

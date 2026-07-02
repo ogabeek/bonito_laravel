@@ -49,7 +49,7 @@
                     <div class="text-lg shrink-0">{{ $icon ?? $defaultIcon }}</div>
                 @endif
                 <div class="flex-1">{{ $slot }}</div>
-                <button @click="dismiss()" class="text-gray-400 hover:text-gray-600 shrink-0 text-lg leading-none">&times;</button>
+                <button @click="dismiss()" class="text-gray-400 hover:text-gray-600 shrink-0 text-lg leading-none" aria-label="Dismiss">&times;</button>
             </div>
         </div>
         {{-- Minimal "don't show again" after dismiss --}}
@@ -67,7 +67,7 @@
                 <div class="text-lg shrink-0">{{ $icon ?? $defaultIcon }}</div>
             @endif
             <div class="flex-1">{{ $slot }}</div>
-            <button @click="show = false" class="text-gray-400 hover:text-gray-600 shrink-0 text-lg leading-none">&times;</button>
+            <button @click="show = false" class="text-gray-400 hover:text-gray-600 shrink-0 text-lg leading-none" aria-label="Dismiss">&times;</button>
         </div>
     </div>
 @else

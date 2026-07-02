@@ -120,7 +120,7 @@ new class extends Component
                 <span class="text-sm font-semibold text-gray-800">
                     {{ $this->viewer === 'teacher' ? 'Share your experience' : 'Reply to '.$this->teacher->name }}
                 </span>
-                <button type="button" wire:click="$set('open', false)" class="text-gray-400 hover:text-gray-600">✕</button>
+                <button type="button" wire:click="$set('open', false)" class="text-gray-400 hover:text-gray-600" aria-label="Close">✕</button>
             </div>
 
             @if($this->viewer === 'teacher')

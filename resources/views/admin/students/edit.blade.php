@@ -19,7 +19,7 @@
             @csrf
             @method('PUT')
             <x-student-form :student="$student" mode="edit" />
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mt-4">Update Student</button>
+            <x-button type="submit" class="mt-4">Update Student</x-button>
         </form>
     </x-card>
 
@@ -29,10 +29,18 @@
                 @foreach($student->teachers as $teacher)
                     <div class="bg-gray-100 px-3 py-1 rounded flex items-center gap-2">
                         <span>{{ $teacher->name }}</span>
-                        <form method="POST" action="{{ route('admin.teachers.students.unassign', [$student, $teacher]) }}" class="inline">
+                        <form method="POST" action="{{ route('admin.teachers.students.unassign', [$student, $teacher]) }}" class="inline"
+                              x-data="{ armed: false }"
+                              @submit.prevent="if (armed) $el.submit(); else armed = true"
+                              @click.outside="armed = false">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-800">×</button>
+                            <button type="submit"
+                                    class="text-red-600 hover:text-red-800"
+                                    :class="armed && 'font-bold underline'"
+                                    aria-label="Remove {{ $teacher->name }} from this student"
+                                    x-text="armed ? 'Remove?' : '×'">
+                            </button>
                         </form>
                     </div>
                 @endforeach
@@ -46,7 +54,7 @@
                     <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
                 @endforeach
             </select>
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Assign</button>
+            <x-button type="submit">Assign</x-button>
         </form>
     </x-card>
 

@@ -244,21 +244,19 @@ new class extends Component
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <x-status-legend compact />
-                <button wire:click="refreshBalances"
+                <x-button wire:click="refreshBalances"
                         wire:loading.attr="disabled"
-                        class="px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                        variant="success" size="xs" class="disabled:opacity-50"
                         title="Refresh balance data from Google Sheets">
                     <span wire:loading.remove wire:target="refreshBalances">Refresh Balance</span>
                     <span wire:loading wire:target="refreshBalances">Refreshing...</span>
-                </button>
+                </x-button>
                 <form method="POST" action="{{ route('admin.billing.export') }}" class="inline">
                     @csrf
                     <input type="hidden" name="billing" value="{{ $billing ? 1 : 0 }}">
                     <input type="hidden" name="year" value="{{ $this->currentMonth->year }}">
                     <input type="hidden" name="month" value="{{ $this->currentMonth->month }}">
-                    <button type="submit" class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
-                        Export to Sheet
-                    </button>
+                    <x-button type="submit" size="xs">Export to Sheet</x-button>
                 </form>
             </div>
         </div>
@@ -372,116 +370,7 @@ new class extends Component
         :year="$this->currentMonth->year"
     />
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const chartData = @json($this->chartData);
-        const trendData = chartData.trend;
-        const teacherStats = chartData.teacherStats;
-        const studentStats = chartData.studentStats;
-        const teachers = chartData.teachers;
-        const students = chartData.students;
-
-        const lineOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, ticks: { font: { size: 9 } }, grid: { color: '#f3f4f6' } },
-                x: { ticks: { font: { size: 9 } }, grid: { display: false } }
-            },
-            elements: { line: { tension: 0.3 }, point: { radius: 2 } }
-        };
-
-        const barOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, ticks: { font: { size: 9 } }, grid: { display: false } },
-                x: { ticks: { font: { size: 9 } }, grid: { display: false } }
-            }
-        };
-
-        // Lessons Trend
-        new Chart(document.getElementById('lessonsTrendChart'), {
-            type: 'line',
-            data: {
-                labels: trendData.labels,
-                datasets: [{
-                    data: trendData.totals,
-                    borderColor: 'rgb(99, 102, 241)',
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                    fill: true
-                }]
-            },
-            options: lineOptions
-        });
-
-        // Completion Rate Trend
-        new Chart(document.getElementById('completionTrendChart'), {
-            type: 'line',
-            data: {
-                labels: trendData.labels,
-                datasets: [{
-                    data: trendData.completionRates,
-                    borderColor: 'rgb(34, 197, 94)',
-                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                    fill: true
-                }]
-            },
-            options: {...lineOptions, scales: {...lineOptions.scales, y: {...lineOptions.scales.y, max: 100}}}
-        });
-
-        // Cancellations Trend
-        new Chart(document.getElementById('cancellationsTrendChart'), {
-            type: 'line',
-            data: {
-                labels: trendData.labels,
-                datasets: [{
-                    data: trendData.cancellations,
-                    borderColor: 'rgb(239, 68, 68)',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                    fill: true
-                }]
-            },
-            options: lineOptions
-        });
-
-        // Teacher Workload Bar
-        const teacherData = Object.entries(teacherStats)
-            .map(([id, stats]) => ({
-                name: teachers.find(t => t.id === parseInt(id))?.name?.split(' ')[0] || '?',
-                value: stats.completed || 0
-            }))
-            .sort((a, b) => b.value - a.value);
-
-        new Chart(document.getElementById('teacherWorkloadChart'), {
-            type: 'bar',
-            data: {
-                labels: teacherData.map(t => t.name),
-                datasets: [{ data: teacherData.map(t => t.value), backgroundColor: 'rgba(99, 102, 241, 0.8)' }]
-            },
-            options: barOptions
-        });
-
-        // Top Students Bar
-        const studentData = Object.entries(studentStats)
-            .map(([id, stats]) => ({
-                name: students.find(s => s.id === parseInt(id))?.name?.split(' ')[0] || '?',
-                value: stats.completed || 0
-            }))
-            .sort((a, b) => b.value - a.value)
-            .slice(0, 8);
-
-        new Chart(document.getElementById('studentActivityChart'), {
-            type: 'bar',
-            data: {
-                labels: studentData.map(s => s.name),
-                datasets: [{ data: studentData.map(s => s.value), backgroundColor: 'rgba(236, 72, 153, 0.8)' }]
-            },
-            options: barOptions
-        });
-    });
-    </script>
+    {{-- Chart data island; rendering lives in resources/js/billing-charts.js (bundled via Vite) --}}
+    <script type="application/json" id="billing-chart-data">@json($this->chartData)</script>
+    @vite('resources/js/billing-charts.js')
 </div>

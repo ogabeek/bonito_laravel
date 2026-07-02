@@ -2,7 +2,6 @@
     'lesson',
     'showTeacher' => false,
     'showStudent' => false,
-    'showDelete' => false,
     'dateFormat' => 'D, M d',
     'neutralNonCompleted' => false,
     'showAbsenceFollowUp' => false,
@@ -68,10 +67,4 @@
         @endif
     </div>
     
-    {{-- Delete (hover only) --}}
-    @if($showDelete)
-        <button onclick="deleteLesson({{ $lesson->id }})" 
-                class="absolute right-1 top-1 w-5 h-5 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity text-xs"
-                title="Delete">🗑</button>
-    @endif
 </div>
