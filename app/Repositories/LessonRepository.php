@@ -74,18 +74,6 @@ class LessonRepository
     }
 
     /**
-     * * Uses Lesson::scopePast() - only lessons before today
-     */
-    public function getPastForStudent(int $studentId, array $with = ['teacher']): Collection
-    {
-        return $this->baseQuery($with)
-            ->where('student_id', $studentId)
-            ->past()
-            ->orderBy('class_date', 'desc')
-            ->get();
-    }
-
-    /**
      * * Billing period: 26th prev month → 25th current month
      * ? Why? Admin bills per this cycle, not calendar month
      */
@@ -95,8 +83,8 @@ class LessonRepository
             return $this->getForMonth($month, $with);
         }
 
-        $startDay = config('billing.period_start_day', 26);
-        $endDay = config('billing.period_end_day', 25);
+        $startDay = config('billing.period_start_day');
+        $endDay = config('billing.period_end_day');
         $periodStart = $month->copy()->subMonthNoOverflow()->day($startDay);
         $periodEnd = $month->copy()->day($endDay)->endOfDay();
 

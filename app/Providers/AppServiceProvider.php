@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Http\Middleware\AdminAuthentication;
 use App\Http\Middleware\TeacherAuthentication;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
@@ -23,6 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Surface N+1 queries in dev/tests; never throw in production.
+        Model::preventLazyLoading(! $this->app->isProduction());
+
         Livewire::addPersistentMiddleware([
             AdminAuthentication::class,
             TeacherAuthentication::class,

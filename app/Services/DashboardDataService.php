@@ -65,7 +65,7 @@ class DashboardDataService
      */
     public function getLessonsForMonth(Carbon $month): Collection
     {
-        $tailStart = $month->copy()->subMonthNoOverflow()->day(config('billing.period_end_day', 25));
+        $tailStart = $month->copy()->subMonthNoOverflow()->day(config('billing.period_end_day'));
         $end = $month->copy()->endOfMonth();
 
         return $this->lessonRepo

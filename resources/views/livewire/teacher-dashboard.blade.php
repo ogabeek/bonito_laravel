@@ -10,6 +10,7 @@ use App\Models\Lesson;
 use App\Enums\StudentStatus;
 use App\Concerns\LogsActivityActions;
 use App\Repositories\LessonRepository;
+use App\Services\LessonService;
 use App\Services\LessonStatisticsService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
@@ -156,36 +157,19 @@ new class extends Component
             return;
         }
 
-        $isAbsent = $this->status === \App\Enums\LessonStatus::STUDENT_ABSENT->value;
-
-        $lesson = Lesson::create([
-            'teacher_id' => $this->teacher->id,
+        // Topic/homework only apply to completed lessons; the form hides those
+        // fields for other statuses, so drop any stale form state here.
+        app(LessonService::class)->create([
             'student_id' => $this->student_id,
             'class_date' => $this->class_date,
             'status' => $this->status,
             'topic' => $this->status === 'completed' ? ($this->topic ?: '') : '',
-            'homework' => $this->status === 'completed' ? $this->homework : null,
+            'homework' => $this->status === 'completed' ? ($this->homework ?: null) : null,
             'comments' => $this->comments ?: null,
-            'absence_reminder_sent' => $isAbsent && $this->absence_reminder_sent,
-            'absence_chat_notified' => $isAbsent && $this->absence_chat_notified,
-            'refund_requested' => $isAbsent && $this->refund_requested,
-        ]);
-
-        $lesson->load('student');
-
-        $this->logActivity(
-            $lesson,
-            'lesson_created',
-            [
-                'student_id' => $this->student_id,
-                'class_date' => $this->class_date,
-                'status' => $this->status,
-                'topic' => $this->topic,
-                'homework' => $this->homework,
-                'comments' => $this->comments,
-            ],
-            $this->teacher
-        );
+            'absence_reminder_sent' => $this->absence_reminder_sent,
+            'absence_chat_notified' => $this->absence_chat_notified,
+            'refund_requested' => $this->refund_requested,
+        ], $this->teacher);
 
         // Reset form but keep student and date for convenience
         $keepStudent = $this->student_id;
@@ -212,17 +196,7 @@ new class extends Component
             return;
         }
 
-        $lesson->load('student');
-        $snapshot = $lesson->toArray();
-
-        $this->logActivity(
-            $lesson,
-            'lesson_deleted',
-            ['snapshot' => $snapshot],
-            $this->teacher
-        );
-
-        $lesson->delete();
+        app(LessonService::class)->delete($lesson, $this->teacher);
 
         // Clear computed cache
         unset($this->lessons, $this->stats, $this->studentStats);
@@ -477,12 +451,13 @@ new class extends Component
                 <div class="space-y-2">
                     @foreach($this->lessons as $lesson)
                         <div class="group relative">
-                            <x-lesson-card :lesson="$lesson" :showStudent="true" :showDelete="false" :neutralNonCompleted="true" :showAbsenceFollowUp="true" />
+                            <x-lesson-card :lesson="$lesson" :showStudent="true" :neutralNonCompleted="true" :showAbsenceFollowUp="true" />
                             <button
                                 wire:click="deleteLesson({{ $lesson->id }})"
                                 wire:confirm="Are you sure you want to delete this lesson? This cannot be undone."
                                 class="absolute right-1 top-1 w-5 h-5 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity text-xs"
                                 title="Delete"
+                                aria-label="Delete lesson"
                             >🗑</button>
                         </div>
                     @endforeach

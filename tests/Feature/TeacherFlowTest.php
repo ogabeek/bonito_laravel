@@ -5,6 +5,7 @@ use App\Models\Lesson;
 use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Support\Facades\DB;
+use Livewire\Volt\Volt;
 
 it('shows teacher login form', function () {
     $teacher = Teacher::factory()->create();
@@ -90,19 +91,17 @@ it('creates a lesson for assigned student', function () {
     $student = Student::factory()->create();
     $teacher->students()->attach($student);
 
-    $lessonData = [
-        'student_id' => $student->id,
-        'class_date' => now()->format('Y-m-d'),
-        'status' => LessonStatus::COMPLETED->value,
-        'topic' => 'Test Topic',
-        'homework' => 'Test Homework',
-        'comments' => 'Test Comments',
-    ];
+    session(['teacher_id' => $teacher->id]);
 
-    $this->withSession(['teacher_id' => $teacher->id])
-        ->postJson(route('teacher.lesson.create'), $lessonData)
-        ->assertSuccessful()
-        ->assertJson(['success' => true]);
+    Volt::test('teacher-dashboard', ['teacher' => $teacher])
+        ->set('student_id', (string) $student->id)
+        ->set('class_date', now()->format('Y-m-d'))
+        ->set('status', LessonStatus::COMPLETED->value)
+        ->set('topic', 'Test Topic')
+        ->set('homework', 'Test Homework')
+        ->set('comments', 'Test Comments')
+        ->call('createLesson')
+        ->assertHasNoErrors();
 
     $this->assertDatabaseHas('lessons', [
         'teacher_id' => $teacher->id,
@@ -115,15 +114,17 @@ it('prevents creating lesson for unassigned student', function () {
     $teacher = Teacher::factory()->create();
     $student = Student::factory()->create();
 
-    $this->withSession(['teacher_id' => $teacher->id])
-        ->postJson(route('teacher.lesson.create'), [
-            'student_id' => $student->id,
-            'class_date' => now()->format('Y-m-d'),
-            'status' => LessonStatus::COMPLETED->value,
-            'topic' => 'Test Topic',
-        ])
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors(['student_id']);
+    session(['teacher_id' => $teacher->id]);
+
+    Volt::test('teacher-dashboard', ['teacher' => $teacher])
+        ->set('student_id', (string) $student->id)
+        ->set('class_date', now()->format('Y-m-d'))
+        ->set('status', LessonStatus::COMPLETED->value)
+        ->set('topic', 'Test Topic')
+        ->call('createLesson')
+        ->assertHasErrors(['student_id']);
+
+    $this->assertDatabaseCount('lessons', 0);
 });
 
 it('prevents creating lesson for archived student', function () {
@@ -132,95 +133,43 @@ it('prevents creating lesson for archived student', function () {
     $teacher->students()->attach($student);
     $student->delete();
 
-    $this->withSession(['teacher_id' => $teacher->id])
-        ->postJson(route('teacher.lesson.create'), [
-            'student_id' => $student->id,
-            'class_date' => now()->format('Y-m-d'),
-            'status' => LessonStatus::COMPLETED->value,
-            'topic' => 'Test Topic',
-        ])
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors(['student_id']);
+    session(['teacher_id' => $teacher->id]);
+
+    Volt::test('teacher-dashboard', ['teacher' => $teacher])
+        ->set('student_id', (string) $student->id)
+        ->set('class_date', now()->format('Y-m-d'))
+        ->set('status', LessonStatus::COMPLETED->value)
+        ->set('topic', 'Test Topic')
+        ->call('createLesson')
+        ->assertHasErrors(['student_id']);
+
+    $this->assertDatabaseCount('lessons', 0);
 });
 
-it('updates own lesson', function () {
+it('ignores absence follow-up flags when creating a non-absent lesson', function () {
     $teacher = Teacher::factory()->create();
     $student = Student::factory()->create();
     $teacher->students()->attach($student);
 
-    $lesson = Lesson::factory()->create([
-        'teacher_id' => $teacher->id,
-        'student_id' => $student->id,
-    ]);
+    session(['teacher_id' => $teacher->id]);
 
-    $this->withSession(['teacher_id' => $teacher->id])
-        ->putJson(route('lesson.update', $lesson), [
-            'status' => LessonStatus::STUDENT_ABSENT->value,
-            'topic' => 'Updated Topic',
-            'homework' => 'Updated Homework',
-            'comments' => 'Updated Comments',
-            'absence_reminder_sent' => true,
-            'absence_chat_notified' => true,
-            'refund_requested' => true,
-        ])
-        ->assertSuccessful()
-        ->assertJson(['success' => true]);
+    Volt::test('teacher-dashboard', ['teacher' => $teacher])
+        ->set('student_id', (string) $student->id)
+        ->set('class_date', now()->format('Y-m-d'))
+        ->set('status', LessonStatus::COMPLETED->value)
+        ->set('topic', 'Back to class')
+        ->set('absence_reminder_sent', true)
+        ->set('absence_chat_notified', true)
+        ->set('refund_requested', true)
+        ->call('createLesson')
+        ->assertHasNoErrors();
 
     $this->assertDatabaseHas('lessons', [
-        'id' => $lesson->id,
-        'topic' => 'Updated Topic',
-        'status' => LessonStatus::STUDENT_ABSENT->value,
-        'absence_reminder_sent' => true,
-        'absence_chat_notified' => true,
-        'refund_requested' => true,
-    ]);
-});
-
-it('clears absence follow-up flags when a lesson is no longer absent', function () {
-    $teacher = Teacher::factory()->create();
-    $student = Student::factory()->create();
-    $teacher->students()->attach($student);
-    $lesson = Lesson::factory()->studentAbsent()->create([
-        'teacher_id' => $teacher->id,
         'student_id' => $student->id,
-        'absence_reminder_sent' => true,
-        'absence_chat_notified' => true,
-        'refund_requested' => true,
-    ]);
-
-    $this->withSession(['teacher_id' => $teacher->id])
-        ->putJson(route('lesson.update', $lesson), [
-            'status' => LessonStatus::COMPLETED->value,
-            'topic' => 'Back to class',
-            'absence_reminder_sent' => true,
-            'absence_chat_notified' => true,
-            'refund_requested' => true,
-        ])
-        ->assertSuccessful();
-
-    $this->assertDatabaseHas('lessons', [
-        'id' => $lesson->id,
         'absence_reminder_sent' => false,
         'absence_chat_notified' => false,
         'refund_requested' => false,
     ]);
-});
-
-it('prevents updating another teacher lesson', function () {
-    $teacher1 = Teacher::factory()->create();
-    $teacher2 = Teacher::factory()->create();
-    $student = Student::factory()->create();
-
-    $lesson = Lesson::factory()->create([
-        'teacher_id' => $teacher2->id,
-        'student_id' => $student->id,
-    ]);
-
-    $this->withSession(['teacher_id' => $teacher1->id])
-        ->putJson(route('lesson.update', $lesson), [
-            'status' => LessonStatus::COMPLETED->value,
-        ])
-        ->assertForbidden();
 });
 
 it('deletes own lesson', function () {
@@ -233,10 +182,10 @@ it('deletes own lesson', function () {
         'student_id' => $student->id,
     ]);
 
-    $this->withSession(['teacher_id' => $teacher->id])
-        ->deleteJson(route('lesson.delete', $lesson))
-        ->assertSuccessful()
-        ->assertJson(['success' => true]);
+    session(['teacher_id' => $teacher->id]);
+
+    Volt::test('teacher-dashboard', ['teacher' => $teacher])
+        ->call('deleteLesson', $lesson->id);
 
     $this->assertSoftDeleted('lessons', ['id' => $lesson->id]);
 });
@@ -251,9 +200,12 @@ it('prevents deleting another teacher lesson', function () {
         'student_id' => $student->id,
     ]);
 
-    $this->withSession(['teacher_id' => $teacher1->id])
-        ->deleteJson(route('lesson.delete', $lesson))
-        ->assertForbidden();
+    session(['teacher_id' => $teacher1->id]);
+
+    Volt::test('teacher-dashboard', ['teacher' => $teacher1])
+        ->call('deleteLesson', $lesson->id);
+
+    $this->assertNotSoftDeleted('lessons', ['id' => $lesson->id]);
 });
 
 it('logs out teacher', function () {

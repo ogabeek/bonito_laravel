@@ -89,26 +89,4 @@ class Lesson extends Model
         return $query->whereYear('class_date', $date->year)
             ->whereMonth('class_date', $date->month);
     }
-
-    /**
-     * Scope: ->past() - lessons before today
-     *
-     * @param  Builder<Lesson>  $query
-     * @return Builder<Lesson>
-     */
-    public function scopePast(Builder $query): Builder
-    {
-        return $query->where('class_date', '<', now()->startOfDay());
-    }
-
-    /**
-     * Scope: ->withStatus(LessonStatus::COMPLETED)
-     *
-     * @param  Builder<Lesson>  $query
-     * @return Builder<Lesson>
-     */
-    public function scopeWithStatus(Builder $query, LessonStatus $status): Builder
-    {
-        return $query->where('status', $status);
-    }
 }

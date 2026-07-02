@@ -20,14 +20,16 @@ it('requires a note when marking a student absent', function () {
     $student = Student::factory()->create();
     $teacher->students()->attach($student);
 
-    $this->withSession(['teacher_id' => $teacher->id])
-        ->postJson(route('teacher.lesson.create'), [
-            'student_id' => $student->id,
-            'class_date' => now()->format('Y-m-d'),
-            'status' => 'student_absent',
-        ])
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors(['comments']);
+    session(['teacher_id' => $teacher->id]);
+
+    Volt::test('teacher-dashboard', ['teacher' => $teacher])
+        ->set('student_id', (string) $student->id)
+        ->set('class_date', now()->format('Y-m-d'))
+        ->set('status', 'student_absent')
+        ->call('createLesson')
+        ->assertHasErrors(['comments']);
+
+    $this->assertDatabaseCount('lessons', 0);
 });
 
 it('stores and logs the follow-up choices for an absent lesson', function () {

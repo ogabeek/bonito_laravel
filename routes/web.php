@@ -6,7 +6,6 @@
  * Route Groups:
  * - /           → Redirects to admin login
  * - /teacher/*  → Teacher login & dashboard (session auth)
- * - /lesson/*   → Lesson CRUD (teacher auth required)
  * - /student/*  → Student dashboard (UUID-based, no login)
  * - /admin/*    → Admin dashboard & management
  */
@@ -28,20 +27,11 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
     Route::post('/logout', [TeacherController::class, 'logout'])->name('logout');
 
     // Protected: requires teacher.auth middleware
+    // ? Lesson CRUD happens inside the teacher-dashboard Livewire component (LessonService)
     Route::middleware('teacher.auth')->group(function () {
         Route::get('/{teacher}/dashboard', [TeacherController::class, 'dashboard'])->name('dashboard');
-        Route::post('/lesson/create', [TeacherController::class, 'createLesson'])->name('lesson.create');
     });
 });
-
-// * LESSON ROUTES: /lesson/{id}
-Route::middleware('teacher.auth')
-    ->prefix('lesson')
-    ->name('lesson.')
-    ->group(function () {
-        Route::put('/{lesson}', [TeacherController::class, 'updateLesson'])->name('update');
-        Route::delete('/{lesson}', [TeacherController::class, 'deleteLesson'])->name('delete');
-    });
 
 // * STUDENT ROUTES: /student/{uuid}
 // ? No auth required - UUID acts as access token
