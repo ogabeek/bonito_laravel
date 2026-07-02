@@ -101,11 +101,27 @@ it('calculates weekly distribution for a selected calendar year', function () {
     $distribution = $this->service->calculateWeeklyDistribution($lessons, 2026);
 
     expect($distribution['year'])->toBe(2026)
-        ->and($distribution['weeks'])->toHaveCount(53)
         ->and($distribution['weeks'][0]['count'])->toBe(2)
         ->and($distribution['weeks'][0]['completed'])->toBe(1)
         ->and($distribution['weeks'][0]['other'])->toBe(1)
-        ->and($distribution['weeks'][4]['count'])->toBe(1)
         ->and($distribution['total'])->toBe(3)
         ->and($distribution['max'])->toBe(2);
+});
+
+it('keeps weekly buckets within a single calendar month', function () {
+    // A plain 7-day bucket would run Jan 29 – Feb 4; the Feb class must stay in
+    // February, not leak into January's weeks (which drive the chart's per-month
+    // green cells and watermark total).
+    $lessons = collect([
+        (object) ['class_date' => Carbon::create(2026, 1, 29), 'status' => LessonStatus::COMPLETED],
+        (object) ['class_date' => Carbon::create(2026, 2, 2), 'status' => LessonStatus::COMPLETED],
+    ]);
+
+    $weeks = collect($this->service->calculateWeeklyDistribution($lessons, 2026)['weeks']);
+    $completedByMonth = $weeks->groupBy(fn ($week) => $week['start']->format('Y-m'))
+        ->map(fn ($monthWeeks) => $monthWeeks->sum('completed'));
+
+    expect($weeks->every(fn ($week) => $week['start']->format('Y-m') === $week['end']->format('Y-m')))->toBeTrue()
+        ->and($completedByMonth['2026-01'])->toBe(1)
+        ->and($completedByMonth['2026-02'])->toBe(1);
 });
